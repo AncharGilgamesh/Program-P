@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>icons/base_data.svg</file>
+    <file>icons/cabinet.svg</file>
+    <file>icons/cancel.svg</file>
+    <file>icons/faq.svg</file>
+    <file>icons/otchet_generate.svg</file>
+    <file>icons/plan_generate.svg</file>
+  </qresource>
+</RCC>
