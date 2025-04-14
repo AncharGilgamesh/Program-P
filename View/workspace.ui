@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>561</width>
-    <height>458</height>
+    <width>1061</width>
+    <height>642</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,236 +18,292 @@
 font-family: Consolas;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QToolButton" name="toolButton_5">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: white;
+   <widget class="QStackedWidget" name="mainStackedWidget">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>10</y>
+      <width>641</width>
+      <height>591</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="page">
+     <widget class="QPushButton" name="loadTableButton">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>20</y>
+        <width>171</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Загрузить таблицу</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="loadNagruzkaButton">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>20</y>
+        <width>171</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Загрузить нагрузку</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page_2"/>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>29</y>
+      <width>381</width>
+      <height>471</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QToolButton" name="cabinetToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: white;
 font-size: 16pt;
 background-color: none;
 border:none;
 font-family: Consolas;</string>
-        </property>
-        <property name="text">
-         <string>Личный кабинет</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res_rc.qrc">
-          <normaloff>:/icon/icons/cabinet.svg</normaloff>:/icon/icons/cabinet.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>48</width>
-          <height>48</height>
-         </size>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_4">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: white;
+         </property>
+         <property name="text">
+          <string>Личный кабинет</string>
+         </property>
+         <property name="icon">
+          <iconset resource="res_rc.qrc">
+           <normaloff>:/icon/icons/cabinet.svg</normaloff>:/icon/icons/cabinet.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>48</width>
+           <height>48</height>
+          </size>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+         </property>
+         <property name="autoRaise">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="dataToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: white;
 font-size: 16pt;
 background-color: none;
 border:none;
 font-family: Consolas;</string>
-        </property>
-        <property name="text">
-         <string>Генерация отчета</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res_rc.qrc">
-          <normaloff>:/icon/icons/otchet_generate.svg</normaloff>:/icon/icons/otchet_generate.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>48</width>
-          <height>48</height>
-         </size>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_3">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: white;
+         </property>
+         <property name="text">
+          <string>База данных</string>
+         </property>
+         <property name="icon">
+          <iconset resource="res_rc.qrc">
+           <normaloff>:/icon/icons/base_data.svg</normaloff>:/icon/icons/base_data.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>48</width>
+           <height>48</height>
+          </size>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QToolButton" name="genOtchToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: white;
 font-size: 16pt;
 background-color: none;
 border:none;
 font-family: Consolas;</string>
-        </property>
-        <property name="text">
-         <string>Генерация плана</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res_rc.qrc">
-          <normaloff>:/icon/icons/plan_generate.svg</normaloff>:/icon/icons/plan_generate.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>48</width>
-          <height>48</height>
-         </size>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QToolButton" name="toolButton_2">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: white;
+         </property>
+         <property name="text">
+          <string>Генерация отчета</string>
+         </property>
+         <property name="icon">
+          <iconset resource="res_rc.qrc">
+           <normaloff>:/icon/icons/otchet_generate.svg</normaloff>:/icon/icons/otchet_generate.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>48</width>
+           <height>48</height>
+          </size>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="genPlanToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: white;
 font-size: 16pt;
 background-color: none;
 border:none;
 font-family: Consolas;</string>
-        </property>
-        <property name="text">
-         <string>База данных</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res_rc.qrc">
-          <normaloff>:/icon/icons/base_data.svg</normaloff>:/icon/icons/base_data.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>48</width>
-          <height>48</height>
-         </size>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="toolButton">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: white;
+         </property>
+         <property name="text">
+          <string>Генерация плана</string>
+         </property>
+         <property name="icon">
+          <iconset resource="res_rc.qrc">
+           <normaloff>:/icon/icons/plan_generate.svg</normaloff>:/icon/icons/plan_generate.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>48</width>
+           <height>48</height>
+          </size>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QToolButton" name="faqToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: white;
 font-size: 16pt;
 background-color: none;
 border:none;
 font-family: Consolas;</string>
-        </property>
-        <property name="text">
-         <string>F.A.Q</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res_rc.qrc">
-          <normaloff>:/icon/icons/faq.svg</normaloff>:/icon/icons/faq.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>48</width>
-          <height>48</height>
-         </size>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="exitToolButton">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: white;
+         </property>
+         <property name="text">
+          <string>F.A.Q</string>
+         </property>
+         <property name="icon">
+          <iconset resource="res_rc.qrc">
+           <normaloff>:/icon/icons/faq.svg</normaloff>:/icon/icons/faq.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>48</width>
+           <height>48</height>
+          </size>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="exitToolButton">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: white;
 font-size: 16pt;
 background-color: none;
 border:none;
 font-family: Consolas;</string>
-        </property>
-        <property name="text">
-         <string>Выйти</string>
-        </property>
-        <property name="icon">
-         <iconset resource="res_rc.qrc">
-          <normaloff>:/icon/icons/cancel.svg</normaloff>:/icon/icons/cancel.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>48</width>
-          <height>48</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
-        </property>
-        <property name="popupMode">
-         <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-        <property name="arrowType">
-         <enum>Qt::ArrowType::NoArrow</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-   </layout>
+         </property>
+         <property name="text">
+          <string>Выйти</string>
+         </property>
+         <property name="icon">
+          <iconset resource="res_rc.qrc">
+           <normaloff>:/icon/icons/cancel.svg</normaloff>:/icon/icons/cancel.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>48</width>
+           <height>48</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="popupMode">
+          <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+         </property>
+         <property name="autoRaise">
+          <bool>true</bool>
+         </property>
+         <property name="arrowType">
+          <enum>Qt::ArrowType::NoArrow</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>561</width>
+     <width>1061</width>
      <height>21</height>
     </rect>
    </property>
