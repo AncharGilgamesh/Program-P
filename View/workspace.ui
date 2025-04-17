@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Project P</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="res_rc.qrc">
+    <normaloff>:/icon/icons/TitleIcon.png</normaloff>:/icon/icons/TitleIcon.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">background-color: qlineargradient(spread:pad, x1:1, y1:1, x2:0, y2:0, stop:0 rgba(81, 0, 135, 255), stop:0.427447 rgba(41, 61, 132, 235), stop:1 rgba(155, 79, 165, 255));
 font-family: Consolas;</string>
@@ -21,9 +25,9 @@ font-family: Consolas;</string>
    <widget class="QStackedWidget" name="mainStackedWidget">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>280</x>
       <y>10</y>
-      <width>641</width>
+      <width>771</width>
       <height>591</height>
      </rect>
     </property>
@@ -34,10 +38,10 @@ font-family: Consolas;</string>
      <widget class="QPushButton" name="loadTableButton">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>20</y>
-        <width>171</width>
-        <height>81</height>
+        <x>10</x>
+        <y>0</y>
+        <width>141</width>
+        <height>31</height>
        </rect>
       </property>
       <property name="text">
@@ -47,26 +51,169 @@ font-family: Consolas;</string>
      <widget class="QPushButton" name="loadNagruzkaButton">
       <property name="geometry">
        <rect>
-        <x>220</x>
-        <y>20</y>
-        <width>171</width>
-        <height>81</height>
+        <x>160</x>
+        <y>0</y>
+        <width>141</width>
+        <height>31</height>
        </rect>
       </property>
       <property name="text">
        <string>Загрузить нагрузку</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="loadPlanPushButton">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>0</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Загрузить план</string>
+      </property>
+     </widget>
+     <widget class="QTableView" name="tableView">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>90</y>
+        <width>771</width>
+        <height>491</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QTableView {
+    background-color: rgba(255, 255, 255, 30);
+    border: 1px solid rgba(255, 255, 255, 40);
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+}
+QTableView::item {
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 50);
+    padding: 5px;
+    color: white; /* чтобы проверить, точно ли стиль применяется */
+}
+QTableView::item:selected {
+    border: none;
+    color: white;
+    background-color: rgba(255, 255, 255, 80);
+}
+QHeaderView::section {
+    background-color: rgb(53, 53, 53);
+    color: white;
+    border: none;
+    height: 50px;
+    font-size: 10pt;
+}</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="placePlanButton">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>50</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Место проведения</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="notePlanPushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>91</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Твоя мама</string>
+      </property>
+      <property name="text">
+       <string>Примечание</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="agreementPlanPushButton">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>50</y>
+        <width>91</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>№ договора</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="zakupkaPlanPushButton">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>50</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Необходимость закупки</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="rukPlanPushButton">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>50</y>
+        <width>191</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Руководитель от предприятия</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="savePlanButton">
+      <property name="geometry">
+       <rect>
+        <x>550</x>
+        <y>0</y>
+        <width>91</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Сохранить</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="saveAsPlanButton">
+      <property name="geometry">
+       <rect>
+        <x>650</x>
+        <y>0</y>
+        <width>91</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Сохранить как</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="page_2"/>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>29</y>
-      <width>381</width>
-      <height>471</height>
+      <y>20</y>
+      <width>261</width>
+      <height>521</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -88,7 +235,8 @@ border:none;
 font-family: Consolas;</string>
          </property>
          <property name="text">
-          <string>Личный кабинет</string>
+          <string>Личный
+кабинет</string>
          </property>
          <property name="icon">
           <iconset resource="res_rc.qrc">
@@ -124,7 +272,8 @@ border:none;
 font-family: Consolas;</string>
          </property>
          <property name="text">
-          <string>База данных</string>
+          <string>База
+данных</string>
          </property>
          <property name="icon">
           <iconset resource="res_rc.qrc">
@@ -161,7 +310,8 @@ border:none;
 font-family: Consolas;</string>
          </property>
          <property name="text">
-          <string>Генерация отчета</string>
+          <string>Генерация
+отчета</string>
          </property>
          <property name="icon">
           <iconset resource="res_rc.qrc">
@@ -194,7 +344,8 @@ border:none;
 font-family: Consolas;</string>
          </property>
          <property name="text">
-          <string>Генерация плана</string>
+          <string>Генерация
+плана</string>
          </property>
          <property name="icon">
           <iconset resource="res_rc.qrc">
@@ -308,7 +459,14 @@ font-family: Consolas;</string>
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="statusTip">
+    <string>У вас взорвется анал при нажатии на эту кнопку</string>
+   </property>
+   <property name="whatsThis">
+    <string>Жопа</string>
+   </property>
+  </widget>
  </widget>
  <resources>
   <include location="res_rc.qrc"/>

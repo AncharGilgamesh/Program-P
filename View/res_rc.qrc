@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icons/TitleIcon.png</file>
     <file>icons/base_data.svg</file>
     <file>icons/cabinet.svg</file>
     <file>icons/cancel.svg</file>

@@ -1,12 +1,15 @@
 import sys
 
 import pandas as pd
+import datahandler as dh
 from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView, QStyledItemDelegate
+
+from model import PlanTableModel
 
 from View.workspace import Ui_MainWindow
 
@@ -16,20 +19,74 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+
+        self._plan_data = None
+        self._plan_headers = [
+            "id",
+            "№\nгр.", "Вид практики\n(кол-во студентов)", "Сроки\nпроведения\n(кол-во часов)", "Место\nпроведения\n(предприятие, кафедра)",
+            "№ договора\nс предприя-\nтием\n(числа)","Руководитель от\nуниверситета(ф.и.о.,\nдолжность, звание,\n контактный тел.)",
+            "Руководитель от\nпредпр-я(ф.и.о.,\nдолж.,контакт.\nТел.)", "Наименование\nспециальности и ее\nшифр",
+              "Необходимо\nсть закупки\n(есть, нет)", "Примечан\nие"]
+        self._plan_model = PlanTableModel(self._plan_data, self._plan_headers)
+        self.ui.tableView.setModel(self._plan_model)
+        self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+
         self.ui.dataToolButton.clicked.connect(self.test_function)
+        self.ui.loadPlanPushButton.clicked.connect(self.fill_the_shablon_rows)
         self.ui.cabinetToolButton.clicked.connect(self.cabinet_function)
         self.ui.exitToolButton.clicked.connect(self.exit_function)
         self.ui.loadTableButton.clicked.connect(self.load_table_new)
         self.ui.loadNagruzkaButton.clicked.connect(self.fill_the_shablon)
+        # проверяю insert rows для модели
+        self.ui.notePlanPushButton.clicked.connect(self.test_inserting_rows)
+        # проверяю добавление значений
+        self.ui.placePlanButton.clicked.connect(self.test_adding_info)
+
+
+    def test_adding_info(self):
+        self._plan_model.updateCellsByCondition(1, "B", 4, "Gay\nnot\nnatural")
+        self.ui.tableView.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+
+    def test_inserting_rows(self):
+        self._plan_model.insertRows(0, 2, [["1337", "B", "1337", "B", "1337", "B"], ["1337", "D", "1337", "D","1337", "D"]])
+        self._plan_model.insertRows(2, 3)
+        
 
     def load_table_new(self):
         fname, _ = QFileDialog.getOpenFileName(
             self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)")
         if not fname:
             return
-        bakalavriat = pd.read_excel(fname, 0)
-        magistratura = pd.read_excel(fname, 1)
-        self.upload_word(bakalavriat)
+        baka = pd.read_excel(fname, 0, header=None)
+        maga = pd.read_excel(fname, 1, header=None)
+        #keywords = ["практика", "магистратура"]
+
+        # Проход по всем ячейкам датафрейма
+        """
+        for row_idx, row in df.iterrows():
+            for col in df.columns:
+                value = str(row[col])
+                for word in keywords:
+                    if word.lower() in value.lower():
+                        print(f"Найдено слово '{word}' в ячейке [{row_idx}, '{col}']: {value}")"""
+        # Пример использования
+        blocks = dh.extract_practice_blocks_with_empty_stop(baka)
+        blocks_maga = dh.extract_practice_blocks_with_empty_stop(maga)
+
+        # Вывод результатов
+        
+        #print(blocks_maga)
+        blocks_baka_tr = dh.transform_practice_data(blocks)
+        blocks_maga_tr = dh.transform_practice_data(blocks_maga, len(blocks_baka_tr))
+        combined_blocks = blocks_baka_tr + blocks_maga_tr
+        self._plan_model.insertRows(0, len(combined_blocks), combined_blocks)
+        """
+        for i, block in enumerate(blocks_maga, 1):
+            print(f"\nБлок {i}:")
+            print(f"Заголовок: {block['title']}")
+            print("Данные:")
+            block_df = pd.DataFrame(block['data'])
+            print(block_df.to_string(index=False, header=False))"""
 
 
     # Функция для установки границ у ячейки
@@ -62,8 +119,34 @@ class MainWindow(QMainWindow):
         run._element.rPr.rFonts.set(qn('w:eastAsia'), font_name)
         font.size = Pt(font_size)
 
+    def fill_the_shablon_rows(self):
+        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
+        data = [
+            ["ПМИ-101", "Иванов И.И.", "ООО Рога и Копыта"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-101", "Иванов И.И.", "ООО Рога и Копыта"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-101", "Иванов И.И.", "ООО Рога и Копыта"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-101", "Иванов И.И.", "ООО Рога и Копыта"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
+        ]
+        table = doc.tables[0]
+        start_row = 2
+        self.fill_the_table_rows(table, data, start_row)
+        print("Сохранение успешно")
+        doc.save("Test_results/plan_zapolnen.docx")
+
     def fill_the_shablon(self):
-        doc = Document("E:/Python/Magistr_Project/shablon_plan.docx")
+        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
 
         # Предположим, что нужная таблица — первая в документе
         table = doc.tables[0]
@@ -82,8 +165,8 @@ class MainWindow(QMainWindow):
 
         # Проверка, что столбец найден
         #Заполнение таблицы мой вариант
-        self.fill_the_table(table, column_index, nomera_grupp)
-        self.fill_the_table(table, column_index + 1, other_data)
+        self.fill_the_table_col(table, column_index, nomera_grupp)
+        self.fill_the_table_col(table, column_index + 1, other_data)
         doc.save("Результат_с_границами.docx")
         print("Файл сохранён с границами.")
         # Заполнение таблицы
@@ -103,7 +186,22 @@ class MainWindow(QMainWindow):
         else:
             print("Не найден столбец '№ группы'")"""
 
-    def fill_the_table(self,table, column_index, data):
+    # Заполнение строки word
+    def fill_the_table_rows(self,table, data, start_row):
+        for i, row_data in enumerate(data):
+            # Если строки не хватает — добавляем
+            row_index = start_row + i
+            if start_row + i >= len(table.rows):
+                table.add_row()
+
+            for j, value in enumerate(row_data):
+                cell = table.cell(row_index, j)
+                cell.text = str(value)
+                self.set_cell_font(cell, font_name="Times New Roman", font_size=10)
+                self.set_cell_border(cell, top="single", bottom="single", left="single", right="single")
+
+    # Заполнение столбца word
+    def fill_the_table_col(self,table, column_index, data):
         for i, group in enumerate(data):
                 row_index = i + 2  # начинаем с 3-й строки
                 if row_index >= len(table.rows):
@@ -112,6 +210,8 @@ class MainWindow(QMainWindow):
                 cell.text = group
                 self.set_cell_font(cell, font_name="Times New Roman", font_size=10)
                 self.set_cell_border(cell, top="single", bottom="single", left="single", right="single")
+
+
 
     def upload_word(self, df):
         # Создаем документ Word
