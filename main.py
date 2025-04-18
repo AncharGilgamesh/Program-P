@@ -47,9 +47,12 @@ class MainWindow(QMainWindow):
 
 
     def test_plan_dialog(self):
-        all_group_names = ["322", "1337", "321", "4966", "1096"]
-        dialog = GroupEditDialog(all_group_names, field_label="Место проведения", title="Редактирование места проведения")
-        dialog.exec()
+        all_group_names = self._plan_model.get_column_values(1)
+        all_group_names = list(dict.fromkeys(all_group_names))
+        dialog = GroupEditDialog(all_group_names, field_label="Место проведения", title="Редактирование места проведения", parent=self)
+        if dialog.exec():
+            selected_groups, value = dialog.get_result()
+        print(selected_groups, value)
 
     def test_adding_info(self):
         self._plan_model.updateCellsByCondition(1, "B", 4, "Gay\nnot\nnatural")

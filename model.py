@@ -81,6 +81,13 @@ class PlanTableModel(QAbstractTableModel):
             return self._data[row][column]
        return None
 
+    def get_column_values(self, column_index):
+        """Возвращает список значений из указанного столбца."""
+        if not 0 <= column_index < self.columnCount():
+            return []  # Проверка на выход за границы
+        
+        return [str(row[column_index]) for row in self._data]
+
     def get_data(self):
         """func."""
         return self._data

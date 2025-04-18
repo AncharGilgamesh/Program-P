@@ -1,21 +1,35 @@
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QListView, QPushButton, QTextEdit,
-    QLineEdit, QLabel, QWidget, QMessageBox
+    QLineEdit, QLabel, QWidget, QMessageBox, QComboBox
 )
 from PySide6.QtCore import QStringListModel, Qt
+
+
 class GroupEditDialog(QDialog):
     def __init__(self, all_groups, field_label="Значение", title="Редактирование", parent=None):
         super().__init__(parent)
         self.setWindowTitle(title)
         self.resize(600, 400)
+
         with open("View/dialogstyle.qss", "r") as f:
             self.setStyleSheet(f.read())
 
+        # Полные списки
+        self._full_all_list = sorted(all_groups)
+        self._full_selected_list = []
+
         # Модели
-        self.all_model = QStringListModel(sorted(all_groups))
+        self.all_model = QStringListModel(self._full_all_list)
         self.selected_model = QStringListModel([])
 
-        # UI
+        # Элементы управления
+        self.search_filter_combo = QComboBox()
+        self.search_filter_combo.addItems([
+            "Искать везде",
+            "Только в доступных группах",
+            "Только в выбранных группах"
+        ])
+
         self.search_line = QLineEdit()
         self.search_line.setPlaceholderText("Поиск группы...")
 
@@ -24,6 +38,9 @@ class GroupEditDialog(QDialog):
 
         self.selected_list = QListView()
         self.selected_list.setModel(self.selected_model)
+
+        self.all_list.doubleClicked.connect(self.move_to_selected)
+        self.selected_list.doubleClicked.connect(self.move_to_all)
 
         self.add_button = QPushButton("→")
         self.remove_button = QPushButton("←")
@@ -41,6 +58,7 @@ class GroupEditDialog(QDialog):
 
         # Layout
         layout = QVBoxLayout(self)
+        layout.addWidget(self.search_filter_combo)
         layout.addWidget(self.search_line)
 
         lists_layout = QHBoxLayout()
@@ -65,34 +83,49 @@ class GroupEditDialog(QDialog):
         buttons.addWidget(self.cancel_button)
         layout.addLayout(buttons)
 
+        # Сигналы поиска
         self.search_line.textChanged.connect(self.filter_groups)
-
-        # Полный список сохраняем отдельно
-        self._full_group_list = list(self.all_model.stringList())
+        self.search_filter_combo.currentIndexChanged.connect(
+            lambda: self.filter_groups(self.search_line.text())
+        )
 
     def filter_groups(self, text):
-        filtered = [g for g in self._full_group_list if text.lower() in g.lower()]
-        self.all_model.setStringList(filtered)
+        mode = self.search_filter_combo.currentIndex()
 
-    def move_to_selected(self):
-        selected = [self.all_model.data(i, Qt.DisplayRole) for i in self.all_list.selectedIndexes()]
+        if mode in (0, 1):  # Искать везде или в доступных
+            filtered_all = [g for g in self._full_all_list if text.lower() in g.lower()]
+            self.all_model.setStringList(filtered_all)
+        else:
+            self.all_model.setStringList(self._full_all_list)
+
+        if mode in (0, 2):  # Искать везде или в выбранных
+            filtered_selected = [g for g in self._full_selected_list if text.lower() in g.lower()]
+            self.selected_model.setStringList(filtered_selected)
+        else:
+            self.selected_model.setStringList(self._full_selected_list)
+
+    def move_to_selected(self, index=None):
+        if index:
+            selected = [self.all_model.data(index, Qt.DisplayRole)]
+        else:
+            selected = [self.all_model.data(i, Qt.DisplayRole) for i in self.all_list.selectedIndexes()]
         if not selected:
             return
-        current_selected = set(self.selected_model.stringList())
-        updated_selected = sorted(current_selected.union(selected))
-        self.selected_model.setStringList(updated_selected)
-        self._full_group_list = [g for g in self._full_group_list if g not in selected]
-        self.all_model.setStringList(self._full_group_list)
+        self._full_selected_list = sorted(set(self._full_selected_list).union(selected))
+        self._full_all_list = [g for g in self._full_all_list if g not in selected]
+        self.filter_groups(self.search_line.text())
 
-    def move_to_all(self):
-        selected = [self.selected_model.data(i, Qt.DisplayRole) for i in self.selected_list.selectedIndexes()]
+    def move_to_all(self, index=None):
+        if index:
+            selected = [self.selected_model.data(index, Qt.DisplayRole)]
+        else:
+            selected = [self.selected_model.data(i, Qt.DisplayRole) for i in self.selected_list.selectedIndexes()]
         if not selected:
             return
-        current_all = set(self._full_group_list).union(selected)
-        self._full_group_list = sorted(current_all)
-        self.all_model.setStringList(self._full_group_list)
-        remaining = [g for g in self.selected_model.stringList() if g not in selected]
-        self.selected_model.setStringList(remaining)
+        self._full_all_list = sorted(set(self._full_all_list).union(selected))
+        self._full_selected_list = [g for g in self._full_selected_list if g not in selected]
+        self.filter_groups(self.search_line.text())
+
 
     def get_result(self):
-        return self.selected_model.stringList(), self.input_edit.toPlainText()
+        return self._full_selected_list, self.input_edit.toPlainText()
