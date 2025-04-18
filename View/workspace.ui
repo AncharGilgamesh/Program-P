@@ -105,7 +105,6 @@ QHeaderView::section {
     background-color: rgb(53, 53, 53);
     color: white;
     border: none;
-    height: 50px;
     font-size: 10pt;
 }</string>
       </property>

@@ -71,7 +71,6 @@ class Ui_MainWindow(object):
 "    background-color: rgb(53, 53, 53);\n"
 "    color: white;\n"
 "    border: none;\n"
-"    height: 50px;\n"
 "    font-size: 10pt;\n"
 "}")
         self.placePlanButton = QPushButton(self.page)

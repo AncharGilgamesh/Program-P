@@ -12,6 +12,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderVie
 from model import PlanTableModel
 
 from View.workspace import Ui_MainWindow
+from View.planaddingdialogs import GroupEditDialog
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -41,7 +42,14 @@ class MainWindow(QMainWindow):
         self.ui.notePlanPushButton.clicked.connect(self.test_inserting_rows)
         # проверяю добавление значений
         self.ui.placePlanButton.clicked.connect(self.test_adding_info)
+        # проверяю диалоговое окно
+        self.ui.rukPlanPushButton.clicked.connect(self.test_plan_dialog)
 
+
+    def test_plan_dialog(self):
+        all_group_names = ["322", "1337", "321", "4966", "1096"]
+        dialog = GroupEditDialog(all_group_names, field_label="Место проведения", title="Редактирование места проведения")
+        dialog.exec()
 
     def test_adding_info(self):
         self._plan_model.updateCellsByCondition(1, "B", 4, "Gay\nnot\nnatural")
