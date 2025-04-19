@@ -19,15 +19,18 @@
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: qlineargradient(spread:pad, x1:1, y1:1, x2:0, y2:0, stop:0 rgba(81, 0, 135, 255), stop:0.427447 rgba(41, 61, 132, 235), stop:1 rgba(155, 79, 165, 255));
-font-family: Consolas;</string>
+font-family: Consolas;
+QPushButton {
+    color: white;
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QStackedWidget" name="mainStackedWidget">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>250</x>
       <y>10</y>
-      <width>771</width>
+      <width>801</width>
       <height>591</height>
      </rect>
     </property>
@@ -41,8 +44,13 @@ font-family: Consolas;</string>
         <x>10</x>
         <y>0</y>
         <width>141</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>Загрузить таблицу</string>
@@ -54,8 +62,13 @@ font-family: Consolas;</string>
         <x>160</x>
         <y>0</y>
         <width>141</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>Загрузить нагрузку</string>
@@ -67,8 +80,13 @@ font-family: Consolas;</string>
         <x>310</x>
         <y>0</y>
         <width>141</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>Загрузить план</string>
@@ -77,9 +95,9 @@ font-family: Consolas;</string>
      <widget class="QTableView" name="tableView">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>90</y>
-        <width>771</width>
+        <x>10</x>
+        <y>100</y>
+        <width>781</width>
         <height>491</height>
        </rect>
       </property>
@@ -112,11 +130,16 @@ QHeaderView::section {
      <widget class="QPushButton" name="placePlanButton">
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>50</y>
+        <x>100</x>
+        <y>40</y>
         <width>131</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>Место проведения</string>
@@ -126,13 +149,18 @@ QHeaderView::section {
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>50</y>
+        <y>40</y>
         <width>91</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
       </property>
       <property name="toolTip">
        <string>Твоя мама</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>Примечание</string>
@@ -141,11 +169,16 @@ QHeaderView::section {
      <widget class="QPushButton" name="agreementPlanPushButton">
       <property name="geometry">
        <rect>
-        <x>260</x>
-        <y>50</y>
+        <x>230</x>
+        <y>40</y>
         <width>91</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>№ договора</string>
@@ -154,11 +187,16 @@ QHeaderView::section {
      <widget class="QPushButton" name="zakupkaPlanPushButton">
       <property name="geometry">
        <rect>
-        <x>360</x>
-        <y>50</y>
+        <x>320</x>
+        <y>40</y>
         <width>151</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>Необходимость закупки</string>
@@ -167,11 +205,16 @@ QHeaderView::section {
      <widget class="QPushButton" name="rukPlanPushButton">
       <property name="geometry">
        <rect>
-        <x>520</x>
-        <y>50</y>
+        <x>470</x>
+        <y>40</y>
         <width>191</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>Руководитель от предприятия</string>
@@ -180,11 +223,16 @@ QHeaderView::section {
      <widget class="QPushButton" name="savePlanButton">
       <property name="geometry">
        <rect>
-        <x>550</x>
+        <x>580</x>
         <y>0</y>
         <width>91</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>Сохранить</string>
@@ -193,14 +241,39 @@ QHeaderView::section {
      <widget class="QPushButton" name="saveAsPlanButton">
       <property name="geometry">
        <rect>
-        <x>650</x>
+        <x>680</x>
         <y>0</y>
         <width>91</width>
-        <height>31</height>
+        <height>21</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+    color: white;
+}</string>
       </property>
       <property name="text">
        <string>Сохранить как</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="searchPlanLineEdit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>221</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="planSearchComboBox">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>60</y>
+        <width>151</width>
+        <height>21</height>
+       </rect>
       </property>
      </widget>
     </widget>
@@ -211,8 +284,8 @@ QHeaderView::section {
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>261</width>
-      <height>521</height>
+      <width>241</width>
+      <height>551</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -303,7 +376,7 @@ font-family: Consolas;</string>
          </property>
          <property name="styleSheet">
           <string notr="true">color: white;
-font-size: 16pt;
+font-size: 12pt;
 background-color: none;
 border:none;
 font-family: Consolas;</string>
@@ -318,8 +391,8 @@ font-family: Consolas;</string>
          </property>
          <property name="iconSize">
           <size>
-           <width>48</width>
-           <height>48</height>
+           <width>32</width>
+           <height>32</height>
           </size>
          </property>
          <property name="toolButtonStyle">
@@ -337,7 +410,7 @@ font-family: Consolas;</string>
          </property>
          <property name="styleSheet">
           <string notr="true">color: white;
-font-size: 16pt;
+font-size: 12pt;
 background-color: none;
 border:none;
 font-family: Consolas;</string>
@@ -352,8 +425,8 @@ font-family: Consolas;</string>
          </property>
          <property name="iconSize">
           <size>
-           <width>48</width>
-           <height>48</height>
+           <width>32</width>
+           <height>32</height>
           </size>
          </property>
          <property name="toolButtonStyle">

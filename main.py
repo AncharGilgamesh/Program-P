@@ -8,6 +8,7 @@ from docx.oxml.ns import qn
 from docx.shared import Pt
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView, QStyledItemDelegate
+from PySide6.QtCore import QSortFilterProxyModel, Qt
 
 from model import PlanTableModel
 
@@ -31,6 +32,26 @@ class MainWindow(QMainWindow):
         self._plan_model = PlanTableModel(self._plan_data, self._plan_headers)
         self.ui.tableView.setModel(self._plan_model)
         self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.ui.tableView.hideColumn(0)
+        # Новый участок кода
+        """
+        Этот участок кода реализует поиск в таблице. Пока не знаю. нужно ли это вообще мне
+        self.proxy_model = QSortFilterProxyModel(self)
+        self.proxy_model.setSourceModel(self._plan_model)
+        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.proxy_model.setFilterKeyColumn(-1)  # по умолчанию — все столбцы
+        self.ui.tableView.setModel(self.proxy_model)
+        self.ui.planSearchComboBox.addItem("Все столбцы", -1)
+        self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.ui.tableView.hideColumn(0)
+        for i in range(self._plan_model.columnCount()):
+            header = self._plan_model.headerData(i, Qt.Horizontal)
+            self.ui.planSearchComboBox.addItem(header, i)
+        # Сигналы
+        self.ui.searchPlanLineEdit.textChanged.connect(self.apply_filter)
+        self.ui.planSearchComboBox.currentIndexChanged.connect(self.apply_filter)
+        #Конец нового участка кода
+        """
 
         self.ui.dataToolButton.clicked.connect(self.test_function)
         self.ui.loadPlanPushButton.clicked.connect(self.fill_the_shablon_rows)
@@ -39,29 +60,54 @@ class MainWindow(QMainWindow):
         self.ui.loadTableButton.clicked.connect(self.load_table_new)
         self.ui.loadNagruzkaButton.clicked.connect(self.fill_the_shablon)
         # проверяю insert rows для модели
-        self.ui.notePlanPushButton.clicked.connect(self.test_inserting_rows)
+        self.ui.notePlanPushButton.clicked.connect(self.open_group_dialog)
         # проверяю добавление значений
-        self.ui.placePlanButton.clicked.connect(self.test_adding_info)
+        self.ui.placePlanButton.clicked.connect(self.open_group_dialog)
+        self.ui.agreementPlanPushButton.clicked.connect(self.open_group_dialog)
+        self.ui.zakupkaPlanPushButton.clicked.connect(self.open_group_dialog)
         # проверяю диалоговое окно
-        self.ui.rukPlanPushButton.clicked.connect(self.test_plan_dialog)
+        self.ui.rukPlanPushButton.clicked.connect(self.open_group_dialog)
 
 
+    # Открывает диалоговое окно с выбором групп и редактирования некоторых данных
     def test_plan_dialog(self):
         all_group_names = self._plan_model.get_column_values(1)
         all_group_names = list(dict.fromkeys(all_group_names))
         dialog = GroupEditDialog(all_group_names, field_label="Место проведения", title="Редактирование места проведения", parent=self)
         if dialog.exec():
             selected_groups, value = dialog.get_result()
-        print(selected_groups, value)
+            
+        
+
+    # Модифицируем метод для открытия редактирования
+    def open_group_dialog(self):
+        self.button_to_keyword = {
+            "Примечание": "Примечан",
+            "Место проведения": "Место\nпроведения",
+            "№ договора": "№ договора",
+            "Необходимость закупки": "Необходимо",
+            "Руководитель от предприятия": "Руководитель от\nпредпр-я",
+        }
+        button = self.sender()
+        if not button:
+            return
+        field_label = button.text()
+        title = "Добавление данных для столбца " + '"' + field_label + '"'
+        all_group_names = self._plan_model.get_column_values(1)
+        all_group_names = list(dict.fromkeys(all_group_names))
+        dialog = GroupEditDialog(all_group_names, field_label=field_label, title=title, parent=self)
+        keyword = self.button_to_keyword.get(field_label)
+        if dialog.exec():
+            selected_groups, value = dialog.get_result()
+            # print(selected_groups, value)
+            col = dh.find_column_index_by_keyword(self._plan_model, keyword)
+            for group in selected_groups:
+                self._plan_model.updateCellsByCondition(1, int(group), col, str(value))
+                
 
     def test_adding_info(self):
         self._plan_model.updateCellsByCondition(1, "B", 4, "Gay\nnot\nnatural")
-        self.ui.tableView.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-
-    def test_inserting_rows(self):
-        self._plan_model.insertRows(0, 2, [["1337", "B", "1337", "B", "1337", "B"], ["1337", "D", "1337", "D","1337", "D"]])
-        self._plan_model.insertRows(2, 3)
-        
+        self.ui.tableView.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)        
 
     def load_table_new(self):
         fname, _ = QFileDialog.getOpenFileName(
@@ -271,6 +317,16 @@ class MainWindow(QMainWindow):
         #bakalavriat = pd.read_excel(fname, 0)
         #magistratura = pd.read_excel(fname, 1)
         print(sheet_data)
+
+    """
+    # функции для фильтрации tableView
+    def apply_filter(self):
+        text = self.ui.searchPlanLineEdit.text()
+        column = self.ui.planSearchComboBox.currentData()
+        self.proxy_model.setFilterKeyColumn(column)
+        self.proxy_model.setFilterFixedString(text)
+        self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+    """
 
     def test_function(self):
         print('test')

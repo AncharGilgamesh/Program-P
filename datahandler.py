@@ -1,5 +1,15 @@
 import pandas as pd
+from PySide6.QtCore import Qt
 
+
+def find_column_index_by_keyword(model, keyword: str) -> int:
+    """Ищет столбец, в заголовке которого содержится keyword (без учёта регистра)."""
+    keyword = keyword.lower()
+    for col in range(model.columnCount()):
+        header = model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+        if header and keyword in str(header).lower():
+            return col
+    return -1
 
 # функция для обработки данных, загруженных из Excel таблицы
 def transform_practice_data(data, start_id=0):

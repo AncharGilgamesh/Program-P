@@ -42,7 +42,7 @@ class PlanTableModel(QAbstractTableModel):
             return len(self._data[0])
         return len(self._header)
 
-    def headerData(self, section, orientation, role):
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
         """func."""
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
@@ -50,18 +50,7 @@ class PlanTableModel(QAbstractTableModel):
                     return self._header[section]
                 else:
                     return 'Проверка'
-    """
-    def insertRows(self, position, rows, values=None, parent=QModelIndex()):
-        self.beginInsertRows(QModelIndex(), position, position + rows - 1)
-        if values is None:
-            values = [
-                [
-                    '' for i in range(self.columnCount(None))
-                    ] for j in range(rows)]
-        for value in values:
-            self._data.append(value)
-        self.endInsertRows()
-        return True"""
+
 
     def insertRows(self, position, rows, values=None, parent=QModelIndex()):
         """Ваша функция с небольшими изменениями"""

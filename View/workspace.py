@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QMainWindow,
-    QMenuBar, QPushButton, QSizePolicy, QStackedWidget,
-    QStatusBar, QTableView, QToolButton, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QHeaderView,
+    QLineEdit, QMainWindow, QMenuBar, QPushButton,
+    QSizePolicy, QStackedWidget, QStatusBar, QTableView,
+    QToolButton, QVBoxLayout, QWidget)
 import View.res_rc
 
 class Ui_MainWindow(object):
@@ -30,26 +30,38 @@ class Ui_MainWindow(object):
         icon.addFile(u":/icon/icons/TitleIcon.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setStyleSheet(u"background-color: qlineargradient(spread:pad, x1:1, y1:1, x2:0, y2:0, stop:0 rgba(81, 0, 135, 255), stop:0.427447 rgba(41, 61, 132, 235), stop:1 rgba(155, 79, 165, 255));\n"
-"font-family: Consolas;")
+"font-family: Consolas;\n"
+"QPushButton {\n"
+"    color: white;\n"
+"}")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.mainStackedWidget = QStackedWidget(self.centralwidget)
         self.mainStackedWidget.setObjectName(u"mainStackedWidget")
-        self.mainStackedWidget.setGeometry(QRect(280, 10, 771, 591))
+        self.mainStackedWidget.setGeometry(QRect(250, 10, 801, 591))
         self.page = QWidget()
         self.page.setObjectName(u"page")
         self.loadTableButton = QPushButton(self.page)
         self.loadTableButton.setObjectName(u"loadTableButton")
-        self.loadTableButton.setGeometry(QRect(10, 0, 141, 31))
+        self.loadTableButton.setGeometry(QRect(10, 0, 141, 21))
+        self.loadTableButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.loadNagruzkaButton = QPushButton(self.page)
         self.loadNagruzkaButton.setObjectName(u"loadNagruzkaButton")
-        self.loadNagruzkaButton.setGeometry(QRect(160, 0, 141, 31))
+        self.loadNagruzkaButton.setGeometry(QRect(160, 0, 141, 21))
+        self.loadNagruzkaButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.loadPlanPushButton = QPushButton(self.page)
         self.loadPlanPushButton.setObjectName(u"loadPlanPushButton")
-        self.loadPlanPushButton.setGeometry(QRect(310, 0, 141, 31))
+        self.loadPlanPushButton.setGeometry(QRect(310, 0, 141, 21))
+        self.loadPlanPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.tableView = QTableView(self.page)
         self.tableView.setObjectName(u"tableView")
-        self.tableView.setGeometry(QRect(0, 90, 771, 491))
+        self.tableView.setGeometry(QRect(10, 100, 781, 491))
         self.tableView.setStyleSheet(u"QTableView {\n"
 "    background-color: rgba(255, 255, 255, 30);\n"
 "    border: 1px solid rgba(255, 255, 255, 40);\n"
@@ -75,32 +87,59 @@ class Ui_MainWindow(object):
 "}")
         self.placePlanButton = QPushButton(self.page)
         self.placePlanButton.setObjectName(u"placePlanButton")
-        self.placePlanButton.setGeometry(QRect(110, 50, 131, 31))
+        self.placePlanButton.setGeometry(QRect(100, 40, 131, 21))
+        self.placePlanButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.notePlanPushButton = QPushButton(self.page)
         self.notePlanPushButton.setObjectName(u"notePlanPushButton")
-        self.notePlanPushButton.setGeometry(QRect(10, 50, 91, 31))
+        self.notePlanPushButton.setGeometry(QRect(10, 40, 91, 21))
+        self.notePlanPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.agreementPlanPushButton = QPushButton(self.page)
         self.agreementPlanPushButton.setObjectName(u"agreementPlanPushButton")
-        self.agreementPlanPushButton.setGeometry(QRect(260, 50, 91, 31))
+        self.agreementPlanPushButton.setGeometry(QRect(230, 40, 91, 21))
+        self.agreementPlanPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.zakupkaPlanPushButton = QPushButton(self.page)
         self.zakupkaPlanPushButton.setObjectName(u"zakupkaPlanPushButton")
-        self.zakupkaPlanPushButton.setGeometry(QRect(360, 50, 151, 31))
+        self.zakupkaPlanPushButton.setGeometry(QRect(320, 40, 151, 21))
+        self.zakupkaPlanPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.rukPlanPushButton = QPushButton(self.page)
         self.rukPlanPushButton.setObjectName(u"rukPlanPushButton")
-        self.rukPlanPushButton.setGeometry(QRect(520, 50, 191, 31))
+        self.rukPlanPushButton.setGeometry(QRect(470, 40, 191, 21))
+        self.rukPlanPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.savePlanButton = QPushButton(self.page)
         self.savePlanButton.setObjectName(u"savePlanButton")
-        self.savePlanButton.setGeometry(QRect(550, 0, 91, 31))
+        self.savePlanButton.setGeometry(QRect(580, 0, 91, 21))
+        self.savePlanButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.saveAsPlanButton = QPushButton(self.page)
         self.saveAsPlanButton.setObjectName(u"saveAsPlanButton")
-        self.saveAsPlanButton.setGeometry(QRect(650, 0, 91, 31))
+        self.saveAsPlanButton.setGeometry(QRect(680, 0, 91, 21))
+        self.saveAsPlanButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.searchPlanLineEdit = QLineEdit(self.page)
+        self.searchPlanLineEdit.setObjectName(u"searchPlanLineEdit")
+        self.searchPlanLineEdit.setGeometry(QRect(10, 60, 221, 31))
+        self.planSearchComboBox = QComboBox(self.page)
+        self.planSearchComboBox.setObjectName(u"planSearchComboBox")
+        self.planSearchComboBox.setGeometry(QRect(230, 60, 151, 21))
         self.mainStackedWidget.addWidget(self.page)
         self.page_2 = QWidget()
         self.page_2.setObjectName(u"page_2")
         self.mainStackedWidget.addWidget(self.page_2)
         self.layoutWidget = QWidget(self.centralwidget)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(10, 20, 261, 521))
+        self.layoutWidget.setGeometry(QRect(10, 20, 241, 551))
         self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -148,14 +187,14 @@ class Ui_MainWindow(object):
         self.genOtchToolButton.setObjectName(u"genOtchToolButton")
         self.genOtchToolButton.setMinimumSize(QSize(150, 100))
         self.genOtchToolButton.setStyleSheet(u"color: white;\n"
-"font-size: 16pt;\n"
+"font-size: 12pt;\n"
 "background-color: none;\n"
 "border:none;\n"
 "font-family: Consolas;")
         icon3 = QIcon()
         icon3.addFile(u":/icon/icons/otchet_generate.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.genOtchToolButton.setIcon(icon3)
-        self.genOtchToolButton.setIconSize(QSize(48, 48))
+        self.genOtchToolButton.setIconSize(QSize(32, 32))
         self.genOtchToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
         self.horizontalLayout_2.addWidget(self.genOtchToolButton)
@@ -164,14 +203,14 @@ class Ui_MainWindow(object):
         self.genPlanToolButton.setObjectName(u"genPlanToolButton")
         self.genPlanToolButton.setMinimumSize(QSize(150, 100))
         self.genPlanToolButton.setStyleSheet(u"color: white;\n"
-"font-size: 16pt;\n"
+"font-size: 12pt;\n"
 "background-color: none;\n"
 "border:none;\n"
 "font-family: Consolas;")
         icon4 = QIcon()
         icon4.addFile(u":/icon/icons/plan_generate.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.genPlanToolButton.setIcon(icon4)
-        self.genPlanToolButton.setIconSize(QSize(48, 48))
+        self.genPlanToolButton.setIconSize(QSize(32, 32))
         self.genPlanToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
         self.horizontalLayout_2.addWidget(self.genPlanToolButton)
