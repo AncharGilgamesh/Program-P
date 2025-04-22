@@ -67,6 +67,19 @@ class MainWindow(QMainWindow):
         self.ui.zakupkaPlanPushButton.clicked.connect(self.open_group_dialog)
         # проверяю диалоговое окно
         self.ui.rukPlanPushButton.clicked.connect(self.open_group_dialog)
+        # работаем надо сохранениями
+        self.ui.savePlanButton.clicked.connect(self.save_plan_function)
+
+
+    # Реализуем обычное сохранение
+    def save_plan_function(self):
+        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
+        data_for_save = self._plan_model.get_data_without_id()
+        table = doc.tables[0]
+        start_row = 2
+        self.fill_the_table_rows(table, data_for_save, start_row)
+        print("Сохранение успешно")
+        doc.save("Test_results/plan_zapolnen.docx")
 
 
     # Открывает диалоговое окно с выбором групп и редактирования некоторых данных

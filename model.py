@@ -80,6 +80,10 @@ class PlanTableModel(QAbstractTableModel):
     def get_data(self):
         """func."""
         return self._data
+    
+    def get_data_without_id(self):
+        """Возвращает данные без первого столбца (id)."""
+        return [row[1:] for row in self._data]
 
     def get_header(self):
         """Get header."""
