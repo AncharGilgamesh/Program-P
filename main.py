@@ -52,11 +52,9 @@ class MainWindow(QMainWindow):
         self.ui.planSearchComboBox.currentIndexChanged.connect(self.apply_filter)
         #Конец нового участка кода
         """
-
-        self.ui.dataToolButton.clicked.connect(self.test_function)
-        self.ui.loadPlanPushButton.clicked.connect(self.fill_the_shablon_rows)
-        self.ui.cabinetToolButton.clicked.connect(self.cabinet_function)
-        self.ui.exitToolButton.clicked.connect(self.exit_function)
+        # Тут страница отчета
+        self.ui.otch_pln_btn.clicked.connect(self.load_plan)
+        # Тут страница плана        
         self.ui.loadTableButton.clicked.connect(self.load_table_new)
         self.ui.loadNagruzkaButton.clicked.connect(self.fill_the_shablon)
         # проверяю insert rows для модели
@@ -69,8 +67,57 @@ class MainWindow(QMainWindow):
         self.ui.rukPlanPushButton.clicked.connect(self.open_group_dialog)
         # работаем надо сохранениями
         self.ui.savePlanButton.clicked.connect(self.save_plan_function)
+        # Переключение между окнами
+        self.ui.cabinetToolButton.clicked.connect(lambda: self.switch_page(4))
+        self.ui.dataToolButton.clicked.connect(lambda: self.switch_page(0))
+        self.ui.genOtchToolButton.clicked.connect(lambda: self.switch_page(1))
+        self.ui.genPlanToolButton.clicked.connect(lambda: self.switch_page(2))
+        self.ui.faqToolButton.clicked.connect(lambda: self.switch_page(3))
+        self.ui.exitToolButton.clicked.connect(self.exit_function)
+
+    # ==========================Код для работы с отчетом====================================================
+    # Работает, но надо переработать и попробуй выгрузить в word
+    def load_plan(self):
+        fname, _ = QFileDialog.getOpenFileName(
+            self, "Choose file", "", "Excel Files (*.docx)")
+        if not fname:
+            return
+        data = dh.read_plan_from_docx(fname)
+        table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
+        headers_for_first_stage = [
+            "№", "Группа", "Направление\n/Специальность", "Семестр", "Вид практики", "Дата\nпроведения\nсобрания"
+            ]
+        first_stage_model = PlanTableModel(table1, headers_for_first_stage)
+        self.ui.otchFirstTableView.setModel(first_stage_model)
 
 
+
+    # Функция для переключения окон
+    def switch_page(self, index):
+        """Переключает страницу в QStackedWidget и обновляет состояние кнопок"""
+        self.ui.mainStackedWidget.setCurrentIndex(index)  # stackedWidget — имя QStackedWidget в Qt Designer
+        
+        # Сбрасываем выделение всех кнопок (если нужно)
+        for button in [
+            self.ui.cabinetToolButton,
+            self.ui.dataToolButton,
+            self.ui.genOtchToolButton,
+            self.ui.genPlanToolButton,
+            self.ui.faqToolButton
+        ]:
+            button.setChecked(False)
+        
+        # Выделяем активную кнопку
+        current_button = [
+            self.ui.cabinetToolButton,
+            self.ui.dataToolButton,
+            self.ui.genOtchToolButton,
+            self.ui.genPlanToolButton,
+            self.ui.faqToolButton
+        ][index]
+        current_button.setChecked(True)
+        
+    # ==========================Код для работы с планом====================================================
     # Реализуем обычное сохранение
     def save_plan_function(self):
         doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")

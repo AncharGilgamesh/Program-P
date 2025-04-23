@@ -1,6 +1,134 @@
 import pandas as pd
+import re
 from PySide6.QtCore import Qt
+from docx.opc.exceptions import PackageNotFoundError
+from docx import Document
+from datetime import datetime
 
+
+# Обработка плана для отчета
+def parse_practice_table(data_rows):
+    result = []
+    
+    for i, row in enumerate(data_rows):
+        if len(row) < 9:
+            continue  # пропускаем пустые строки
+
+        group = row[0].strip()
+        direction = row[7].strip()  # направление
+        practice_text = row[1].strip()
+        raw_dates = row[2].strip()
+
+        # ===== 1. Семестр =====
+        try:
+            course_digit = int(str(group)[1])  # вторая цифра номера группы
+        except (IndexError, ValueError):
+            course_digit = None
+
+        month = extract_first_month(raw_dates)
+        semester = None
+        if course_digit:
+            if month and 1 <= month <= 6:
+                semester = course_digit * 2
+            elif month and 6 < month <= 12:
+                semester = course_digit * 2 - 1
+
+            # поправка для 8 семестра (второй семестр 4 курса)
+            if semester == 7 and course_digit == 4:
+                semester = 8
+
+        # ===== 2. Вид практики =====
+        practice_type = extract_practice_type(practice_text)
+
+        # ===== 3. Дата собрания =====
+        meeting_date = extract_meeting_date(raw_dates)
+
+        result.append([
+            i + 1,            # №
+            group,
+            direction,
+            semester or "",
+            practice_type,
+            meeting_date
+        ])
+
+    return result
+
+# --- Вспомогательные функции:
+
+def extract_practice_type(text):
+    # Оставляем только "Учебная практика ..." или "Производственная практика ..."
+    match = re.search(r"(Учебная практика|Производственная практика)[^\n]*", text, re.IGNORECASE)
+    return match.group(0).strip().capitalize() if match else ""
+
+def extract_first_month(text):
+    # Ищем первую дату в формате дд.мм или дд.мм.гггг
+    match = re.search(r"\b(\d{1,2})[./](\d{1,2})([./](\d{4}))?", text)
+    if match:
+        day, month = int(match.group(1)), int(match.group(2))
+        return month
+    return None
+
+def extract_meeting_date(text):
+
+    text = text.replace('\n', ' ').replace('г.', '').replace('г', '').strip()
+
+    # Ищем все даты (одна или две)
+    date_matches = re.findall(r'(\d{1,2})[./-](\d{1,2})(?:[./-](\d{4}))?', text)
+
+    if not date_matches:
+        return ""
+
+    day, month, *year1 = date_matches[0]
+    day = int(day)
+    month = int(month)
+
+    # Подбор года
+    year = None
+    if year1 and year1[0]:
+        year = int(year1[0])
+    elif len(date_matches) > 1:
+        # Попробуем взять год из второй даты
+        second = date_matches[1]
+        if len(second) == 3 and second[2].isdigit():
+            year = int(second[2])
+
+    if not year:
+        year = datetime.now().year  # fallback, если ничего нет
+
+    try:
+        date_obj = datetime(day=day, month=month, year=year)
+        return date_obj.strftime("%d.%m.%Y")
+    except ValueError:
+        return ""
+
+
+
+# Функция для чтения плана
+def read_plan_from_docx(docx_path):
+    """
+    Читает первую таблицу из Word-документа и возвращает список списков.
+    - Первая строка используется как заголовки.
+    - Вторая строка (обычно объединённая и пустая) пропускается.
+    - Остальные строки — данные (начиная с третьей строки).
+    """
+    doc = Document(docx_path)
+    table = doc.tables[0]
+
+    data = []
+
+    # Получаем заголовки из первой строки
+    headers = [cell.text.strip() for cell in table.rows[0].cells]
+    data.append(headers)
+
+    # Пропускаем вторую строку (индекс 1), читаем с третьей
+    for row in table.rows[2:]:
+        row_data = [cell.text.strip() for cell in row.cells]
+        # Добавляем только если в строке есть хотя бы одно непустое значение
+        if any(row_data):
+            data.append(row_data)
+
+    return data
 
 def find_column_index_by_keyword(model, keyword: str) -> int:
     """Ищет столбец, в заголовке которого содержится keyword (без учёта регистра)."""
