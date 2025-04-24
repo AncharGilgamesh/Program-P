@@ -28,9 +28,9 @@ QPushButton {
    <widget class="QStackedWidget" name="mainStackedWidget">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>170</x>
       <y>10</y>
-      <width>801</width>
+      <width>881</width>
       <height>591</height>
      </rect>
     </property>
@@ -110,9 +110,12 @@ QPushButton {
        <rect>
         <x>0</x>
         <y>30</y>
-        <width>801</width>
+        <width>881</width>
         <height>551</height>
        </rect>
+      </property>
+      <property name="currentIndex">
+       <number>1</number>
       </property>
       <widget class="QWidget" name="page">
        <widget class="QTableView" name="otchFirstTableView">
@@ -120,13 +123,87 @@ QPushButton {
          <rect>
           <x>0</x>
           <y>60</y>
-          <width>801</width>
+          <width>881</width>
           <height>491</height>
          </rect>
         </property>
+        <property name="styleSheet">
+         <string notr="true">QTableView {
+    background-color: rgba(255, 255, 255, 30);
+    border: 1px solid rgba(255, 255, 255, 40);
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+}
+QTableView::item {
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 50);
+    padding: 5px;
+    color: white; /* чтобы проверить, точно ли стиль применяется */
+}
+QTableView::item:selected {
+    border: none;
+    color: white;
+    background-color: rgba(255, 255, 255, 80);
+}
+QHeaderView::section {
+    background-color: rgb(53, 53, 53);
+    color: white;
+    border: none;
+    font-size: 10pt;
+}</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="meeting_date_otch_btn">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>30</y>
+          <width>251</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Назначить дату проведения собрания</string>
+        </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="page_2"/>
+      <widget class="QWidget" name="page_2">
+       <widget class="QTableView" name="otchSecondTableView">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>60</y>
+          <width>881</width>
+          <height>491</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QTableView {
+    background-color: rgba(255, 255, 255, 30);
+    border: 1px solid rgba(255, 255, 255, 40);
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+}
+QTableView::item {
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 50);
+    padding: 5px;
+    color: white; /* чтобы проверить, точно ли стиль применяется */
+}
+QTableView::item:selected {
+    border: none;
+    color: white;
+    background-color: rgba(255, 255, 255, 80);
+}
+QHeaderView::section {
+    background-color: rgb(53, 53, 53);
+    color: white;
+    border: none;
+    font-size: 10pt;
+}</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
      <widget class="QPushButton" name="otch_nagr_btn">
       <property name="geometry">
@@ -226,9 +303,9 @@ QPushButton {
      <widget class="QTableView" name="tableView">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>0</x>
         <y>100</y>
-        <width>781</width>
+        <width>881</width>
         <height>491</height>
        </rect>
       </property>

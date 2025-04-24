@@ -14,6 +14,7 @@ from model import PlanTableModel
 
 from View.workspace import Ui_MainWindow
 from View.planaddingdialogs import GroupEditDialog
+from View.meetingdatedialog import MeetingDateDialog
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -21,6 +22,9 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+
+        self._oth_frst_stg_model = None
+        self._oth_scnd_std_model = None
 
         self._plan_data = None
         self._plan_headers = [
@@ -33,6 +37,8 @@ class MainWindow(QMainWindow):
         self.ui.tableView.setModel(self._plan_model)
         self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.tableView.hideColumn(0)
+        # Определяем заголовки для таблиц
+        self.set_otchet_tables_models()
         # Новый участок кода
         """
         Этот участок кода реализует поиск в таблице. Пока не знаю. нужно ли это вообще мне
@@ -53,7 +59,13 @@ class MainWindow(QMainWindow):
         #Конец нового участка кода
         """
         # Тут страница отчета
+        self.ui.otch_prev_btn.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentIndex(self.ui.stackedWidget.currentIndex()-1))
+        self.ui.otch_next_btn.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentIndex(self.ui.stackedWidget.currentIndex()+1))
         self.ui.otch_pln_btn.clicked.connect(self.load_plan)
+        # first stage
+        self.ui.meeting_date_otch_btn.clicked.connect(self.add_meting_date)
         # Тут страница плана        
         self.ui.loadTableButton.clicked.connect(self.load_table_new)
         self.ui.loadNagruzkaButton.clicked.connect(self.fill_the_shablon)
@@ -76,47 +88,52 @@ class MainWindow(QMainWindow):
         self.ui.exitToolButton.clicked.connect(self.exit_function)
 
     # ==========================Код для работы с отчетом====================================================
-    # Работает, но надо переработать и попробуй выгрузить в word
+
+
+    def add_meting_date(self):
+        data_for_meeting = self._oth_frst_stg_model.get_data()
+        data_fin = dh.get_group_practice_keys_frst_stg(data_for_meeting)
+        dialog = GroupEditDialog(data_fin, self)
+
+        if dialog.exec():
+            selected_keys, date_str = dialog.get_result()
+            rows_to_update = dh.get_target_row_indices(data_for_meeting, selected_keys)
+            # можно выделить это в отдельную функцию для добавления по индексам!!!!!!!!!
+            for row in rows_to_update:
+                # столбец 5 — это "Дата проведения собрания"
+                self._oth_frst_stg_model.setData(self._oth_frst_stg_model.index(row, 5), date_str)
+    # Переработал первый этап, эта функция будет пополняться по мере заполнения этапов
     def load_plan(self):
         fname, _ = QFileDialog.getOpenFileName(
             self, "Choose file", "", "Excel Files (*.docx)")
         if not fname:
             return
         data = dh.read_plan_from_docx(fname)
+        # Вот эту функцию нужно переработать, чтобы даты не брались
         table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
+        self._oth_frst_stg_model.insertRows(0,len(table1), table1)
+        table2 = dh.parse_second_table(data[1:])
+        self._oth_scnd_std_model.insertRows(0, len(table2), table2)
+            
+
+    def set_otchet_tables_models(self):
         headers_for_first_stage = [
             "№", "Группа", "Направление\n/Специальность", "Семестр", "Вид практики", "Дата\nпроведения\nсобрания"
             ]
-        first_stage_model = PlanTableModel(table1, headers_for_first_stage)
-        self.ui.otchFirstTableView.setModel(first_stage_model)
-
+        headers_for_second_stage = [
+            "№\nп/п", "Город", "Место проведения", "Направлено", "Прибыло", "Инструктаж по ТБ", "Факт. конец"
+        ]
+        first_data = None
+        self._oth_frst_stg_model = PlanTableModel(first_data, headers_for_first_stage)
+        self.ui.otchFirstTableView.setModel(self._oth_frst_stg_model)
+        self._oth_scnd_std_model = PlanTableModel(first_data, headers_for_second_stage)
+        self.ui.otchSecondTableView.setModel(self._oth_scnd_std_model)
 
 
     # Функция для переключения окон
     def switch_page(self, index):
         """Переключает страницу в QStackedWidget и обновляет состояние кнопок"""
-        self.ui.mainStackedWidget.setCurrentIndex(index)  # stackedWidget — имя QStackedWidget в Qt Designer
-        
-        # Сбрасываем выделение всех кнопок (если нужно)
-        for button in [
-            self.ui.cabinetToolButton,
-            self.ui.dataToolButton,
-            self.ui.genOtchToolButton,
-            self.ui.genPlanToolButton,
-            self.ui.faqToolButton
-        ]:
-            button.setChecked(False)
-        
-        # Выделяем активную кнопку
-        current_button = [
-            self.ui.cabinetToolButton,
-            self.ui.dataToolButton,
-            self.ui.genOtchToolButton,
-            self.ui.genPlanToolButton,
-            self.ui.faqToolButton
-        ][index]
-        current_button.setChecked(True)
-        
+        self.ui.mainStackedWidget.setCurrentIndex(index) 
     # ==========================Код для работы с планом====================================================
     # Реализуем обычное сохранение
     def save_plan_function(self):

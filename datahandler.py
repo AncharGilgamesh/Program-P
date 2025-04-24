@@ -6,6 +6,160 @@ from docx import Document
 from datetime import datetime
 
 
+#Второй этап отчета
+def parse_second_table(data_rows):
+    result = []
+
+    for i, row in enumerate(data_rows):
+        if len(row) < 8:
+            continue  # пропускаем неполные строки
+
+        group = row[0].strip()
+        practice_text = row[1].strip()
+        date_text = row[2].strip()
+        place_text = row[3].strip()
+
+        # 1. Нумерация
+        number = i + 1
+
+        # 2. Город
+        city = "Казань"
+
+        # 3. Место проведения
+        if "кафедра" in place_text.lower():
+            location = f"Учебная кафедра ПМИ, гр. {group}"
+        elif place_text:
+            location = f"{place_text}, Учебная каф. ПМИ, гр. {group}"
+        else:
+            location = f"Учебная каф. ПМИ, гр. {group}"
+
+        # 4. Сколько человек направлено — ищем все числа в practice_text
+        numbers = [int(n) for n in re.findall(r"\d+", practice_text)]
+        people_count = sum(numbers)
+
+        # 5. Пустая строка
+        placeholder = ""
+
+        # 6-7. Даты начала и конца практики
+        start_date, end_date = extract_start_end_dates(date_text)
+
+        result.append([
+            number,
+            city,
+            location,
+            people_count,
+            placeholder,
+            start_date,
+            end_date
+        ])
+
+    return result
+
+
+def extract_start_end_dates(text):
+    text = text.replace('\n', ' ').replace('г.', '').replace('г', '').strip()
+    date_matches = re.findall(r'(\d{1,2})[./-](\d{1,2})(?:[./-](\d{4}))?', text)
+
+    if not date_matches:
+        return "", ""
+
+    # Первая дата
+    day1, month1, *year1 = date_matches[0]
+    day1 = int(day1)
+    month1 = int(month1)
+    year1 = int(year1[0]) if year1 and year1[0].isdigit() else None
+
+    # Вторая дата (если есть)
+    if len(date_matches) > 1:
+        day2, month2, *year2 = date_matches[1]
+        day2 = int(day2)
+        month2 = int(month2)
+        year2 = int(year2[0]) if year2 and year2[0].isdigit() else None
+    else:
+        day2 = month2 = year2 = None
+
+    # Подставим год, если его нет у первой даты
+    if not year1 and year2:
+        year1 = year2
+    elif not year1:
+        year1 = datetime.now().year
+
+    if not year2:
+        year2 = year1
+
+    try:
+        start = datetime(day=day1, month=month1, year=year1).strftime("%d.%m.%Y")
+    except:
+        start = ""
+
+    try:
+        end = datetime(day=day2, month=month2, year=year2).strftime("%d.%m.%Y") if day2 and month2 else ""
+    except:
+        end = ""
+
+    return start, end
+
+# Первый этап отчета
+# Эта функция принимает данные из модели первого этапа отчета и разделяет группа - практика, для
+# диалогового окна в дальнейшем
+def get_group_practice_keys_frst_stg(data):
+    seen = set()
+    group_practice_list = []
+
+    for row in data:
+        if len(row) < 5:
+            continue  # на всякий случай
+
+        group = str(row[1]).strip()
+        practice = str(row[4]).strip()
+
+        # Сокращения
+        practice_short = practice.replace(
+            "по получению навыков научно-исследовательской работы", "ППНИР"
+        ).replace(
+            "научно-исследовательская работа", "НИР"
+        ).replace(
+            "научно-исследовательская  работа", "НИР"
+        )
+
+        key = f"{group} – {practice_short}"
+        if key not in seen:
+            seen.add(key)
+            group_practice_list.append(key)
+
+    return group_practice_list
+
+def get_target_row_indices(data, selected_keys):
+    """
+    Возвращает список индексов строк, соответствующих выбранным ключам.
+    Ключ: "Группа – Вид практики (с сокращением)"
+    """
+    target_indices = []
+
+    for i, row in enumerate(data):
+        if len(row) < 5:
+            continue
+
+        group = str(row[1]).strip()
+        practice = str(row[4]).strip()
+
+        # Сокращения
+        practice_short = practice.replace(
+            "по получению навыков научно-исследовательской работы", "ППНИР"
+        ).replace(
+            "научно-исследовательская работа", "НИР"
+        ).replace(
+            "научно-исследовательская  работа", "НИР"
+        )
+
+        key = f"{group} – {practice_short}"
+        if key in selected_keys:
+            target_indices.append(i)
+
+    return target_indices
+
+
+
 # Обработка плана для отчета
 def parse_practice_table(data_rows):
     result = []
@@ -205,7 +359,7 @@ def extract_practice_blocks_with_empty_stop(df):
                     inside_block = True  # Входим в режим сбора данных
                     continue
 
-                # Если внутри ббора данных и встретили пустую ячейку в первом столбце
+                # Если внутри блока данных и встретили пустую ячейку в первом столбце
                 if inside_block and first_cell_empty:
                     inside_block = False  # Прекращаем сбор
                     continue
