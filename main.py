@@ -25,6 +25,7 @@ class MainWindow(QMainWindow):
 
         self._oth_frst_stg_model = None
         self._oth_scnd_std_model = None
+        self._oth_thrd_stg_model = None
 
         self._plan_data = None
         self._plan_headers = [
@@ -110,10 +111,13 @@ class MainWindow(QMainWindow):
             return
         data = dh.read_plan_from_docx(fname)
         # Вот эту функцию нужно переработать, чтобы даты не брались
-        table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
-        self._oth_frst_stg_model.insertRows(0,len(table1), table1)
-        table2 = dh.parse_second_table(data[1:])
-        self._oth_scnd_std_model.insertRows(0, len(table2), table2)
+        #table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
+        #self._oth_frst_stg_model.insertRows(0,len(table1), table1)
+        #table2 = dh.parse_second_table(data[1:])
+        #self._oth_scnd_std_model.insertRows(0, len(table2), table2)
+        table3 = dh.parse_third_table(data[1:])
+        for row in table3:
+            print(row)
             
 
     def set_otchet_tables_models(self):
@@ -123,11 +127,16 @@ class MainWindow(QMainWindow):
         headers_for_second_stage = [
             "№\nп/п", "Город", "Место проведения", "Направлено", "Прибыло", "Инструктаж по ТБ", "Факт. конец"
         ]
+        headers_for_third_stage = [
+            "Место", "Рук. от КАИ", "Рук. от предприятия"
+        ]
         first_data = None
         self._oth_frst_stg_model = PlanTableModel(first_data, headers_for_first_stage)
         self.ui.otchFirstTableView.setModel(self._oth_frst_stg_model)
         self._oth_scnd_std_model = PlanTableModel(first_data, headers_for_second_stage)
         self.ui.otchSecondTableView.setModel(self._oth_scnd_std_model)
+        self._oth_thrd_stg_model = PlanTableModel(first_data, headers_for_third_stage)
+        self.ui.otchThirdTableView.setModel(self._oth_thrd_stg_model)
 
 
     # Функция для переключения окон

@@ -4,7 +4,35 @@ from PySide6.QtCore import Qt
 from docx.opc.exceptions import PackageNotFoundError
 from docx import Document
 from datetime import datetime
+from collections import defaultdict
 
+# Третий этап отчета
+
+def parse_third_table(data_rows):
+    result = []
+    grouped = defaultdict(set)
+
+    for row in data_rows:
+        if len(row) < 6:
+            continue
+
+        group = row[0].strip()
+        location = row[3].strip()
+        teacher = row[5].strip()
+
+        if "кафедра" in location.lower():
+            final_place = f"Учебная лаборатория кафедры ПМИ"
+        else:
+            final_place = f"{location}, Учебная каф. ПМИ"
+
+        key = (final_place, teacher)
+        grouped[key].add(group)
+
+    for (place, teacher), groups in grouped.items():
+        place_with_groups = f"{place}, " + ", ".join(groups)
+        result.append([place_with_groups, teacher, ""])
+
+    return result
 
 #Второй этап отчета
 def parse_second_table(data_rows):

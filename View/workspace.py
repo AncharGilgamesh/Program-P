@@ -15,10 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QHeaderView, QLabel,
-    QLineEdit, QMainWindow, QMenuBar, QPushButton,
-    QSizePolicy, QStackedWidget, QStatusBar, QTableView,
-    QToolButton, QWidget)
+from PySide6.QtWidgets import (QApplication, QHeaderView, QLabel, QMainWindow,
+    QMenuBar, QPushButton, QSizePolicy, QStackedWidget,
+    QStatusBar, QTableView, QToolButton, QWidget)
 import View.res_rc
 
 class Ui_MainWindow(object):
@@ -123,6 +122,38 @@ class Ui_MainWindow(object):
 "    font-size: 10pt;\n"
 "}")
         self.stackedWidget.addWidget(self.page_2)
+        self.page_3 = QWidget()
+        self.page_3.setObjectName(u"page_3")
+        self.otchThirdTableView = QTableView(self.page_3)
+        self.otchThirdTableView.setObjectName(u"otchThirdTableView")
+        self.otchThirdTableView.setGeometry(QRect(0, 60, 881, 491))
+        self.otchThirdTableView.setStyleSheet(u"QTableView {\n"
+"    background-color: rgba(255, 255, 255, 30);\n"
+"    border: 1px solid rgba(255, 255, 255, 40);\n"
+"    border-bottom-right-radius: 7px;\n"
+"    border-bottom-left-radius: 7px;\n"
+"}\n"
+"QTableView::item {\n"
+"    border: none;\n"
+"    border-bottom: 1px solid rgba(255, 255, 255, 50);\n"
+"    padding: 5px;\n"
+"    color: white; /* \u0447\u0442\u043e\u0431\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c, \u0442\u043e\u0447\u043d\u043e \u043b\u0438 \u0441\u0442\u0438\u043b\u044c \u043f\u0440\u0438\u043c\u0435\u043d\u044f\u0435\u0442\u0441\u044f */\n"
+"}\n"
+"QTableView::item:selected {\n"
+"    border: none;\n"
+"    color: white;\n"
+"    background-color: rgba(255, 255, 255, 80);\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: rgb(53, 53, 53);\n"
+"    color: white;\n"
+"    border: none;\n"
+"    font-size: 10pt;\n"
+"}")
+        self.otch_next_btn_2 = QPushButton(self.page_3)
+        self.otch_next_btn_2.setObjectName(u"otch_next_btn_2")
+        self.otch_next_btn_2.setGeometry(QRect(10, 30, 131, 24))
+        self.stackedWidget.addWidget(self.page_3)
         self.otch_nagr_btn = QPushButton(self.otchet_page)
         self.otch_nagr_btn.setObjectName(u"otch_nagr_btn")
         self.otch_nagr_btn.setGeometry(QRect(440, 0, 91, 24))
@@ -221,12 +252,6 @@ class Ui_MainWindow(object):
         self.saveAsPlanButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
-        self.searchPlanLineEdit = QLineEdit(self.plan_page)
-        self.searchPlanLineEdit.setObjectName(u"searchPlanLineEdit")
-        self.searchPlanLineEdit.setGeometry(QRect(10, 60, 221, 31))
-        self.planSearchComboBox = QComboBox(self.plan_page)
-        self.planSearchComboBox.setObjectName(u"planSearchComboBox")
-        self.planSearchComboBox.setGeometry(QRect(230, 60, 151, 31))
         self.mainStackedWidget.addWidget(self.plan_page)
         self.faq_page = QWidget()
         self.faq_page.setObjectName(u"faq_page")
@@ -340,8 +365,8 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.mainStackedWidget.setCurrentIndex(1)
-        self.stackedWidget.setCurrentIndex(1)
+        self.mainStackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -355,6 +380,7 @@ class Ui_MainWindow(object):
         self.otch_next_btn.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0430\u043b\u0435\u0435", None))
         self.otch_prev_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u0430\u0434", None))
         self.meeting_date_otch_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u043d\u0430\u0447\u0438\u0442\u044c \u0434\u0430\u0442\u0443 \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u044f \u0441\u043e\u0431\u0440\u0430\u043d\u0438\u044f", None))
+        self.otch_next_btn_2.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0434\u0430\u043d\u043d\u044b\u043c\u0438", None))
         self.otch_nagr_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0433\u0440\u0443\u0437\u043a\u0430", None))
         self.otch_pln_btn.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d", None))
         self.otch_tbl_btn.setText(QCoreApplication.translate("MainWindow", u"\u0422\u0430\u0431\u043b\u0438\u0446\u0430", None))
