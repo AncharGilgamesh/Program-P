@@ -49,15 +49,27 @@ class Ui_MainWindow(object):
         self.otch_lbl_page_info = QLabel(self.otchet_page)
         self.otch_lbl_page_info.setObjectName(u"otch_lbl_page_info")
         self.otch_lbl_page_info.setGeometry(QRect(0, 0, 131, 21))
+        self.otch_lbl_page_info.setStyleSheet(u"QLabel{\n"
+"    color: white;\n"
+"}")
         self.otch_lbl_stage = QLabel(self.otchet_page)
         self.otch_lbl_stage.setObjectName(u"otch_lbl_stage")
         self.otch_lbl_stage.setGeometry(QRect(140, 0, 131, 21))
+        self.otch_lbl_stage.setStyleSheet(u"QLabel{\n"
+"    color: white;\n"
+"}")
         self.otch_next_btn = QPushButton(self.otchet_page)
         self.otch_next_btn.setObjectName(u"otch_next_btn")
         self.otch_next_btn.setGeometry(QRect(340, 0, 75, 24))
+        self.otch_next_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.otch_prev_btn = QPushButton(self.otchet_page)
         self.otch_prev_btn.setObjectName(u"otch_prev_btn")
         self.otch_prev_btn.setGeometry(QRect(270, 0, 75, 24))
+        self.otch_prev_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.stackedWidget = QStackedWidget(self.otchet_page)
         self.stackedWidget.setObjectName(u"stackedWidget")
         self.stackedWidget.setGeometry(QRect(0, 30, 881, 551))
@@ -92,6 +104,9 @@ class Ui_MainWindow(object):
         self.meeting_date_otch_btn = QPushButton(self.page)
         self.meeting_date_otch_btn.setObjectName(u"meeting_date_otch_btn")
         self.meeting_date_otch_btn.setGeometry(QRect(0, 30, 251, 24))
+        self.meeting_date_otch_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.stackedWidget.addWidget(self.page)
         self.page_2 = QWidget()
         self.page_2.setObjectName(u"page_2")
@@ -150,19 +165,112 @@ class Ui_MainWindow(object):
 "    border: none;\n"
 "    font-size: 10pt;\n"
 "}")
-        self.otch_next_btn_2 = QPushButton(self.page_3)
-        self.otch_next_btn_2.setObjectName(u"otch_next_btn_2")
-        self.otch_next_btn_2.setGeometry(QRect(10, 30, 131, 24))
         self.stackedWidget.addWidget(self.page_3)
+        self.page_4 = QWidget()
+        self.page_4.setObjectName(u"page_4")
+        self.otchFourthTableView = QTableView(self.page_4)
+        self.otchFourthTableView.setObjectName(u"otchFourthTableView")
+        self.otchFourthTableView.setGeometry(QRect(0, 60, 881, 491))
+        self.otchFourthTableView.setStyleSheet(u"QTableView {\n"
+"    background-color: rgba(255, 255, 255, 30);\n"
+"    border: 1px solid rgba(255, 255, 255, 40);\n"
+"    border-bottom-right-radius: 7px;\n"
+"    border-bottom-left-radius: 7px;\n"
+"}\n"
+"QTableView::item {\n"
+"    border: none;\n"
+"    border-bottom: 1px solid rgba(255, 255, 255, 50);\n"
+"    padding: 5px;\n"
+"    color: white; /* \u0447\u0442\u043e\u0431\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c, \u0442\u043e\u0447\u043d\u043e \u043b\u0438 \u0441\u0442\u0438\u043b\u044c \u043f\u0440\u0438\u043c\u0435\u043d\u044f\u0435\u0442\u0441\u044f */\n"
+"}\n"
+"QTableView::item:selected {\n"
+"    border: none;\n"
+"    color: white;\n"
+"    background-color: rgba(255, 255, 255, 80);\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: rgb(53, 53, 53);\n"
+"    color: white;\n"
+"    border: none;\n"
+"    font-size: 10pt;\n"
+"}")
+        self.stackedWidget.addWidget(self.page_4)
+        self.page_5 = QWidget()
+        self.page_5.setObjectName(u"page_5")
+        self.otchFivethTableView = QTableView(self.page_5)
+        self.otchFivethTableView.setObjectName(u"otchFivethTableView")
+        self.otchFivethTableView.setGeometry(QRect(0, 60, 881, 491))
+        self.otchFivethTableView.setStyleSheet(u"QTableView {\n"
+"    background-color: rgba(255, 255, 255, 30);\n"
+"    border: 1px solid rgba(255, 255, 255, 40);\n"
+"    border-bottom-right-radius: 7px;\n"
+"    border-bottom-left-radius: 7px;\n"
+"}\n"
+"QTableView::item {\n"
+"    border: none;\n"
+"    border-bottom: 1px solid rgba(255, 255, 255, 50);\n"
+"    padding: 5px;\n"
+"    color: white; /* \u0447\u0442\u043e\u0431\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c, \u0442\u043e\u0447\u043d\u043e \u043b\u0438 \u0441\u0442\u0438\u043b\u044c \u043f\u0440\u0438\u043c\u0435\u043d\u044f\u0435\u0442\u0441\u044f */\n"
+"}\n"
+"QTableView::item:selected {\n"
+"    border: none;\n"
+"    color: white;\n"
+"    background-color: rgba(255, 255, 255, 80);\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: rgb(53, 53, 53);\n"
+"    color: white;\n"
+"    border: none;\n"
+"    font-size: 10pt;\n"
+"}")
+        self.stackedWidget.addWidget(self.page_5)
+        self.page_6 = QWidget()
+        self.page_6.setObjectName(u"page_6")
+        self.otchSixthTableView = QTableView(self.page_6)
+        self.otchSixthTableView.setObjectName(u"otchSixthTableView")
+        self.otchSixthTableView.setGeometry(QRect(0, 60, 881, 491))
+        self.otchSixthTableView.setStyleSheet(u"QTableView {\n"
+"    background-color: rgba(255, 255, 255, 30);\n"
+"    border: 1px solid rgba(255, 255, 255, 40);\n"
+"    border-bottom-right-radius: 7px;\n"
+"    border-bottom-left-radius: 7px;\n"
+"}\n"
+"QTableView::item {\n"
+"    border: none;\n"
+"    border-bottom: 1px solid rgba(255, 255, 255, 50);\n"
+"    padding: 5px;\n"
+"    color: white; /* \u0447\u0442\u043e\u0431\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c, \u0442\u043e\u0447\u043d\u043e \u043b\u0438 \u0441\u0442\u0438\u043b\u044c \u043f\u0440\u0438\u043c\u0435\u043d\u044f\u0435\u0442\u0441\u044f */\n"
+"}\n"
+"QTableView::item:selected {\n"
+"    border: none;\n"
+"    color: white;\n"
+"    background-color: rgba(255, 255, 255, 80);\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: rgb(53, 53, 53);\n"
+"    color: white;\n"
+"    border: none;\n"
+"    font-size: 10pt;\n"
+"}")
+        self.stackedWidget.addWidget(self.page_6)
         self.otch_nagr_btn = QPushButton(self.otchet_page)
         self.otch_nagr_btn.setObjectName(u"otch_nagr_btn")
         self.otch_nagr_btn.setGeometry(QRect(440, 0, 91, 24))
+        self.otch_nagr_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.otch_pln_btn = QPushButton(self.otchet_page)
         self.otch_pln_btn.setObjectName(u"otch_pln_btn")
         self.otch_pln_btn.setGeometry(QRect(530, 0, 81, 24))
+        self.otch_pln_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.otch_tbl_btn = QPushButton(self.otchet_page)
         self.otch_tbl_btn.setObjectName(u"otch_tbl_btn")
         self.otch_tbl_btn.setGeometry(QRect(610, 0, 81, 24))
+        self.otch_tbl_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.mainStackedWidget.addWidget(self.otchet_page)
         self.plan_page = QWidget()
         self.plan_page.setObjectName(u"plan_page")
@@ -365,8 +473,8 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.mainStackedWidget.setCurrentIndex(2)
-        self.stackedWidget.setCurrentIndex(2)
+        self.mainStackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(5)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -380,7 +488,6 @@ class Ui_MainWindow(object):
         self.otch_next_btn.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0430\u043b\u0435\u0435", None))
         self.otch_prev_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u0430\u0434", None))
         self.meeting_date_otch_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u043d\u0430\u0447\u0438\u0442\u044c \u0434\u0430\u0442\u0443 \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u044f \u0441\u043e\u0431\u0440\u0430\u043d\u0438\u044f", None))
-        self.otch_next_btn_2.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0434\u0430\u043d\u043d\u044b\u043c\u0438", None))
         self.otch_nagr_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0433\u0440\u0443\u0437\u043a\u0430", None))
         self.otch_pln_btn.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d", None))
         self.otch_tbl_btn.setText(QCoreApplication.translate("MainWindow", u"\u0422\u0430\u0431\u043b\u0438\u0446\u0430", None))

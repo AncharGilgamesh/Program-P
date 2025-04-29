@@ -60,10 +60,8 @@ class MainWindow(QMainWindow):
         #Конец нового участка кода
         """
         # Тут страница отчета
-        self.ui.otch_prev_btn.clicked.connect(
-            lambda: self.ui.stackedWidget.setCurrentIndex(self.ui.stackedWidget.currentIndex()-1))
-        self.ui.otch_next_btn.clicked.connect(
-            lambda: self.ui.stackedWidget.setCurrentIndex(self.ui.stackedWidget.currentIndex()+1))
+        self.ui.otch_prev_btn.clicked.connect(self.to_prev_stage)
+        self.ui.otch_next_btn.clicked.connect(self.to_next_stage)
         self.ui.otch_pln_btn.clicked.connect(self.load_plan)
         # first stage
         self.ui.meeting_date_otch_btn.clicked.connect(self.add_meting_date)
@@ -111,14 +109,40 @@ class MainWindow(QMainWindow):
             return
         data = dh.read_plan_from_docx(fname)
         # Вот эту функцию нужно переработать, чтобы даты не брались
-        #table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
+        table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
         #self._oth_frst_stg_model.insertRows(0,len(table1), table1)
-        #table2 = dh.parse_second_table(data[1:])
+        table2 = dh.parse_second_table(data[1:])
         #self._oth_scnd_std_model.insertRows(0, len(table2), table2)
-        table3 = dh.parse_third_table(data[1:])
-        for row in table3:
+        #table3 = dh.parse_third_table(data[1:])
+        #self._oth_thrd_stg_model.insertRows(0, len(table3), table3)
+        #table4 = dh.parse_fourth_table(table2)
+
+        table5 = dh.parse_fiveth_table(table2)
+        table6 = dh.parse_sixth_table(table1, data)
+        for row in table6:
             print(row)
+        #self._fourth_stg_model.insertRows(0, len(table4), table4)
+        # вот тут представлены варианты изменения размера, нужно это все рассмотреть получше
+        #self.ui.otchThirdTableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        #self.ui.otchThirdTableView.resizeRowsToContents()
+        #Для четвертой таблицы попробуй взять инфу из второй таблицы и надо подредактировать
+        #Сделать диалоговое окно, чтобы можно было заполнять таблицу из второй таблицы
+        
             
+
+    def to_next_stage(self):
+        index = self.ui.stackedWidget.currentIndex()+1
+        if index == 6:
+            return
+        self.ui.otch_lbl_stage.setText(f'{index + 1} этап')
+        self.ui.stackedWidget.setCurrentIndex(index)
+
+    def to_prev_stage(self):
+        index = self.ui.stackedWidget.currentIndex()-1
+        if index == -1:
+            return
+        self.ui.otch_lbl_stage.setText(f'{index + 1} этап')
+        self.ui.stackedWidget.setCurrentIndex(index)
 
     def set_otchet_tables_models(self):
         headers_for_first_stage = [
@@ -130,6 +154,16 @@ class MainWindow(QMainWindow):
         headers_for_third_stage = [
             "Место", "Рук. от КАИ", "Рук. от предприятия"
         ]
+        headers_fourth_stage = [
+            "Место\nпроведения\nпрактики", "В цехах", "Офис", "Инженерно-\nтехнические\nдолжности", "Научные\nлаборатории",
+            "Студ.\n отряды", "Другое", "Оформление\nТБ на рабочем\nместе(да\нет)"
+        ]
+        headers_fiveth_stage = [
+            "Группа", "Всего\nчел.", "Отл.", "Хор.", "Неуд.", "Не\nзащитило", "Место\nзащиты"
+        ]
+        headers_sixth_stage = [
+            "№", "Руководитель", "Должность", "Группа", "Вид\nпрактики", "Удовл.", "Хор.", "Отл."
+        ]
         first_data = None
         self._oth_frst_stg_model = PlanTableModel(first_data, headers_for_first_stage)
         self.ui.otchFirstTableView.setModel(self._oth_frst_stg_model)
@@ -137,6 +171,12 @@ class MainWindow(QMainWindow):
         self.ui.otchSecondTableView.setModel(self._oth_scnd_std_model)
         self._oth_thrd_stg_model = PlanTableModel(first_data, headers_for_third_stage)
         self.ui.otchThirdTableView.setModel(self._oth_thrd_stg_model)
+        self._fourth_stg_model = PlanTableModel(first_data, headers_fourth_stage)
+        self.ui.otchFourthTableView.setModel(self._fourth_stg_model)
+        self._fiveth_stg_model = PlanTableModel(first_data, headers_fiveth_stage)
+        self.ui.otchFivethTableView.setModel(self._fiveth_stg_model)
+        self._sixth_stg_model = PlanTableModel(first_data, headers_sixth_stage)
+        self.ui.otchSixthTableView.setModel(self._sixth_stg_model)
 
 
     # Функция для переключения окон
@@ -167,6 +207,7 @@ class MainWindow(QMainWindow):
 
     # Модифицируем метод для открытия редактирования
     def open_group_dialog(self):
+        """Этот метод используется в плане для редактирования столбцов"""
         self.button_to_keyword = {
             "Примечание": "Примечан",
             "Место проведения": "Место\nпроведения",

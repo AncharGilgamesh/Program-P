@@ -6,6 +6,33 @@ from docx import Document
 from datetime import datetime
 from collections import defaultdict
 
+# Шестой этап
+def parse_sixth_table(data, prepods):
+    # data - table1
+    # prepods - берем из общего плана
+    result = []
+    for i in range(0, len(data)):
+        result.append([str(i+1), prepods[i][5].strip(), "", data[i][1], data[i][4], "","", ""])
+    return result
+
+# Пятый этап отчета
+def parse_fiveth_table(data):
+    # i just wonder can i handle it
+    # сюда передаю table2
+    result = []
+    for row in data:
+        group = re.search(r'\b4\d{3}\b', row[2]).group()
+        people_amount = row[3]
+        result.append([group, people_amount, "", "", "", "", "", "в КНИТУ-КАИ"])
+    return result
+# Четвертый этап отчета
+def parse_fourth_table(data):
+    # сюда передаю table2
+    result = []
+    for row in data:
+        result.append([row[2],"","","","","","", "да"])
+    return result
+
 # Третий этап отчета
 
 def parse_third_table(data_rows):
