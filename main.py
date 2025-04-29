@@ -88,6 +88,15 @@ class MainWindow(QMainWindow):
 
     # ==========================Код для работы с отчетом====================================================
 
+    def set_otchet_resizing(self):
+        self.ui.otchFirstTableView.resizeRowsToContents()
+        self.ui.otchSecondTableView.resizeRowsToContents()
+        self.ui.otchThirdTableView.resizeRowsToContents()
+        self.ui.otchFourthTableView.resizeRowsToContents()
+
+        self.ui.otchFivethTableView.resizeRowsToContents()
+        self.ui.otchSixthTableView.resizeRowsToContents()
+
 
     def add_meting_date(self):
         data_for_meeting = self._oth_frst_stg_model.get_data()
@@ -110,17 +119,20 @@ class MainWindow(QMainWindow):
         data = dh.read_plan_from_docx(fname)
         # Вот эту функцию нужно переработать, чтобы даты не брались
         table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
-        #self._oth_frst_stg_model.insertRows(0,len(table1), table1)
+        self._oth_frst_stg_model.insertRows(0,len(table1), table1)
         table2 = dh.parse_second_table(data[1:])
-        #self._oth_scnd_std_model.insertRows(0, len(table2), table2)
-        #table3 = dh.parse_third_table(data[1:])
-        #self._oth_thrd_stg_model.insertRows(0, len(table3), table3)
-        #table4 = dh.parse_fourth_table(table2)
+        self._oth_scnd_std_model.insertRows(0, len(table2), table2)
+        table3 = dh.parse_third_table(data[1:])
+        self._oth_thrd_stg_model.insertRows(0, len(table3), table3)
+        table4 = dh.parse_fourth_table(table2)
+        self._fourth_stg_model.insertRows(0, len(table4), table4)
 
         table5 = dh.parse_fiveth_table(table2)
+        self._fiveth_stg_model.insertRows(0, len(table5), table5)
         table6 = dh.parse_sixth_table(table1, data)
-        for row in table6:
-            print(row)
+        self._sixth_stg_model.insertRows(0, len(table6), table6)
+        self.set_otchet_resizing()
+    
         #self._fourth_stg_model.insertRows(0, len(table4), table4)
         # вот тут представлены варианты изменения размера, нужно это все рассмотреть получше
         #self.ui.otchThirdTableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)

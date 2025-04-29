@@ -12,7 +12,7 @@ def parse_sixth_table(data, prepods):
     # prepods - берем из общего плана
     result = []
     for i in range(0, len(data)):
-        result.append([str(i+1), prepods[i][5].strip(), "", data[i][1], data[i][4], "","", ""])
+        result.append([str(i+1), prepods[i+1][5].strip(), "", data[i][1], data[i][4], "","", ""])
     return result
 
 # Пятый этап отчета
@@ -23,7 +23,7 @@ def parse_fiveth_table(data):
     for row in data:
         group = re.search(r'\b4\d{3}\b', row[2]).group()
         people_amount = row[3]
-        result.append([group, people_amount, "", "", "", "", "", "в КНИТУ-КАИ"])
+        result.append([group, people_amount, "", "", "", "", "в КНИТУ-КАИ"])
     return result
 # Четвертый этап отчета
 def parse_fourth_table(data):
