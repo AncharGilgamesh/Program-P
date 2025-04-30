@@ -40,9 +40,56 @@ class Ui_MainWindow(object):
         self.mainStackedWidget.setGeometry(QRect(170, 10, 881, 591))
         self.db_page = QWidget()
         self.db_page.setObjectName(u"db_page")
-        self.label = QLabel(self.db_page)
-        self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(140, 200, 321, 91))
+        self.dataBaseTableView = QTableView(self.db_page)
+        self.dataBaseTableView.setObjectName(u"dataBaseTableView")
+        self.dataBaseTableView.setGeometry(QRect(0, 100, 881, 491))
+        self.dataBaseTableView.setStyleSheet(u"QTableView {\n"
+"    background-color: rgba(255, 255, 255, 30);\n"
+"    border: 1px solid rgba(255, 255, 255, 40);\n"
+"    border-bottom-right-radius: 7px;\n"
+"    border-bottom-left-radius: 7px;\n"
+"}\n"
+"QTableView::item {\n"
+"    border: none;\n"
+"    border-bottom: 1px solid rgba(255, 255, 255, 50);\n"
+"    padding: 5px;\n"
+"    color: white; /* \u0447\u0442\u043e\u0431\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c, \u0442\u043e\u0447\u043d\u043e \u043b\u0438 \u0441\u0442\u0438\u043b\u044c \u043f\u0440\u0438\u043c\u0435\u043d\u044f\u0435\u0442\u0441\u044f */\n"
+"}\n"
+"QTableView::item:selected {\n"
+"    border: none;\n"
+"    color: white;\n"
+"    background-color: rgba(255, 255, 255, 80);\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: rgb(53, 53, 53);\n"
+"    color: white;\n"
+"    border: none;\n"
+"    font-size: 10pt;\n"
+"}")
+        self.dbPlansPushButton = QPushButton(self.db_page)
+        self.dbPlansPushButton.setObjectName(u"dbPlansPushButton")
+        self.dbPlansPushButton.setGeometry(QRect(0, 60, 121, 31))
+        self.dbPlansPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbOtchetsPushButton = QPushButton(self.db_page)
+        self.dbOtchetsPushButton.setObjectName(u"dbOtchetsPushButton")
+        self.dbOtchetsPushButton.setGeometry(QRect(120, 60, 121, 31))
+        self.dbOtchetsPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbPrepodsPushButton = QPushButton(self.db_page)
+        self.dbPrepodsPushButton.setObjectName(u"dbPrepodsPushButton")
+        self.dbPrepodsPushButton.setGeometry(QRect(240, 60, 121, 31))
+        self.dbPrepodsPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbStarostaPushButton = QPushButton(self.db_page)
+        self.dbStarostaPushButton.setObjectName(u"dbStarostaPushButton")
+        self.dbStarostaPushButton.setGeometry(QRect(360, 60, 121, 31))
+        self.dbStarostaPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
         self.mainStackedWidget.addWidget(self.db_page)
         self.otchet_page = QWidget()
         self.otchet_page.setObjectName(u"otchet_page")
@@ -473,8 +520,8 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.mainStackedWidget.setCurrentIndex(1)
-        self.stackedWidget.setCurrentIndex(5)
+        self.mainStackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -482,7 +529,10 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Project P", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"\u0411\u0430\u0437\u0430 \u0434\u0430\u043d\u043d\u044b\u0445 \u0442\u0443\u0442", None))
+        self.dbPlansPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d\u044b", None))
+        self.dbOtchetsPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0442\u0447\u0435\u0442\u044b", None))
+        self.dbPrepodsPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u0438", None))
+        self.dbStarostaPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u0442\u0430\u0440\u043e\u0441\u0442\u044b \u0433\u0440\u0443\u043f\u043f", None))
         self.otch_lbl_page_info.setText(QCoreApplication.translate("MainWindow", u"\u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f \u043e\u0442\u0447\u0435\u0442\u0430", None))
         self.otch_lbl_stage.setText(QCoreApplication.translate("MainWindow", u"1 \u044d\u0442\u0430\u043f", None))
         self.otch_next_btn.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0430\u043b\u0435\u0435", None))
