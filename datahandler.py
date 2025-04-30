@@ -6,6 +6,7 @@ from docx import Document
 from datetime import datetime
 from collections import defaultdict
 
+
 # Шестой этап
 def parse_sixth_table(data, prepods):
     # data - table1

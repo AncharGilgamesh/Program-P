@@ -108,3 +108,49 @@ class PlanTableModel(QAbstractTableModel):
         top_left = self.index(0, 0)
         bottom_right = self.index(self.rowCount()-1, self.columnCount()-1)
         self.dataChanged.emit(top_left, bottom_right, [Qt.DisplayRole])
+
+class ResultTableModel(PlanTableModel):
+    def __init__(self, data, headers):
+        super().__init__(data, headers)
+
+    def data(self, index, role=Qt.DisplayRole):
+        if not index.isValid():
+            return None
+
+        row, col = index.row(), index.column()
+
+        if role == Qt.DisplayRole:
+            value = self._data[row][col]
+            if col == 5:  # "Не защитило"
+                try:
+                    total = int(self._data[row][1])
+                    scores = [int(self._data[row][i] or 0) for i in range(2, 5)]
+                    return str(max(total - sum(scores), 0))
+                except:
+                    return "-"
+            return value if value not in [None, ""] else "-"
+
+        return super().data(index, role)
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if not index.isValid() or role != Qt.EditRole:
+            return False
+
+        row, col = index.row(), index.column()
+
+        # "Не защитило" нельзя редактировать вручную
+        if col == 5:
+            return False
+
+        self._data[row][col] = value
+        self.dataChanged.emit(index, index)
+        return True
+
+    def flags(self, index):
+        if not index.isValid():
+            return Qt.NoItemFlags
+
+        col = index.column()
+        if col == 0 or col == 1 or col == 5:
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable  # Только просмотр
+        return Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled

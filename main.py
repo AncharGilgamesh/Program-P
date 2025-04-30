@@ -10,10 +10,11 @@ from PySide6 import QtWidgets
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView, QStyledItemDelegate
 from PySide6.QtCore import QSortFilterProxyModel, Qt
 
-from model import PlanTableModel
+from model import PlanTableModel, ResultTableModel
 
 from View.workspace import Ui_MainWindow
 from View.planaddingdialogs import GroupEditDialog
+from View.smartTableView import SmartTableView
 from View.meetingdatedialog import MeetingDateDialog
 
 class MainWindow(QMainWindow):
@@ -22,10 +23,12 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-
         self._oth_frst_stg_model = None
         self._oth_scnd_std_model = None
         self._oth_thrd_stg_model = None
+        self._fourth_stg_model = None
+        self._fiveth_stg_model = None
+        self._sixth_stg_model = None
 
         self._plan_data = None
         self._plan_headers = [
@@ -85,6 +88,9 @@ class MainWindow(QMainWindow):
         self.ui.genPlanToolButton.clicked.connect(lambda: self.switch_page(2))
         self.ui.faqToolButton.clicked.connect(lambda: self.switch_page(3))
         self.ui.exitToolButton.clicked.connect(self.exit_function)
+
+
+
 
     # ==========================Код для работы с отчетом====================================================
 
@@ -185,7 +191,7 @@ class MainWindow(QMainWindow):
         self.ui.otchThirdTableView.setModel(self._oth_thrd_stg_model)
         self._fourth_stg_model = PlanTableModel(first_data, headers_fourth_stage)
         self.ui.otchFourthTableView.setModel(self._fourth_stg_model)
-        self._fiveth_stg_model = PlanTableModel(first_data, headers_fiveth_stage)
+        self._fiveth_stg_model = ResultTableModel(first_data, headers_fiveth_stage)
         self.ui.otchFivethTableView.setModel(self._fiveth_stg_model)
         self._sixth_stg_model = PlanTableModel(first_data, headers_sixth_stage)
         self.ui.otchSixthTableView.setModel(self._sixth_stg_model)
