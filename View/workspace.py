@@ -68,26 +68,74 @@ class Ui_MainWindow(object):
 "}")
         self.dbPlansPushButton = QPushButton(self.db_page)
         self.dbPlansPushButton.setObjectName(u"dbPlansPushButton")
-        self.dbPlansPushButton.setGeometry(QRect(0, 60, 121, 31))
+        self.dbPlansPushButton.setGeometry(QRect(240, 0, 121, 31))
         self.dbPlansPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbOtchetsPushButton = QPushButton(self.db_page)
-        self.dbOtchetsPushButton.setObjectName(u"dbOtchetsPushButton")
-        self.dbOtchetsPushButton.setGeometry(QRect(120, 60, 121, 31))
-        self.dbOtchetsPushButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
         self.dbPrepodsPushButton = QPushButton(self.db_page)
         self.dbPrepodsPushButton.setObjectName(u"dbPrepodsPushButton")
-        self.dbPrepodsPushButton.setGeometry(QRect(240, 60, 121, 31))
+        self.dbPrepodsPushButton.setGeometry(QRect(360, 0, 121, 31))
         self.dbPrepodsPushButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
         self.dbStarostaPushButton = QPushButton(self.db_page)
         self.dbStarostaPushButton.setObjectName(u"dbStarostaPushButton")
-        self.dbStarostaPushButton.setGeometry(QRect(360, 60, 121, 31))
+        self.dbStarostaPushButton.setGeometry(QRect(480, 0, 121, 31))
         self.dbStarostaPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.sa = QPushButton(self.db_page)
+        self.sa.setObjectName(u"sa")
+        self.sa.setGeometry(QRect(20, 10, 121, 31))
+        self.sa.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbPlansPushButton_3 = QPushButton(self.db_page)
+        self.dbPlansPushButton_3.setObjectName(u"dbPlansPushButton_3")
+        self.dbPlansPushButton_3.setGeometry(QRect(20, 40, 121, 31))
+        self.dbPlansPushButton_3.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbPlansPushButton_7 = QPushButton(self.db_page)
+        self.dbPlansPushButton_7.setObjectName(u"dbPlansPushButton_7")
+        self.dbPlansPushButton_7.setGeometry(QRect(20, 70, 121, 31))
+        self.dbPlansPushButton_7.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbEditPrepodPushButton = QPushButton(self.db_page)
+        self.dbEditPrepodPushButton.setObjectName(u"dbEditPrepodPushButton")
+        self.dbEditPrepodPushButton.setGeometry(QRect(360, 70, 121, 31))
+        self.dbEditPrepodPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbAddPrepodPushButton = QPushButton(self.db_page)
+        self.dbAddPrepodPushButton.setObjectName(u"dbAddPrepodPushButton")
+        self.dbAddPrepodPushButton.setGeometry(QRect(240, 70, 121, 31))
+        self.dbAddPrepodPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbDelPrepodPushButton = QPushButton(self.db_page)
+        self.dbDelPrepodPushButton.setObjectName(u"dbDelPrepodPushButton")
+        self.dbDelPrepodPushButton.setGeometry(QRect(480, 70, 121, 31))
+        self.dbDelPrepodPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbAddStarostaPushButton = QPushButton(self.db_page)
+        self.dbAddStarostaPushButton.setObjectName(u"dbAddStarostaPushButton")
+        self.dbAddStarostaPushButton.setGeometry(QRect(710, 10, 121, 31))
+        self.dbAddStarostaPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbEditStarostaPushButton = QPushButton(self.db_page)
+        self.dbEditStarostaPushButton.setObjectName(u"dbEditStarostaPushButton")
+        self.dbEditStarostaPushButton.setGeometry(QRect(710, 40, 121, 31))
+        self.dbEditStarostaPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+        self.dbDelStarostaPushButton = QPushButton(self.db_page)
+        self.dbDelStarostaPushButton.setObjectName(u"dbDelStarostaPushButton")
+        self.dbDelStarostaPushButton.setGeometry(QRect(710, 70, 121, 31))
+        self.dbDelStarostaPushButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
         self.mainStackedWidget.addWidget(self.db_page)
@@ -529,10 +577,24 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Project P", None))
-        self.dbPlansPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d\u044b", None))
-        self.dbOtchetsPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0442\u0447\u0435\u0442\u044b", None))
+        self.dbPlansPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b", None))
         self.dbPrepodsPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u0438", None))
         self.dbStarostaPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u0442\u0430\u0440\u043e\u0441\u0442\u044b \u0433\u0440\u0443\u043f\u043f", None))
+        self.sa.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0449\u0438\u0442\u0430 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430", None))
+        self.dbPlansPushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
+        self.dbPlansPushButton_7.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
+        self.dbEditPrepodPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435\n"
+"\u043f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u044f", None))
+        self.dbAddPrepodPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u0438\u0435\n"
+"\u043f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u044f", None))
+        self.dbDelPrepodPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435\n"
+"\u043f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u044f", None))
+        self.dbAddStarostaPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u0438\u0435\n"
+"\u0441\u0442\u0430\u0440\u043e\u0441\u0442\u044b", None))
+        self.dbEditStarostaPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435\n"
+"\u0441\u0442\u0430\u0440\u043e\u0441\u0442\u044b", None))
+        self.dbDelStarostaPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435\n"
+"\u0441\u0442\u0430\u0440\u043e\u0441\u0442\u044b", None))
         self.otch_lbl_page_info.setText(QCoreApplication.translate("MainWindow", u"\u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f \u043e\u0442\u0447\u0435\u0442\u0430", None))
         self.otch_lbl_stage.setText(QCoreApplication.translate("MainWindow", u"1 \u044d\u0442\u0430\u043f", None))
         self.otch_next_btn.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0430\u043b\u0435\u0435", None))

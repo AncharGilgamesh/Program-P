@@ -1,14 +1,17 @@
 import sys
+import datetime
 
 import pandas as pd
 import datahandler as dh
+import Models.dbhandler_new as dbh
 from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView, QStyledItemDelegate
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView
 from PySide6.QtCore import QSortFilterProxyModel, Qt
+
 
 from model import PlanTableModel, ResultTableModel
 
@@ -16,12 +19,19 @@ from View.workspace import Ui_MainWindow
 from View.planaddingdialogs import GroupEditDialog
 from View.smartTableView import SmartTableView
 from View.meetingdatedialog import MeetingDateDialog
+from View.prepod_dialog import PrepodDialog
+from View.startosta_dialog import StarostaDialog
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        # Создаем базы данных
+        dbh.create_tables()
+
+        self._db_model = None
 
         self._oth_frst_stg_model = None
         self._oth_scnd_std_model = None
@@ -80,7 +90,7 @@ class MainWindow(QMainWindow):
         # проверяю диалоговое окно
         self.ui.rukPlanPushButton.clicked.connect(self.open_group_dialog)
         # работаем надо сохранениями
-        self.ui.savePlanButton.clicked.connect(self.save_plan_function)
+        self.ui.savePlanButton.clicked.connect(self.save_plan_new)
         # Переключение между окнами
         self.ui.cabinetToolButton.clicked.connect(lambda: self.switch_page(4))
         self.ui.dataToolButton.clicked.connect(lambda: self.switch_page(0))
@@ -89,7 +99,85 @@ class MainWindow(QMainWindow):
         self.ui.faqToolButton.clicked.connect(lambda: self.switch_page(3))
         self.ui.exitToolButton.clicked.connect(self.exit_function)
 
+        # страница базы данных
+        self.ui.dbPlansPushButton.clicked.connect(self.upload_db_docs)
+        self.ui.dbPrepodsPushButton.clicked.connect(self.upload_db_teachers)
+        self.ui.dbStarostaPushButton.clicked.connect(self.upload_db_starosta)
 
+        self.ui.dbAddPrepodPushButton.clicked.connect(self.add_db_prepod)
+        self.ui.dbEditPrepodPushButton.clicked.connect(self.edit_db_prepod)
+        self.ui.dbDelPrepodPushButton.clicked.connect(self.remove_db_prepod)
+
+        self.ui.dbAddStarostaPushButton.clicked.connect(self.add_db_starosta)
+
+
+
+    # ==========================Код для работы с базой данных===============================================
+
+    def upload_db_starosta(self):
+        data = dbh.load_starostas()
+        headers = ["id","id_Куратора", "Фамилия", "Имя", "Отчество", "Группа", "Почта", "Номер"]
+        self._db_model = PlanTableModel(data, headers)
+        self.ui.dataBaseTableView.setModel(self._db_model)
+
+    def add_db_starosta(self):
+        teachers = [
+            (1, "Иванов", "Иван", "Иванович", ...),
+            (2, "Петров", "Пётр", "Петрович", ...),
+            (3, "Сидоров", "Сидор", "Сидорович", ...)
+        ]
+        dialog = StarostaDialog(teachers=teachers, parent=self)
+        if dialog.exec():
+            data = dialog.get_data()
+        print(data)
+
+    def upload_db_teachers(self):
+        data = dbh.load_teachers()
+        headers = ["id", "Фамилия", "Имя", "Отчество", "Степень", "Должность", "Почта", "Номер"]
+        self._db_model = PlanTableModel(data, headers)
+        self.ui.dataBaseTableView.setModel(self._db_model)
+
+    def add_db_prepod(self):
+        dialog = PrepodDialog(parent=self)
+        if dialog.exec():
+            data = dialog.get_data()
+        try:
+            dbh.insert_teacher(*data)
+            self.upload_db_teachers()
+        except:
+            return
+
+    def edit_db_prepod(self):
+        index = self.ui.dataBaseTableView.selectedIndexes()[0]
+        row = index.row()
+        data = self._db_model.get_row(row)
+        id = data[0]
+        dialog = PrepodDialog(data=data[1:], parent=self)
+        if dialog.exec():
+            data = dialog.get_data()
+        try:
+            dbh.update_teacher(id, data)
+            self.upload_db_teachers()
+        except:
+            return
+
+    def remove_db_prepod(self):
+        index = self.ui.dataBaseTableView.selectedIndexes()[0]
+        row = index.row()
+        data = self._db_model.get_row(row)
+        id = data[0]
+        try:
+            dbh.remove_teacher(id)
+            self.upload_db_teachers()
+        except:
+            return
+
+
+    def upload_db_docs(self):
+        data = dbh.load_docs()
+        headers = ["id", "Год", "Тип", "Дата создания", "Создатель", "Защищено", "Открыть"]
+        self._db_model = PlanTableModel(data, headers)
+        self.ui.dataBaseTableView.setModel(self._db_model)
 
 
     # ==========================Код для работы с отчетом====================================================
@@ -202,6 +290,19 @@ class MainWindow(QMainWindow):
         """Переключает страницу в QStackedWidget и обновляет состояние кнопок"""
         self.ui.mainStackedWidget.setCurrentIndex(index) 
     # ==========================Код для работы с планом====================================================
+    def save_plan_new(self):
+        year = datetime.datetime.now().year
+        current_date = str(datetime.datetime.now().strftime("%Y.%m.%d"))
+        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
+        data_for_save = self._plan_model.get_data_without_id()
+        table = doc.tables[0]
+        start_row = 2
+        self.fill_the_table_rows(table, data_for_save, start_row)
+        dbh.insert_document(year,"План", current_date, "Вася Пупкин", f"Saves/{year}.docx", False)
+        doc.save(f'Saves/{year}.docx')
+        
+
+
     # Реализуем обычное сохранение
     def save_plan_function(self):
         doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")

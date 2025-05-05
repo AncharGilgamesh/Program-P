@@ -1,62 +1,8 @@
 """Here are the models"""
 
-from PySide6.QtCore import QAbstractTableModel, Qt, QModelIndex, QAbstractListModel
+from PySide6.QtCore import QAbstractTableModel, Qt, QModelIndex
 
-class DocTableModel(QAbstractTableModel):
-    HEADERS = ["Год", "Тип", "Создано", "Истекает", "Создатель", "Защищено", "Открыть", "Удалить"]
 
-    def __init__(self, data):
-        super().__init__()
-        self._data = data
-
-    def rowCount(self, parent=QModelIndex()):
-        return len(self._data)
-
-    def columnCount(self, parent=QModelIndex()):
-        return len(self.HEADERS)
-
-    def data(self, index, role=Qt.DisplayRole):
-        if not index.isValid():
-            return None
-        row, col = index.row(), index.column()
-        item = self._data[row]
-
-        if role == Qt.DisplayRole:
-            if col == 0:
-                return item["year"]
-            elif col == 1:
-                return item["type"]
-            elif col == 2:
-                return item["created"].toString("dd.MM.yyyy")
-            elif col == 3:
-                return item["created"].addYears(5).toString("dd.MM.yyyy")
-            elif col == 4:
-                return item["creator"]
-            elif col in [6, 7]:
-                return ""  # кнопки
-
-        if role == Qt.CheckStateRole and col == 5:
-            return Qt.Checked if item["protected"] else Qt.Unchecked
-
-        return None
-
-    def setData(self, index, value, role=Qt.EditRole):
-        if not index.isValid():
-            return False
-        row, col = index.row(), index.column()
-        if col == 5 and role == Qt.CheckStateRole:
-            self._data[row]["protected"] = (value == Qt.Checked)
-            self.dataChanged.emit(index, index)
-            return True
-        return False
-
-    def flags(self, index):
-        if not index.isValid():
-            return Qt.NoItemFlags
-        col = index.column()
-        if col == 5:
-            return Qt.ItemIsUserCheckable | Qt.ItemIsEnabled
-        return Qt.ItemIsEnabled
 
 class PlanTableModel(QAbstractTableModel):
     def __init__(self, data = [], header=None):
@@ -136,7 +82,10 @@ class PlanTableModel(QAbstractTableModel):
     def get_data(self):
         """func."""
         return self._data
-    
+
+    def get_row(self, row):
+        return self._data[row]
+
     def get_data_without_id(self):
         """Возвращает данные без первого столбца (id)."""
         return [row[1:] for row in self._data]
