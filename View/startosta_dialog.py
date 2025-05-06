@@ -28,16 +28,16 @@ class StarostaDialog(QDialog):
 
         # Заполнение при редактировании
         if starosta_data:
-            index = self.teacher_combo.findData(starosta_data.get("teacher_id"))
+            index = self.teacher_combo.findData(starosta_data[0])  # teacher_id
             if index != -1:
                 self.teacher_combo.setCurrentIndex(index)
 
-            self.last_name_edit.setText(starosta_data.get("last_name", ""))
-            self.first_name_edit.setText(starosta_data.get("first_name", ""))
-            self.middle_name_edit.setText(starosta_data.get("middle_name", ""))
-            self.group_edit.setText(starosta_data.get("group_num", ""))
-            self.email_edit.setText(starosta_data.get("email", ""))
-            self.phone_edit.setText(starosta_data.get("phone", ""))
+            self.last_name_edit.setText(starosta_data[1])     # last_name
+            self.first_name_edit.setText(starosta_data[2])    # first_name
+            self.middle_name_edit.setText(starosta_data[3])   # middle_name
+            self.group_edit.setText(starosta_data[4])         # group_num
+            self.email_edit.setText(starosta_data[5])         # email
+            self.phone_edit.setText(starosta_data[6])         # phone
 
         # Layout
         form_layout = QFormLayout()

@@ -109,6 +109,8 @@ class MainWindow(QMainWindow):
         self.ui.dbDelPrepodPushButton.clicked.connect(self.remove_db_prepod)
 
         self.ui.dbAddStarostaPushButton.clicked.connect(self.add_db_starosta)
+        self.ui.dbEditStarostaPushButton.clicked.connect(self.edit_db_starosta)
+        self.ui.dbDelStarostaPushButton.clicked.connect(self.remove_db_starosta)
 
 
 
@@ -121,21 +123,49 @@ class MainWindow(QMainWindow):
         self.ui.dataBaseTableView.setModel(self._db_model)
 
     def add_db_starosta(self):
-        teachers = [
-            (1, "Иванов", "Иван", "Иванович", ...),
-            (2, "Петров", "Пётр", "Петрович", ...),
-            (3, "Сидоров", "Сидор", "Сидорович", ...)
-        ]
+        teachers = dbh.load_teachers()
         dialog = StarostaDialog(teachers=teachers, parent=self)
         if dialog.exec():
             data = dialog.get_data()
-        print(data)
+        try:
+            dbh.insert_starosta(*data)
+            self.upload_db_starosta()
+        except:
+            return
+        
+    def edit_db_starosta(self):
+        teachers = dbh.load_teachers()
+        index = self.ui.dataBaseTableView.selectedIndexes()[0]
+        row = index.row()
+        data = self._db_model.get_row(row)
+        id = data[0]
+        dialog = StarostaDialog(teachers=teachers, starosta_data=list(data[1:]), parent=self)
+        if dialog.exec():
+            data = dialog.get_data()
+        try:
+            dbh.update_starosta(id, data)
+            self.upload_db_starosta()
+        except:
+            return
+
+    def remove_db_starosta(self):
+        index = self.ui.dataBaseTableView.selectedIndexes()[0]
+        row = index.row()
+        data = self._db_model.get_row(row)
+        id = data[0]
+        try:
+            dbh.remove_starosta(id)
+            self.upload_db_starosta()
+        except:
+            return
+
 
     def upload_db_teachers(self):
         data = dbh.load_teachers()
         headers = ["id", "Фамилия", "Имя", "Отчество", "Степень", "Должность", "Почта", "Номер"]
         self._db_model = PlanTableModel(data, headers)
         self.ui.dataBaseTableView.setModel(self._db_model)
+        
 
     def add_db_prepod(self):
         dialog = PrepodDialog(parent=self)

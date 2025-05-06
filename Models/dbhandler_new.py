@@ -100,6 +100,24 @@ def insert_starosta(teacher_id, l_name, f_name, m_name, group, email, phone):
     params = (teacher_id, l_name, f_name, m_name, group, email, phone)
     execute_query(query, params)
 
+def update_starosta(id, data):
+    query = ("""
+        UPDATE startostas
+        SET teacher_id = ?,
+            last_name = ?,
+            first_name = ?,
+            middle_name = ?,
+            group_num = ?,
+            email = ?,
+            phone = ?
+        WHERE id = {}
+    """).format(id)
+    execute_query(query, data)
+
+def remove_starosta(id):
+    query = "DELETE FROM startostas WHERE id = {}".format(id)
+    execute_query(query)
+
 def insert_document(year: int, doc_type: str, created: str, creator: str, file_path: str, protected: bool = False):
     query = """
         INSERT INTO documents (year, type, created, creator, protected, file_path)
