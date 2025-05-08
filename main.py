@@ -16,6 +16,7 @@ from PySide6.QtCore import QSortFilterProxyModel, Qt
 from model import PlanTableModel, ResultTableModel
 
 from View.workspace import Ui_MainWindow
+from View.appearance_logic import AppearanceDialog
 from View.planaddingdialogs import GroupEditDialog
 from View.smartTableView import SmartTableView
 from View.meetingdatedialog import MeetingDateDialog
@@ -624,6 +625,10 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    appearance = AppearanceDialog()
+    appearance.exec()
+    if not appearance.success:
+        sys.exit()
     window = MainWindow()
     window.show()
 
