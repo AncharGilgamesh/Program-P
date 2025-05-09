@@ -108,6 +108,10 @@ def remove_teacher(id):
     query = "DELETE FROM teachers WHERE id = {}".format(id)
     execute_query(query)
 
+def remove_user(username):
+    query = "DELETE FROM users WHERE username = ?"
+    execute_query(query, (username,))
+
 def insert_teacher(l_name, f_name, m_name, a_degree, a_title, email, phone):
     query = """
         INSERT INTO teachers (last_name, first_name, middle_name, academic_degree, academic_title, email, phone)
@@ -165,19 +169,39 @@ def select_teacher_by_name(l_name, f_name, m_name):
     params = (l_name, f_name, m_name)
     return execute_query(query, params=params, fetch=True)
 
+def select_teacher_by_id(id):
+    query = ("""SELECT * FROM teachers
+        WHERE id = ?
+    """)
+    return execute_query(query, (id,), fetch=True)
+
 def select_user_by_username(username):
     query = ("""SELECT * FROM users
         WHERE username = ?
     """)
     return execute_query(query, (username,), fetch=True)
 
+def select_remembered_user():
+    query = ("""SELECT * FROM users
+        WHERE is_remembered = 1
+    """)
+    return execute_query(query, fetch=True)
+
 def update_user_password(username, new_password):
     query = ("""
         UPDATE users
         SET password = ?
-        WHERE username = {}
-    """).format(username)
-    execute_query(query, (new_password,))
+        WHERE username = ?
+    """)
+    execute_query(query, (new_password, username))
+
+def update_remember_status(username, status):
+    query = ("""
+        UPDATE users
+        SET is_remembered = ?
+        WHERE username = ?
+    """)
+    execute_query(query, (status, username))
 
 def load_docs():
     query = "SELECT id, year, type, created, creator, protected, file_path FROM documents"

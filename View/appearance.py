@@ -35,6 +35,9 @@ class Ui_Dialog(object):
 "    font-family: 'Consolas';\n"
 "    color: white;\n"
 "}\n"
+"QCheckBox {\n"
+"	background: transparent;\n"
+"}\n"
 "QLabel {\n"
 "    font-size: 12px;\n"
 "    color: white;\n"
@@ -47,7 +50,7 @@ class Ui_Dialog(object):
 "    border-radius: 5px;\n"
 "    padding: 8px;\n"
 "    color: white;\n"
-"    font-size: 10px;\n"
+"    font-size: 14px;\n"
 "    selection-background-color: rgba(155, 79, 165, 150);\n"
 "}\n"
 "QLineEdit:focus {\n"
@@ -60,9 +63,9 @@ class Ui_Dialog(object):
 "}\n"
 "\n"
 "QPushButton {\n"
-"    background-color: rgba(155, 79, 165, 180);\n"
-"    bord"
-                        "er: 1px solid rgba(255, 255, 255, 0.2);\n"
+"    bac"
+                        "kground-color: rgba(155, 79, 165, 180);\n"
+"    border: 1px solid rgba(255, 255, 255, 0.2);\n"
 "    border-radius: 5px;\n"
 "    padding: 8px 16px;\n"
 "    color: white;\n"
@@ -103,13 +106,10 @@ class Ui_Dialog(object):
         self.label_3.setGeometry(QRect(10, 180, 111, 21))
         self.authPushButton = QPushButton(self.page)
         self.authPushButton.setObjectName(u"authPushButton")
-        self.authPushButton.setGeometry(QRect(140, 260, 111, 31))
-        self.loginStatusLabel = QLabel(self.page)
-        self.loginStatusLabel.setObjectName(u"loginStatusLabel")
-        self.loginStatusLabel.setGeometry(QRect(40, 170, 321, 31))
+        self.authPushButton.setGeometry(QRect(110, 260, 181, 31))
         self.checkBox = QCheckBox(self.page)
         self.checkBox.setObjectName(u"checkBox")
-        self.checkBox.setGeometry(QRect(130, 300, 151, 20))
+        self.checkBox.setGeometry(QRect(140, 300, 151, 20))
         self.stackedWidget.addWidget(self.page)
         self.page_3 = QWidget()
         self.page_3.setObjectName(u"page_3")
@@ -127,7 +127,7 @@ class Ui_Dialog(object):
         self.label_12.setGeometry(QRect(10, 140, 121, 21))
         self.recoverPushButton = QPushButton(self.page_3)
         self.recoverPushButton.setObjectName(u"recoverPushButton")
-        self.recoverPushButton.setGeometry(QRect(130, 300, 131, 31))
+        self.recoverPushButton.setGeometry(QRect(110, 290, 181, 31))
         self.label_13 = QLabel(self.page_3)
         self.label_13.setObjectName(u"label_13")
         self.label_13.setGeometry(QRect(10, 180, 121, 21))
@@ -191,7 +191,7 @@ class Ui_Dialog(object):
         self.stackedWidget.addWidget(self.page_2)
         self.mainInfoLabel = QLabel(Dialog)
         self.mainInfoLabel.setObjectName(u"mainInfoLabel")
-        self.mainInfoLabel.setGeometry(QRect(100, 10, 201, 31))
+        self.mainInfoLabel.setGeometry(QRect(140, 10, 201, 31))
         self.mainInfoLabel.setStyleSheet(u"QLabel {\n"
 "    font-size: 16px;\n"
 "    font-weight: bold;\n"
@@ -220,7 +220,6 @@ class Ui_Dialog(object):
         self.label.setText(QCoreApplication.translate("Dialog", u"\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"\u041f\u0430\u0440\u043e\u043b\u044c", None))
         self.authPushButton.setText(QCoreApplication.translate("Dialog", u"\u0412\u043e\u0439\u0442\u0438", None))
-        self.loginStatusLabel.setText("")
         self.checkBox.setText(QCoreApplication.translate("Dialog", u"\u0417\u0430\u043f\u043e\u043c\u043d\u0438\u0442\u044c \u043c\u0435\u043d\u044f", None))
         self.label_11.setText(QCoreApplication.translate("Dialog", u"\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f", None))
         self.label_12.setText(QCoreApplication.translate("Dialog", u"\u041a\u043e\u0434 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438", None))

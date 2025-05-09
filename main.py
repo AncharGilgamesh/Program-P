@@ -1,5 +1,6 @@
 import sys
 import datetime
+import os
 
 import pandas as pd
 import datahandler as dh
@@ -9,7 +10,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView, QMessageBox
 from PySide6.QtCore import QSortFilterProxyModel, Qt
 
 
@@ -23,14 +24,23 @@ from View.meetingdatedialog import MeetingDateDialog
 from View.prepod_dialog import PrepodDialog
 from View.startosta_dialog import StarostaDialog
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
+help_path = os.path.join(base_dir, "View", "help.html")
+
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, user=None):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        self.load_help_html()
+        
+
         # Создаем базы данных
         dbh.create_tables()
+
+        self.user = user
+        print(user)
 
         self._db_model = None
 
@@ -93,7 +103,7 @@ class MainWindow(QMainWindow):
         # работаем надо сохранениями
         self.ui.savePlanButton.clicked.connect(self.save_plan_new)
         # Переключение между окнами
-        self.ui.cabinetToolButton.clicked.connect(lambda: self.switch_page(4))
+        self.ui.cabinetToolButton.clicked.connect(self.go_to_lk)
         self.ui.dataToolButton.clicked.connect(lambda: self.switch_page(0))
         self.ui.genOtchToolButton.clicked.connect(lambda: self.switch_page(1))
         self.ui.genPlanToolButton.clicked.connect(lambda: self.switch_page(2))
@@ -112,6 +122,61 @@ class MainWindow(QMainWindow):
         self.ui.dbAddStarostaPushButton.clicked.connect(self.add_db_starosta)
         self.ui.dbEditStarostaPushButton.clicked.connect(self.edit_db_starosta)
         self.ui.dbDelStarostaPushButton.clicked.connect(self.remove_db_starosta)
+
+        # страница личного кабинта
+        self.ui.lkChangePassPushButton.clicked.connect(self.lk_change_password)
+        self.ui.lkDelAccPushButton.clicked.connect(self.lk_del_account)
+
+
+    def load_help_html(self):
+        with open(help_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        self.ui.faqTextBrowser.setHtml(html)
+
+    # ==========================Код для работы с личным кабинетом ==========================================
+    def lk_del_account(self):
+        reply = QMessageBox.question(
+            self, "Подтверждение",
+            "Вы уверены, что хотите удалить этот аккаунт?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No  # По умолчанию выделена кнопка "Нет"
+        )
+
+        if reply == QMessageBox.Yes:
+            # Действие при подтверждении
+            dbh.remove_user(self.user)
+            self.exit_function()
+        else:
+            # Отмена действия
+            return
+
+    def lk_change_password(self):
+        password = self.ui.lkNewPassLine.text()
+        repeat_password = self.ui.lkRepeatPassLine.text()
+        if not password == repeat_password:
+            QMessageBox.warning(self, "Ошибка", "Пароли не совпадают")
+            return
+
+        try:
+            dbh.update_user_password(self.user, password)
+            QMessageBox.information(self, "Успешно", "Успешная смена пароля")
+        except:
+            QMessageBox.warning(self, "Ошибка", "Что-то пошло не так")
+            return
+    
+    def go_to_lk(self):
+        self.switch_page(4)
+        user = dbh.select_user_by_username(self.user)[0]
+        # передаем teacher_id, чтобы получить инфу по преподавателю
+        user_data = dbh.select_teacher_by_id(user[1])[0]
+        self.ui.lkUsernameLine.setText(self.user)
+        self.ui.lkLastNameLine.setText(user[4])
+        self.ui.lkNameLine.setText(user[5])
+        self.ui.lkMiddleNameLine.setText(user[6])
+        self.ui.lkTitleLine.setText(user_data[5])
+        self.ui.lkDegreeLine.setText(user_data[4])
+        self.ui.lkEmailLine.setText(user_data[-2])
+        self.ui.lkPhoneLine.setText(user_data[-1])
 
 
 
@@ -621,15 +686,59 @@ class MainWindow(QMainWindow):
         print('genOtch button')
 
     def exit_function(self):
-        sys.exit()
+        dbh.update_remember_status(self.user, 0)
+        self.restart_auth = True
+        self.close()  # просто закрываем окно, не sys.exit()
+
+def check_for_appearance():
+    try:
+        user = dbh.select_remembered_user()[0]
+        if user:
+            return user[2]
+    except:
+        appearance = AppearanceDialog()
+        appearance.exec()
+        if not appearance.get_success_status():
+            sys.exit()
+        return appearance.get_username()
+
+
+def run_application():
+    while True:
+        # 1. Проверка, запомнен ли пользователь
+        try:
+            user = dbh.select_remembered_user()[0]
+            if user and user[3]:  # если есть флаг remember_me
+                username = user[2]
+            else:
+                raise Exception("Требуется авторизация")
+        except:
+            # 2. Открываем окно авторизации
+            appearance = AppearanceDialog()
+            appearance.exec()
+            if not appearance.get_success_status():
+                break  # выход из цикла и завершение приложения
+            username = appearance.get_username()
+
+        # 3. Запускаем основное окно
+        main_window = MainWindow(user=username)
+        main_window.show()
+
+        # 4. Запускаем event loop и ждём выхода
+        app.exec()
+
+        # 5. Если внутри MainWindow вызвали "выход" и закрыли — продолжаем с начала
+        if getattr(main_window, "restart_auth", False):
+            continue
+        else:
+            break  # обычный выход, завершаем
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    appearance = AppearanceDialog()
-    appearance.exec()
-    if not appearance.success:
-        sys.exit()
-    window = MainWindow()
+    run_application()
+    '''
+    username = check_for_appearance()
+    window = MainWindow(user=username)
     window.show()
 
-    sys.exit(app.exec())
+    sys.exit(app.exec())'''

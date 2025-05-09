@@ -40,7 +40,7 @@ QLineEdit {
     border-radius: 5px;
     padding: 8px;
     color: white;
-    font-size: 10px;
+    font-size: 14px;
     selection-background-color: rgba(155, 79, 165, 150);
 }
 QLineEdit:focus {
@@ -87,7 +87,7 @@ QStackedWidget {
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="page">
     <widget class="QLineEdit" name="authUsernameLine">
@@ -139,27 +139,14 @@ QStackedWidget {
     <widget class="QPushButton" name="authPushButton">
      <property name="geometry">
       <rect>
-       <x>140</x>
+       <x>110</x>
        <y>260</y>
-       <width>111</width>
+       <width>181</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
       <string>Войти</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="loginStatusLabel">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>170</y>
-       <width>321</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox">
@@ -226,9 +213,9 @@ QStackedWidget {
     <widget class="QPushButton" name="recoverPushButton">
      <property name="geometry">
       <rect>
-       <x>130</x>
-       <y>300</y>
-       <width>131</width>
+       <x>110</x>
+       <y>290</y>
+       <width>181</width>
        <height>31</height>
       </rect>
      </property>
@@ -463,7 +450,7 @@ QStackedWidget {
   <widget class="QLabel" name="mainInfoLabel">
    <property name="geometry">
     <rect>
-     <x>100</x>
+     <x>140</x>
      <y>10</y>
      <width>201</width>
      <height>31</height>
