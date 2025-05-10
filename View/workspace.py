@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'workspace.ui'
+## Form generated from reading UI file 'workspace_com.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.9.0
 ##
@@ -15,17 +15,18 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHeaderView, QLabel, QLineEdit,
-    QMainWindow, QMenuBar, QPushButton, QSizePolicy,
-    QStackedWidget, QStatusBar, QTableView, QTextBrowser,
-    QToolButton, QWidget)
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
+    QLineEdit, QMainWindow, QMenuBar, QPushButton,
+    QSizePolicy, QSpacerItem, QStackedWidget, QStatusBar,
+    QTableView, QTextBrowser, QToolButton, QVBoxLayout,
+    QWidget)
 import View.res_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1061, 642)
+        MainWindow.resize(1073, 692)
         icon = QIcon()
         icon.addFile(u":/icon/icons/TitleIcon.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
@@ -78,9 +79,116 @@ class Ui_MainWindow(object):
 "}")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
+        self.horizontalLayout = QHBoxLayout(self.centralwidget)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.verticalLayout = QVBoxLayout()
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.cabinetToolButton = QToolButton(self.centralwidget)
+        self.cabinetToolButton.setObjectName(u"cabinetToolButton")
+        self.cabinetToolButton.setMinimumSize(QSize(150, 100))
+        self.cabinetToolButton.setStyleSheet(u"color: white;\n"
+"font-size: 12pt;\n"
+"background-color: none;\n"
+"border:none;\n"
+"font-family: Consolas;")
+        icon1 = QIcon()
+        icon1.addFile(u":/icon/icons/cabinet.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.cabinetToolButton.setIcon(icon1)
+        self.cabinetToolButton.setIconSize(QSize(32, 32))
+        self.cabinetToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+        self.cabinetToolButton.setAutoRaise(True)
+
+        self.verticalLayout.addWidget(self.cabinetToolButton)
+
+        self.dataToolButton = QToolButton(self.centralwidget)
+        self.dataToolButton.setObjectName(u"dataToolButton")
+        self.dataToolButton.setMinimumSize(QSize(150, 100))
+        self.dataToolButton.setStyleSheet(u"color: white;\n"
+"font-size: 12pt;\n"
+"background-color: none;\n"
+"border:none;\n"
+"font-family: Consolas;")
+        icon2 = QIcon()
+        icon2.addFile(u":/icon/icons/base_data.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.dataToolButton.setIcon(icon2)
+        self.dataToolButton.setIconSize(QSize(32, 32))
+        self.dataToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+
+        self.verticalLayout.addWidget(self.dataToolButton)
+
+        self.genOtchToolButton = QToolButton(self.centralwidget)
+        self.genOtchToolButton.setObjectName(u"genOtchToolButton")
+        self.genOtchToolButton.setMinimumSize(QSize(150, 100))
+        self.genOtchToolButton.setStyleSheet(u"color: white;\n"
+"font-size: 12pt;\n"
+"background-color: none;\n"
+"border:none;\n"
+"font-family: Consolas;")
+        icon3 = QIcon()
+        icon3.addFile(u":/icon/icons/otchet_generate.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.genOtchToolButton.setIcon(icon3)
+        self.genOtchToolButton.setIconSize(QSize(32, 32))
+        self.genOtchToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+
+        self.verticalLayout.addWidget(self.genOtchToolButton)
+
+        self.genPlanToolButton = QToolButton(self.centralwidget)
+        self.genPlanToolButton.setObjectName(u"genPlanToolButton")
+        self.genPlanToolButton.setMinimumSize(QSize(150, 100))
+        self.genPlanToolButton.setStyleSheet(u"color: white;\n"
+"font-size: 12pt;\n"
+"background-color: none;\n"
+"border:none;\n"
+"font-family: Consolas;")
+        icon4 = QIcon()
+        icon4.addFile(u":/icon/icons/plan_generate.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.genPlanToolButton.setIcon(icon4)
+        self.genPlanToolButton.setIconSize(QSize(32, 32))
+        self.genPlanToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+
+        self.verticalLayout.addWidget(self.genPlanToolButton)
+
+        self.faqToolButton = QToolButton(self.centralwidget)
+        self.faqToolButton.setObjectName(u"faqToolButton")
+        self.faqToolButton.setMinimumSize(QSize(150, 100))
+        self.faqToolButton.setStyleSheet(u"color: white;\n"
+"font-size: 12pt;\n"
+"background-color: none;\n"
+"border:none;\n"
+"font-family: Consolas;")
+        icon5 = QIcon()
+        icon5.addFile(u":/icon/icons/faq.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.faqToolButton.setIcon(icon5)
+        self.faqToolButton.setIconSize(QSize(32, 32))
+        self.faqToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+
+        self.verticalLayout.addWidget(self.faqToolButton)
+
+        self.exitToolButton = QToolButton(self.centralwidget)
+        self.exitToolButton.setObjectName(u"exitToolButton")
+        self.exitToolButton.setMinimumSize(QSize(150, 100))
+        self.exitToolButton.setStyleSheet(u"color: white;\n"
+"font-size: 12pt;\n"
+"background-color: none;\n"
+"border:none;\n"
+"font-family: Consolas;")
+        icon6 = QIcon()
+        icon6.addFile(u":/icon/icons/cancel.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.exitToolButton.setIcon(icon6)
+        self.exitToolButton.setIconSize(QSize(32, 32))
+        self.exitToolButton.setCheckable(False)
+        self.exitToolButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.exitToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+        self.exitToolButton.setAutoRaise(True)
+        self.exitToolButton.setArrowType(Qt.ArrowType.NoArrow)
+
+        self.verticalLayout.addWidget(self.exitToolButton)
+
+
+        self.horizontalLayout.addLayout(self.verticalLayout)
+
         self.mainStackedWidget = QStackedWidget(self.centralwidget)
         self.mainStackedWidget.setObjectName(u"mainStackedWidget")
-        self.mainStackedWidget.setGeometry(QRect(170, 10, 881, 591))
         self.db_page = QWidget()
         self.db_page.setObjectName(u"db_page")
         self.dataBaseTableView = QTableView(self.db_page)
@@ -182,38 +290,99 @@ class Ui_MainWindow(object):
         self.mainStackedWidget.addWidget(self.db_page)
         self.otchet_page = QWidget()
         self.otchet_page.setObjectName(u"otchet_page")
+        self.verticalLayout_3 = QVBoxLayout(self.otchet_page)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.horizontalLayout_8 = QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.otch_lbl_page_info = QLabel(self.otchet_page)
         self.otch_lbl_page_info.setObjectName(u"otch_lbl_page_info")
-        self.otch_lbl_page_info.setGeometry(QRect(0, 0, 131, 21))
-        self.otch_lbl_page_info.setStyleSheet(u"QLabel{\n"
+        self.otch_lbl_page_info.setStyleSheet(u"QLabel {\n"
+"    font-size: 12px;\n"
 "    color: white;\n"
+"    padding: 5px;\n"
 "}")
+
+        self.horizontalLayout_6.addWidget(self.otch_lbl_page_info)
+
         self.otch_lbl_stage = QLabel(self.otchet_page)
         self.otch_lbl_stage.setObjectName(u"otch_lbl_stage")
-        self.otch_lbl_stage.setGeometry(QRect(140, 0, 131, 21))
-        self.otch_lbl_stage.setStyleSheet(u"QLabel{\n"
+        self.otch_lbl_stage.setStyleSheet(u"QLabel {\n"
+"    font-size: 12px;\n"
 "    color: white;\n"
+"    padding: 5px;\n"
 "}")
-        self.otch_next_btn = QPushButton(self.otchet_page)
-        self.otch_next_btn.setObjectName(u"otch_next_btn")
-        self.otch_next_btn.setGeometry(QRect(340, 0, 75, 31))
-        self.otch_next_btn.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
+
+        self.horizontalLayout_6.addWidget(self.otch_lbl_stage)
+
         self.otch_prev_btn = QPushButton(self.otchet_page)
         self.otch_prev_btn.setObjectName(u"otch_prev_btn")
-        self.otch_prev_btn.setGeometry(QRect(270, 0, 75, 31))
         self.otch_prev_btn.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
+
+        self.horizontalLayout_6.addWidget(self.otch_prev_btn)
+
+        self.otch_next_btn = QPushButton(self.otchet_page)
+        self.otch_next_btn.setObjectName(u"otch_next_btn")
+        self.otch_next_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_6.addWidget(self.otch_next_btn)
+
+
+        self.horizontalLayout_8.addLayout(self.horizontalLayout_6)
+
+        self.horizontalLayout_7 = QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.otch_nagr_btn = QPushButton(self.otchet_page)
+        self.otch_nagr_btn.setObjectName(u"otch_nagr_btn")
+        self.otch_nagr_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_7.addWidget(self.otch_nagr_btn)
+
+        self.otch_pln_btn = QPushButton(self.otchet_page)
+        self.otch_pln_btn.setObjectName(u"otch_pln_btn")
+        self.otch_pln_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_7.addWidget(self.otch_pln_btn)
+
+        self.otch_tbl_btn = QPushButton(self.otchet_page)
+        self.otch_tbl_btn.setObjectName(u"otch_tbl_btn")
+        self.otch_tbl_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_7.addWidget(self.otch_tbl_btn)
+
+
+        self.horizontalLayout_8.addLayout(self.horizontalLayout_7)
+
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_8)
+
         self.stackedWidget = QStackedWidget(self.otchet_page)
         self.stackedWidget.setObjectName(u"stackedWidget")
-        self.stackedWidget.setGeometry(QRect(0, 30, 881, 551))
         self.page = QWidget()
         self.page.setObjectName(u"page")
+        self.verticalLayout_5 = QVBoxLayout(self.page)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.meeting_date_otch_btn = QPushButton(self.page)
+        self.meeting_date_otch_btn.setObjectName(u"meeting_date_otch_btn")
+        self.meeting_date_otch_btn.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.verticalLayout_5.addWidget(self.meeting_date_otch_btn)
+
         self.otchFirstTableView = QTableView(self.page)
         self.otchFirstTableView.setObjectName(u"otchFirstTableView")
-        self.otchFirstTableView.setGeometry(QRect(0, 60, 881, 491))
         self.otchFirstTableView.setStyleSheet(u"QTableView {\n"
 "    background-color: rgba(255, 255, 255, 30);\n"
 "    border: 1px solid rgba(255, 255, 255, 40);\n"
@@ -237,12 +406,9 @@ class Ui_MainWindow(object):
 "    border: none;\n"
 "    font-size: 10pt;\n"
 "}")
-        self.meeting_date_otch_btn = QPushButton(self.page)
-        self.meeting_date_otch_btn.setObjectName(u"meeting_date_otch_btn")
-        self.meeting_date_otch_btn.setGeometry(QRect(0, 23, 261, 31))
-        self.meeting_date_otch_btn.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
+
+        self.verticalLayout_5.addWidget(self.otchFirstTableView)
+
         self.stackedWidget.addWidget(self.page)
         self.page_2 = QWidget()
         self.page_2.setObjectName(u"page_2")
@@ -389,48 +555,120 @@ class Ui_MainWindow(object):
 "    font-size: 10pt;\n"
 "}")
         self.stackedWidget.addWidget(self.page_6)
-        self.otch_nagr_btn = QPushButton(self.otchet_page)
-        self.otch_nagr_btn.setObjectName(u"otch_nagr_btn")
-        self.otch_nagr_btn.setGeometry(QRect(440, 0, 91, 31))
-        self.otch_nagr_btn.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.otch_pln_btn = QPushButton(self.otchet_page)
-        self.otch_pln_btn.setObjectName(u"otch_pln_btn")
-        self.otch_pln_btn.setGeometry(QRect(530, 0, 81, 31))
-        self.otch_pln_btn.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.otch_tbl_btn = QPushButton(self.otchet_page)
-        self.otch_tbl_btn.setObjectName(u"otch_tbl_btn")
-        self.otch_tbl_btn.setGeometry(QRect(610, 0, 81, 31))
-        self.otch_tbl_btn.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
+
+        self.verticalLayout_3.addWidget(self.stackedWidget)
+
         self.mainStackedWidget.addWidget(self.otchet_page)
         self.plan_page = QWidget()
         self.plan_page.setObjectName(u"plan_page")
+        self.verticalLayout_2 = QVBoxLayout(self.plan_page)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.loadTableButton = QPushButton(self.plan_page)
         self.loadTableButton.setObjectName(u"loadTableButton")
-        self.loadTableButton.setGeometry(QRect(10, 0, 151, 31))
         self.loadTableButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
+
+        self.horizontalLayout_2.addWidget(self.loadTableButton)
+
         self.loadNagruzkaButton = QPushButton(self.plan_page)
         self.loadNagruzkaButton.setObjectName(u"loadNagruzkaButton")
-        self.loadNagruzkaButton.setGeometry(QRect(160, 0, 161, 31))
         self.loadNagruzkaButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
+
+        self.horizontalLayout_2.addWidget(self.loadNagruzkaButton)
+
         self.loadPlanPushButton = QPushButton(self.plan_page)
         self.loadPlanPushButton.setObjectName(u"loadPlanPushButton")
-        self.loadPlanPushButton.setGeometry(QRect(320, 0, 141, 31))
         self.loadPlanPushButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
+
+        self.horizontalLayout_2.addWidget(self.loadPlanPushButton)
+
+
+        self.horizontalLayout_5.addLayout(self.horizontalLayout_2)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_3.addItem(self.horizontalSpacer)
+
+        self.savePlanButton = QPushButton(self.plan_page)
+        self.savePlanButton.setObjectName(u"savePlanButton")
+        self.savePlanButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_3.addWidget(self.savePlanButton)
+
+        self.saveAsPlanButton = QPushButton(self.plan_page)
+        self.saveAsPlanButton.setObjectName(u"saveAsPlanButton")
+        self.saveAsPlanButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_3.addWidget(self.saveAsPlanButton)
+
+
+        self.horizontalLayout_5.addLayout(self.horizontalLayout_3)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_5)
+
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.notePlanPushButton = QPushButton(self.plan_page)
+        self.notePlanPushButton.setObjectName(u"notePlanPushButton")
+        self.notePlanPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_4.addWidget(self.notePlanPushButton)
+
+        self.placePlanButton = QPushButton(self.plan_page)
+        self.placePlanButton.setObjectName(u"placePlanButton")
+        self.placePlanButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_4.addWidget(self.placePlanButton)
+
+        self.agreementPlanPushButton = QPushButton(self.plan_page)
+        self.agreementPlanPushButton.setObjectName(u"agreementPlanPushButton")
+        self.agreementPlanPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_4.addWidget(self.agreementPlanPushButton)
+
+        self.zakupkaPlanPushButton = QPushButton(self.plan_page)
+        self.zakupkaPlanPushButton.setObjectName(u"zakupkaPlanPushButton")
+        self.zakupkaPlanPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_4.addWidget(self.zakupkaPlanPushButton)
+
+        self.rukPlanPushButton = QPushButton(self.plan_page)
+        self.rukPlanPushButton.setObjectName(u"rukPlanPushButton")
+        self.rukPlanPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_4.addWidget(self.rukPlanPushButton)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_4)
+
         self.tableView = QTableView(self.plan_page)
         self.tableView.setObjectName(u"tableView")
-        self.tableView.setGeometry(QRect(0, 100, 881, 491))
         self.tableView.setStyleSheet(u"QTableView {\n"
 "    background-color: rgba(255, 255, 255, 30);\n"
 "    border: 1px solid rgba(255, 255, 255, 40);\n"
@@ -454,54 +692,19 @@ class Ui_MainWindow(object):
 "    border: none;\n"
 "    font-size: 10pt;\n"
 "}")
-        self.placePlanButton = QPushButton(self.plan_page)
-        self.placePlanButton.setObjectName(u"placePlanButton")
-        self.placePlanButton.setGeometry(QRect(100, 40, 141, 31))
-        self.placePlanButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.notePlanPushButton = QPushButton(self.plan_page)
-        self.notePlanPushButton.setObjectName(u"notePlanPushButton")
-        self.notePlanPushButton.setGeometry(QRect(0, 40, 101, 31))
-        self.notePlanPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.agreementPlanPushButton = QPushButton(self.plan_page)
-        self.agreementPlanPushButton.setObjectName(u"agreementPlanPushButton")
-        self.agreementPlanPushButton.setGeometry(QRect(240, 40, 101, 31))
-        self.agreementPlanPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.zakupkaPlanPushButton = QPushButton(self.plan_page)
-        self.zakupkaPlanPushButton.setObjectName(u"zakupkaPlanPushButton")
-        self.zakupkaPlanPushButton.setGeometry(QRect(340, 40, 171, 31))
-        self.zakupkaPlanPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.rukPlanPushButton = QPushButton(self.plan_page)
-        self.rukPlanPushButton.setObjectName(u"rukPlanPushButton")
-        self.rukPlanPushButton.setGeometry(QRect(520, 40, 221, 31))
-        self.rukPlanPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.savePlanButton = QPushButton(self.plan_page)
-        self.savePlanButton.setObjectName(u"savePlanButton")
-        self.savePlanButton.setGeometry(QRect(580, 0, 101, 31))
-        self.savePlanButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.saveAsPlanButton = QPushButton(self.plan_page)
-        self.saveAsPlanButton.setObjectName(u"saveAsPlanButton")
-        self.saveAsPlanButton.setGeometry(QRect(680, 0, 121, 31))
-        self.saveAsPlanButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
+
+        self.verticalLayout_2.addWidget(self.tableView)
+
         self.mainStackedWidget.addWidget(self.plan_page)
         self.faq_page = QWidget()
         self.faq_page.setObjectName(u"faq_page")
+        self.verticalLayout_4 = QVBoxLayout(self.faq_page)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.faqTextBrowser = QTextBrowser(self.faq_page)
         self.faqTextBrowser.setObjectName(u"faqTextBrowser")
-        self.faqTextBrowser.setGeometry(QRect(10, 30, 861, 551))
+
+        self.verticalLayout_4.addWidget(self.faqTextBrowser)
+
         self.mainStackedWidget.addWidget(self.faq_page)
         self.lk_page = QWidget()
         self.lk_page.setObjectName(u"lk_page")
@@ -660,99 +863,13 @@ class Ui_MainWindow(object):
 "	background: transparent\n"
 "}")
         self.mainStackedWidget.addWidget(self.lk_page)
-        self.genOtchToolButton = QToolButton(self.centralwidget)
-        self.genOtchToolButton.setObjectName(u"genOtchToolButton")
-        self.genOtchToolButton.setGeometry(QRect(10, 190, 150, 100))
-        self.genOtchToolButton.setMinimumSize(QSize(150, 100))
-        self.genOtchToolButton.setStyleSheet(u"color: white;\n"
-"font-size: 12pt;\n"
-"background-color: none;\n"
-"border:none;\n"
-"font-family: Consolas;")
-        icon1 = QIcon()
-        icon1.addFile(u":/icon/icons/otchet_generate.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.genOtchToolButton.setIcon(icon1)
-        self.genOtchToolButton.setIconSize(QSize(32, 32))
-        self.genOtchToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-        self.genPlanToolButton = QToolButton(self.centralwidget)
-        self.genPlanToolButton.setObjectName(u"genPlanToolButton")
-        self.genPlanToolButton.setGeometry(QRect(10, 310, 150, 100))
-        self.genPlanToolButton.setMinimumSize(QSize(150, 100))
-        self.genPlanToolButton.setStyleSheet(u"color: white;\n"
-"font-size: 12pt;\n"
-"background-color: none;\n"
-"border:none;\n"
-"font-family: Consolas;")
-        icon2 = QIcon()
-        icon2.addFile(u":/icon/icons/plan_generate.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.genPlanToolButton.setIcon(icon2)
-        self.genPlanToolButton.setIconSize(QSize(32, 32))
-        self.genPlanToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-        self.exitToolButton = QToolButton(self.centralwidget)
-        self.exitToolButton.setObjectName(u"exitToolButton")
-        self.exitToolButton.setGeometry(QRect(10, 510, 150, 100))
-        self.exitToolButton.setMinimumSize(QSize(150, 100))
-        self.exitToolButton.setStyleSheet(u"color: white;\n"
-"font-size: 12pt;\n"
-"background-color: none;\n"
-"border:none;\n"
-"font-family: Consolas;")
-        icon3 = QIcon()
-        icon3.addFile(u":/icon/icons/cancel.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.exitToolButton.setIcon(icon3)
-        self.exitToolButton.setIconSize(QSize(32, 32))
-        self.exitToolButton.setCheckable(False)
-        self.exitToolButton.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-        self.exitToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-        self.exitToolButton.setAutoRaise(True)
-        self.exitToolButton.setArrowType(Qt.ArrowType.NoArrow)
-        self.faqToolButton = QToolButton(self.centralwidget)
-        self.faqToolButton.setObjectName(u"faqToolButton")
-        self.faqToolButton.setGeometry(QRect(10, 420, 150, 100))
-        self.faqToolButton.setMinimumSize(QSize(150, 100))
-        self.faqToolButton.setStyleSheet(u"color: white;\n"
-"font-size: 12pt;\n"
-"background-color: none;\n"
-"border:none;\n"
-"font-family: Consolas;")
-        icon4 = QIcon()
-        icon4.addFile(u":/icon/icons/faq.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.faqToolButton.setIcon(icon4)
-        self.faqToolButton.setIconSize(QSize(32, 32))
-        self.faqToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-        self.cabinetToolButton = QToolButton(self.centralwidget)
-        self.cabinetToolButton.setObjectName(u"cabinetToolButton")
-        self.cabinetToolButton.setGeometry(QRect(10, 0, 150, 100))
-        self.cabinetToolButton.setMinimumSize(QSize(150, 100))
-        self.cabinetToolButton.setStyleSheet(u"color: white;\n"
-"font-size: 12pt;\n"
-"background-color: none;\n"
-"border:none;\n"
-"font-family: Consolas;")
-        icon5 = QIcon()
-        icon5.addFile(u":/icon/icons/cabinet.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.cabinetToolButton.setIcon(icon5)
-        self.cabinetToolButton.setIconSize(QSize(32, 32))
-        self.cabinetToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-        self.cabinetToolButton.setAutoRaise(True)
-        self.dataToolButton = QToolButton(self.centralwidget)
-        self.dataToolButton.setObjectName(u"dataToolButton")
-        self.dataToolButton.setGeometry(QRect(10, 90, 150, 100))
-        self.dataToolButton.setMinimumSize(QSize(150, 100))
-        self.dataToolButton.setStyleSheet(u"color: white;\n"
-"font-size: 12pt;\n"
-"background-color: none;\n"
-"border:none;\n"
-"font-family: Consolas;")
-        icon6 = QIcon()
-        icon6.addFile(u":/icon/icons/base_data.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.dataToolButton.setIcon(icon6)
-        self.dataToolButton.setIconSize(QSize(32, 32))
-        self.dataToolButton.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+
+        self.horizontalLayout.addWidget(self.mainStackedWidget)
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1061, 21))
+        self.menubar.setGeometry(QRect(0, 0, 1073, 21))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -760,7 +877,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.mainStackedWidget.setCurrentIndex(3)
+        self.mainStackedWidget.setCurrentIndex(1)
         self.stackedWidget.setCurrentIndex(0)
 
 
@@ -769,6 +886,15 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Project P", None))
+        self.cabinetToolButton.setText(QCoreApplication.translate("MainWindow", u"\u041b\u0438\u0447\u043d\u044b\u0439\n"
+"\u043a\u0430\u0431\u0438\u043d\u0435\u0442", None))
+        self.dataToolButton.setText(QCoreApplication.translate("MainWindow", u"\u0411\u0430\u0437\u0430\n"
+"\u0434\u0430\u043d\u043d\u044b\u0445", None))
+        self.genOtchToolButton.setText(QCoreApplication.translate("MainWindow", u"\u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f\n"
+"\u043e\u0442\u0447\u0435\u0442\u0430", None))
+        self.genPlanToolButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d", None))
+        self.faqToolButton.setText(QCoreApplication.translate("MainWindow", u"F.A.Q", None))
+        self.exitToolButton.setText(QCoreApplication.translate("MainWindow", u"\u0412\u044b\u0439\u0442\u0438", None))
         self.dbPlansPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b", None))
         self.dbPrepodsPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u0438", None))
         self.dbStarostaPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u0442\u0430\u0440\u043e\u0441\u0442\u044b \u0433\u0440\u0443\u043f\u043f", None))
@@ -789,25 +915,25 @@ class Ui_MainWindow(object):
 "\u0441\u0442\u0430\u0440\u043e\u0441\u0442\u044b", None))
         self.otch_lbl_page_info.setText(QCoreApplication.translate("MainWindow", u"\u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f \u043e\u0442\u0447\u0435\u0442\u0430", None))
         self.otch_lbl_stage.setText(QCoreApplication.translate("MainWindow", u"1 \u044d\u0442\u0430\u043f", None))
-        self.otch_next_btn.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0430\u043b\u0435\u0435", None))
         self.otch_prev_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u0430\u0434", None))
-        self.meeting_date_otch_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u043d\u0430\u0447\u0438\u0442\u044c \u0434\u0430\u0442\u0443 \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u044f \u0441\u043e\u0431\u0440\u0430\u043d\u0438\u044f", None))
+        self.otch_next_btn.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0430\u043b\u0435\u0435", None))
         self.otch_nagr_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0433\u0440\u0443\u0437\u043a\u0430", None))
         self.otch_pln_btn.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d", None))
         self.otch_tbl_btn.setText(QCoreApplication.translate("MainWindow", u"\u0422\u0430\u0431\u043b\u0438\u0446\u0430", None))
+        self.meeting_date_otch_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u043d\u0430\u0447\u0438\u0442\u044c \u0434\u0430\u0442\u0443 \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u044f \u0441\u043e\u0431\u0440\u0430\u043d\u0438\u044f", None))
         self.loadTableButton.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0442\u0430\u0431\u043b\u0438\u0446\u0443", None))
         self.loadNagruzkaButton.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043d\u0430\u0433\u0440\u0443\u0437\u043a\u0443", None))
         self.loadPlanPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043f\u043b\u0430\u043d", None))
-        self.placePlanButton.setText(QCoreApplication.translate("MainWindow", u"\u041c\u0435\u0441\u0442\u043e \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u044f", None))
+        self.savePlanButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c", None))
+        self.saveAsPlanButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a", None))
 #if QT_CONFIG(tooltip)
         self.notePlanPushButton.setToolTip(QCoreApplication.translate("MainWindow", u"\u0422\u0432\u043e\u044f \u043c\u0430\u043c\u0430", None))
 #endif // QT_CONFIG(tooltip)
         self.notePlanPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u0438\u043c\u0435\u0447\u0430\u043d\u0438\u0435", None))
+        self.placePlanButton.setText(QCoreApplication.translate("MainWindow", u"\u041c\u0435\u0441\u0442\u043e \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u044f", None))
         self.agreementPlanPushButton.setText(QCoreApplication.translate("MainWindow", u"\u2116 \u0434\u043e\u0433\u043e\u0432\u043e\u0440\u0430", None))
         self.zakupkaPlanPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u043e\u0441\u0442\u044c \u0437\u0430\u043a\u0443\u043f\u043a\u0438", None))
         self.rukPlanPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0420\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u043e\u0442 \u043f\u0440\u0435\u0434\u043f\u0440\u0438\u044f\u0442\u0438\u044f", None))
-        self.savePlanButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c", None))
-        self.saveAsPlanButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a", None))
         self.faqTextBrowser.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -831,15 +957,6 @@ class Ui_MainWindow(object):
         self.lkRepeatPassLine.setPlaceholderText(QCoreApplication.translate("MainWindow", u"\u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u0430\u0440\u043e\u043b\u044c", None))
         self.lkDelAccPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0430\u043a\u043a\u0430\u0443\u043d\u0442", None))
         self.lkMainLabel_10.setText(QCoreApplication.translate("MainWindow", u"\u0421\u0442\u0435\u043f\u0435\u043d\u044c", None))
-        self.genOtchToolButton.setText(QCoreApplication.translate("MainWindow", u"\u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f\n"
-"\u043e\u0442\u0447\u0435\u0442\u0430", None))
-        self.genPlanToolButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d", None))
-        self.exitToolButton.setText(QCoreApplication.translate("MainWindow", u"\u0412\u044b\u0439\u0442\u0438", None))
-        self.faqToolButton.setText(QCoreApplication.translate("MainWindow", u"F.A.Q", None))
-        self.cabinetToolButton.setText(QCoreApplication.translate("MainWindow", u"\u041b\u0438\u0447\u043d\u044b\u0439\n"
-"\u043a\u0430\u0431\u0438\u043d\u0435\u0442", None))
-        self.dataToolButton.setText(QCoreApplication.translate("MainWindow", u"\u0411\u0430\u0437\u0430\n"
-"\u0434\u0430\u043d\u043d\u044b\u0445", None))
 #if QT_CONFIG(statustip)
         self.statusbar.setStatusTip(QCoreApplication.translate("MainWindow", u"\u0423 \u0432\u0430\u0441 \u0432\u0437\u043e\u0440\u0432\u0435\u0442\u0441\u044f \u0430\u043d\u0430\u043b \u043f\u0440\u0438 \u043d\u0430\u0436\u0430\u0442\u0438\u0438 \u043d\u0430 \u044d\u0442\u0443 \u043a\u043d\u043e\u043f\u043a\u0443", None))
 #endif // QT_CONFIG(statustip)

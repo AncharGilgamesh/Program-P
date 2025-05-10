@@ -433,3 +433,76 @@ def extract_practice_blocks_with_empty_stop(df):
                 practice_blocks.append(current_block)
 
             return practice_blocks
+
+
+# Тут порпобую грузить нагрузку
+def format_teacher_name(name: str) -> str:
+    """Форматирует ФИО преподавателя — делает заглавными только первые буквы."""
+    parts = name.strip().split()
+    return " ".join(p.capitalize() for p in parts)
+
+def normalize_practice_type(practice: str) -> str:
+    """Преобразует названия практик согласно правилам."""
+    practice = practice.strip().lower()
+
+    if "ознакомительная" in practice:
+        return "Учебная практика – ознакомительная"
+    elif "технологическая" in practice or "проектно-технологическая" in practice:
+        return "Учебная практика – технологическая (проектно-технологическая)"
+    elif "эксплуатационная" in practice:
+        return "Производственная практика – эксплуатационная"
+    elif "научно-исследовательская работа" in practice and "практика по получению" not in practice:
+        return "Производственная практика: Научно-исследовательская работа"
+    elif "по получению навыков научно-исследовательской работы" in practice:
+        return "Производственная практика по получению навыков научно-исследовательской работы"
+    return practice  # если не найдено соответствие — оставить как есть
+
+def extract_data(df):
+    results = []
+    bachelor_list = []
+    master_list = []
+    for idx, row in df.iterrows():
+        if idx == 0:
+            continue
+        group = row[4]
+        if pd.isna(group):
+            continue
+
+        num = len(bachelor_list) + len(master_list) + 1
+        practice_raw = str(row[12]) if not pd.isna(row[12]) else ""
+        practice_type = normalize_practice_type(practice_raw)
+
+        budget = int(row[5]) if not pd.isna(row[5]) else 0
+        paid = int(row[6]) if not pd.isna(row[6]) else 0
+        total = int(row[7]) if not pd.isna(row[7]) else budget + paid
+        targeted = total - budget - paid if total > budget + paid else 0
+        student_info = f"Г/б - {budget}\nПл. - {paid}\nЦелевики - {targeted}"
+        practice_full = f"{practice_type}\n{student_info}"
+
+        teacher_raw = str(row[16]) if not pd.isna(row[16]) else ""
+        teacher_match = re.match(r'^([А-ЯЁа-яёA-Za-z\-]+(?:\s+[А-ЯЁа-яёA-Za-z]\.){1,2})', teacher_raw.strip())
+        teacher = format_teacher_name(teacher_match.group(1)) if teacher_match else ""
+
+        specialty_raw = str(row[8]) if not pd.isna(row[8]) else ""
+        specialty = specialty_raw.split()[0] if specialty_raw else ""
+        
+        note = row[29] if not pd.isna(row[29]) else ""
+
+        sroki = str(row[13]) if not pd.isna(row[13]) else ""
+
+        # Сроки пока оставим пустыми (нужен анализ), заполним позже
+        edu_lvl = str(row[10]).strip().lower()
+
+        result_row = [num, group, practice_full, sroki, "Кафедра", "", teacher, "", specialty, "нет", note]
+        if "маг" in edu_lvl:
+            master_list.append(result_row)
+        else:
+            bachelor_list.append(result_row)
+
+    bachelor_list.sort(key=lambda x: x[1])
+    master_list.sort(key=lambda x: x[1])
+    results = bachelor_list + master_list
+
+    for i in range(len(results)):
+        results[i][0] = i+1
+    return results

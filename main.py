@@ -89,9 +89,11 @@ class MainWindow(QMainWindow):
         self.ui.otch_pln_btn.clicked.connect(self.load_plan)
         # first stage
         self.ui.meeting_date_otch_btn.clicked.connect(self.add_meting_date)
+
+
         # Тут страница плана        
         self.ui.loadTableButton.clicked.connect(self.load_table_new)
-        self.ui.loadNagruzkaButton.clicked.connect(self.fill_the_shablon)
+        self.ui.loadNagruzkaButton.clicked.connect(self.load_nagruzka)
         # проверяю insert rows для модели
         self.ui.notePlanPushButton.clicked.connect(self.open_group_dialog)
         # проверяю добавление значений
@@ -102,6 +104,8 @@ class MainWindow(QMainWindow):
         self.ui.rukPlanPushButton.clicked.connect(self.open_group_dialog)
         # работаем надо сохранениями
         self.ui.savePlanButton.clicked.connect(self.save_plan_new)
+        self.ui.saveAsPlanButton.clicked.connect(self.save_plan_as)
+
         # Переключение между окнами
         self.ui.cabinetToolButton.clicked.connect(self.go_to_lk)
         self.ui.dataToolButton.clicked.connect(lambda: self.switch_page(0))
@@ -329,9 +333,7 @@ class MainWindow(QMainWindow):
         #self.ui.otchThirdTableView.resizeRowsToContents()
         #Для четвертой таблицы попробуй взять инфу из второй таблицы и надо подредактировать
         #Сделать диалоговое окно, чтобы можно было заполнять таблицу из второй таблицы
-        
             
-
     def to_next_stage(self):
         index = self.ui.stackedWidget.currentIndex()+1
         if index == 6:
@@ -386,6 +388,20 @@ class MainWindow(QMainWindow):
         """Переключает страницу в QStackedWidget и обновляет состояние кнопок"""
         self.ui.mainStackedWidget.setCurrentIndex(index) 
     # ==========================Код для работы с планом====================================================
+    def save_plan_as(self):
+        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
+        data_for_save = self._plan_model.get_data_without_id()
+        table = doc.tables[0]
+        start_row = 2
+        self.fill_the_table_rows(table, data_for_save, start_row)
+        options = QFileDialog.Options()
+        fname, _ = QFileDialog.getSaveFileName(
+            self,
+            "Сохранить файл", "", "Excel файлы (*.docx)", options=options)
+        if not fname:
+            return
+        doc.save(fname)
+
     def save_plan_new(self):
         year = datetime.datetime.now().year
         current_date = str(datetime.datetime.now().strftime("%Y.%m.%d"))
@@ -451,6 +467,16 @@ class MainWindow(QMainWindow):
         self._plan_model.updateCellsByCondition(1, "B", 4, "Gay\nnot\nnatural")
         self.ui.tableView.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)        
 
+    def load_nagruzka(self):
+        fname, _ = QFileDialog.getOpenFileName(
+            self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)")
+        if not fname:
+            return
+        data = pd.read_excel(fname, header=None)
+        extracted_data = dh.extract_data(data)
+        self._plan_model.insertRows(0, len(extracted_data), extracted_data)
+        
+
     def load_table_new(self):
         fname, _ = QFileDialog.getOpenFileName(
             self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)")
@@ -477,6 +503,7 @@ class MainWindow(QMainWindow):
         #print(blocks_maga)
         blocks_baka_tr = dh.transform_practice_data(blocks)
         blocks_maga_tr = dh.transform_practice_data(blocks_maga, len(blocks_baka_tr))
+        print(blocks_maga_tr)
         combined_blocks = blocks_baka_tr + blocks_maga_tr
         self._plan_model.insertRows(0, len(combined_blocks), combined_blocks)
         """
@@ -669,21 +696,6 @@ class MainWindow(QMainWindow):
         self.proxy_model.setFilterFixedString(text)
         self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
     """
-
-    def test_function(self):
-        print('test')
-
-    def cabinet_function(self):
-        print('cabinet button')
-
-    def faq_function(self):
-        print('faq button')
-
-    def genOtch_function(self):
-        print('genOtch button')
-
-    def genPlan_function(self):
-        print('genOtch button')
 
     def exit_function(self):
         dbh.update_remember_status(self.user, 0)
