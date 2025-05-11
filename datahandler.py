@@ -349,6 +349,27 @@ def find_column_index_by_keyword(model, keyword: str) -> int:
             return col
     return -1
 
+def clean_practice_name(text):
+    """
+    Удаляет из строки слова "курс", "семестр" и все цифры.
+    
+    Args:
+        text (str): Исходная строка.
+    
+    Returns:
+        str: Очищенная строка.
+    """
+    # Удаляем слова "курс" и "семестр" (регистронезависимо)
+    text = re.sub(r'\b(курс|семестр)\b', '', text, flags=re.IGNORECASE)
+    
+    # Удаляем все цифры
+    text = re.sub(r'\d+', '', text)
+
+    text = text.replace(':', '')
+    
+    # Удаляем лишние пробелы и возвращаем результат
+    return ' '.join(text.split()).strip()
+
 # функция для обработки данных, загруженных из Excel таблицы
 def transform_practice_data(data, start_id=0):
     """
@@ -373,7 +394,7 @@ def transform_practice_data(data, start_id=0):
                 transformed_row = [
                     current_id,               # Уникальный ID
                     row[1],                  # № группы
-                    title,                   # Название практики из title
+                    clean_practice_name(title),                   # Название практики из title
                     row[4],                  # Сроки прохождения
                     "Кафедра",               # Кафедра (везде одинаково)
                     "",                      # Пустая строка
@@ -456,6 +477,27 @@ def normalize_practice_type(practice: str) -> str:
     elif "по получению навыков научно-исследовательской работы" in practice:
         return "Производственная практика по получению навыков научно-исследовательской работы"
     return practice  # если не найдено соответствие — оставить как есть
+
+def extract_additional_info_form_nagruzka(df):
+    result_dict = {}
+    for idx, row in df.iterrows():
+        if idx == 0:
+            continue
+        group = row[4]
+        
+        if pd.isna(group):
+            continue
+        budget = int(row[5]) if not pd.isna(row[5]) else 0
+        paid = int(row[6]) if not pd.isna(row[6]) else 0
+        total = int(row[7]) if not pd.isna(row[7]) else budget + paid
+        targeted = total - budget - paid if total > budget + paid else 0
+        student_info = f"\nГ/б - {budget}\nПл. - {paid}\nЦелевики - {targeted}"
+        if group not in result_dict:
+            result_dict[group] = student_info
+        else:
+            continue
+    return result_dict
+
 
 def extract_data(df):
     results = []

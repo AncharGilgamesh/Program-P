@@ -40,7 +40,8 @@ class MainWindow(QMainWindow):
         dbh.create_tables()
 
         self.user = user
-        print(user)
+        self._table_loaded = False
+        self._nagruzka_loaded = False
 
         self._db_model = None
 
@@ -187,6 +188,7 @@ class MainWindow(QMainWindow):
     # ==========================Код для работы с базой данных===============================================
 
     def upload_db_starosta(self):
+        self.ui.dbPageStackedWidget.setCurrentIndex(1)
         data = dbh.load_starostas()
         headers = ["id","id_Куратора", "Фамилия", "Имя", "Отчество", "Группа", "Почта", "Номер"]
         self._db_model = PlanTableModel(data, headers)
@@ -231,6 +233,7 @@ class MainWindow(QMainWindow):
 
 
     def upload_db_teachers(self):
+        self.ui.dbPageStackedWidget.setCurrentIndex(0)
         data = dbh.load_teachers()
         headers = ["id", "Фамилия", "Имя", "Отчество", "Степень", "Должность", "Почта", "Номер"]
         self._db_model = PlanTableModel(data, headers)
@@ -274,6 +277,7 @@ class MainWindow(QMainWindow):
 
 
     def upload_db_docs(self):
+        self.ui.dbPageStackedWidget.setCurrentIndex(2)
         data = dbh.load_docs()
         headers = ["id", "Год", "Тип", "Дата создания", "Создатель", "Защищено", "Открыть"]
         self._db_model = PlanTableModel(data, headers)
@@ -474,7 +478,15 @@ class MainWindow(QMainWindow):
             return
         data = pd.read_excel(fname, header=None)
         extracted_data = dh.extract_data(data)
-        self._plan_model.insertRows(0, len(extracted_data), extracted_data)
+        if self._table_loaded:
+            additional_data = dh.extract_additional_info_form_nagruzka(data)
+            for key in additional_data.keys():
+                self._plan_model.add_info_to_cell_by_condition(1, key, 2, additional_data[key])
+        else:
+            extracted_data = dh.extract_data(data)
+            self._plan_model.insertRows(0, len(extracted_data), extracted_data)
+        self._nagruzka_loaded = True
+        self.ui.tableView.resizeRowsToContents()
         
 
     def load_table_new(self):
@@ -503,9 +515,10 @@ class MainWindow(QMainWindow):
         #print(blocks_maga)
         blocks_baka_tr = dh.transform_practice_data(blocks)
         blocks_maga_tr = dh.transform_practice_data(blocks_maga, len(blocks_baka_tr))
-        print(blocks_maga_tr)
         combined_blocks = blocks_baka_tr + blocks_maga_tr
         self._plan_model.insertRows(0, len(combined_blocks), combined_blocks)
+        self._table_loaded = True
+        self.ui.tableView.resizeRowsToContents()
         """
         for i, block in enumerate(blocks_maga, 1):
             print(f"\nБлок {i}:")

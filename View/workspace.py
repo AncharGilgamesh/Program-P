@@ -15,11 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
-    QLineEdit, QMainWindow, QMenuBar, QPushButton,
-    QSizePolicy, QSpacerItem, QStackedWidget, QStatusBar,
-    QTableView, QTextBrowser, QToolButton, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QHeaderView,
+    QLabel, QLineEdit, QMainWindow, QMenuBar,
+    QPushButton, QSizePolicy, QSpacerItem, QStackedWidget,
+    QStatusBar, QTableView, QTextBrowser, QToolButton,
+    QVBoxLayout, QWidget)
 import View.res_rc
 
 class Ui_MainWindow(object):
@@ -76,7 +76,35 @@ class Ui_MainWindow(object):
 "\n"
 "QLineEdit::placeholder {\n"
 "    color: rgba(255, 255, 255, 0.5);\n"
-"}")
+"}\n"
+"QTableView {\n"
+"    background-color: rgba(255, 255, 255, 30);\n"
+"    border: 1px solid rgba(255, 255, 255, 40);\n"
+"    border-bottom-right-radius: 7px;\n"
+"    border-bottom-left-radius: 7px;\n"
+"}\n"
+"QTableView::item {\n"
+"    border: none;\n"
+"    border-bottom: 1px solid rgba(255, 255, 255, 50);\n"
+"    padding: 5px;\n"
+"    color: white; /* \u0447\u0442\u043e\u0431\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c, \u0442\u043e\u0447\u043d\u043e \u043b\u0438 \u0441\u0442\u0438\u043b\u044c \u043f\u0440\u0438\u043c\u0435\u043d\u044f\u0435\u0442\u0441\u044f */\n"
+"}\n"
+"QTableView::item:selected {\n"
+"    border: none;\n"
+"    color: white;\n"
+"    background-color: rgba(255, 255, 255, 80);\n"
+"}\n"
+""
+                        "QHeaderView::section {\n"
+"    background-color: rgb(53, 53, 53);\n"
+"    color: white;\n"
+"    border: none;\n"
+"    font-size: 10pt;\n"
+"}\n"
+"QTableView QLineEdit {\n"
+"        background-color: #333333;\n"
+"        color: white;\n"
+"    }")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
@@ -191,9 +219,131 @@ class Ui_MainWindow(object):
         self.mainStackedWidget.setObjectName(u"mainStackedWidget")
         self.db_page = QWidget()
         self.db_page.setObjectName(u"db_page")
+        self.verticalLayout_6 = QVBoxLayout(self.db_page)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.horizontalLayout_9 = QHBoxLayout()
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.dbPlansPushButton = QPushButton(self.db_page)
+        self.dbPlansPushButton.setObjectName(u"dbPlansPushButton")
+        self.dbPlansPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_9.addWidget(self.dbPlansPushButton)
+
+        self.dbPrepodsPushButton = QPushButton(self.db_page)
+        self.dbPrepodsPushButton.setObjectName(u"dbPrepodsPushButton")
+        self.dbPrepodsPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_9.addWidget(self.dbPrepodsPushButton)
+
+        self.dbStarostaPushButton = QPushButton(self.db_page)
+        self.dbStarostaPushButton.setObjectName(u"dbStarostaPushButton")
+        self.dbStarostaPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_9.addWidget(self.dbStarostaPushButton)
+
+
+        self.verticalLayout_6.addLayout(self.horizontalLayout_9)
+
+        self.dbPageStackedWidget = QStackedWidget(self.db_page)
+        self.dbPageStackedWidget.setObjectName(u"dbPageStackedWidget")
+        self.dbPageStackedWidget.setMaximumSize(QSize(16777215, 50))
+        self.dbPageStackedWidget.setStyleSheet(u"")
+        self.dbPrepodPage = QWidget()
+        self.dbPrepodPage.setObjectName(u"dbPrepodPage")
+        self.gridLayout_2 = QGridLayout(self.dbPrepodPage)
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.dbAddPrepodPushButton = QPushButton(self.dbPrepodPage)
+        self.dbAddPrepodPushButton.setObjectName(u"dbAddPrepodPushButton")
+        self.dbAddPrepodPushButton.setStyleSheet(u"")
+
+        self.gridLayout_2.addWidget(self.dbAddPrepodPushButton, 0, 0, 1, 1)
+
+        self.dbEditPrepodPushButton = QPushButton(self.dbPrepodPage)
+        self.dbEditPrepodPushButton.setObjectName(u"dbEditPrepodPushButton")
+        self.dbEditPrepodPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.gridLayout_2.addWidget(self.dbEditPrepodPushButton, 0, 1, 1, 1)
+
+        self.dbDelPrepodPushButton = QPushButton(self.dbPrepodPage)
+        self.dbDelPrepodPushButton.setObjectName(u"dbDelPrepodPushButton")
+        self.dbDelPrepodPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.gridLayout_2.addWidget(self.dbDelPrepodPushButton, 0, 2, 1, 1)
+
+        self.dbPageStackedWidget.addWidget(self.dbPrepodPage)
+        self.dbStarostaPage = QWidget()
+        self.dbStarostaPage.setObjectName(u"dbStarostaPage")
+        self.gridLayout_3 = QGridLayout(self.dbStarostaPage)
+        self.gridLayout_3.setObjectName(u"gridLayout_3")
+        self.dbAddStarostaPushButton = QPushButton(self.dbStarostaPage)
+        self.dbAddStarostaPushButton.setObjectName(u"dbAddStarostaPushButton")
+        self.dbAddStarostaPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.gridLayout_3.addWidget(self.dbAddStarostaPushButton, 0, 0, 1, 1)
+
+        self.dbEditStarostaPushButton = QPushButton(self.dbStarostaPage)
+        self.dbEditStarostaPushButton.setObjectName(u"dbEditStarostaPushButton")
+        self.dbEditStarostaPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.gridLayout_3.addWidget(self.dbEditStarostaPushButton, 0, 1, 1, 1)
+
+        self.dbDelStarostaPushButton = QPushButton(self.dbStarostaPage)
+        self.dbDelStarostaPushButton.setObjectName(u"dbDelStarostaPushButton")
+        self.dbDelStarostaPushButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.gridLayout_3.addWidget(self.dbDelStarostaPushButton, 0, 2, 1, 1)
+
+        self.dbPageStackedWidget.addWidget(self.dbStarostaPage)
+        self.dbDocsPage = QWidget()
+        self.dbDocsPage.setObjectName(u"dbDocsPage")
+        self.gridLayout = QGridLayout(self.dbDocsPage)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.sa = QPushButton(self.dbDocsPage)
+        self.sa.setObjectName(u"sa")
+        self.sa.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.gridLayout.addWidget(self.sa, 0, 0, 1, 1)
+
+        self.dbPlansPushButton_3 = QPushButton(self.dbDocsPage)
+        self.dbPlansPushButton_3.setObjectName(u"dbPlansPushButton_3")
+        self.dbPlansPushButton_3.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.gridLayout.addWidget(self.dbPlansPushButton_3, 0, 1, 1, 1)
+
+        self.dbPlansPushButton_7 = QPushButton(self.dbDocsPage)
+        self.dbPlansPushButton_7.setObjectName(u"dbPlansPushButton_7")
+        self.dbPlansPushButton_7.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.gridLayout.addWidget(self.dbPlansPushButton_7, 0, 2, 1, 1)
+
+        self.dbPageStackedWidget.addWidget(self.dbDocsPage)
+
+        self.verticalLayout_6.addWidget(self.dbPageStackedWidget)
+
         self.dataBaseTableView = QTableView(self.db_page)
         self.dataBaseTableView.setObjectName(u"dataBaseTableView")
-        self.dataBaseTableView.setGeometry(QRect(0, 100, 881, 491))
         self.dataBaseTableView.setStyleSheet(u"QTableView {\n"
 "    background-color: rgba(255, 255, 255, 30);\n"
 "    border: 1px solid rgba(255, 255, 255, 40);\n"
@@ -217,76 +367,9 @@ class Ui_MainWindow(object):
 "    border: none;\n"
 "    font-size: 10pt;\n"
 "}")
-        self.dbPlansPushButton = QPushButton(self.db_page)
-        self.dbPlansPushButton.setObjectName(u"dbPlansPushButton")
-        self.dbPlansPushButton.setGeometry(QRect(240, 0, 121, 31))
-        self.dbPlansPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbPrepodsPushButton = QPushButton(self.db_page)
-        self.dbPrepodsPushButton.setObjectName(u"dbPrepodsPushButton")
-        self.dbPrepodsPushButton.setGeometry(QRect(360, 0, 121, 31))
-        self.dbPrepodsPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbStarostaPushButton = QPushButton(self.db_page)
-        self.dbStarostaPushButton.setObjectName(u"dbStarostaPushButton")
-        self.dbStarostaPushButton.setGeometry(QRect(480, 0, 131, 31))
-        self.dbStarostaPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.sa = QPushButton(self.db_page)
-        self.sa.setObjectName(u"sa")
-        self.sa.setGeometry(QRect(20, 10, 141, 31))
-        self.sa.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbPlansPushButton_3 = QPushButton(self.db_page)
-        self.dbPlansPushButton_3.setObjectName(u"dbPlansPushButton_3")
-        self.dbPlansPushButton_3.setGeometry(QRect(20, 40, 141, 31))
-        self.dbPlansPushButton_3.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbPlansPushButton_7 = QPushButton(self.db_page)
-        self.dbPlansPushButton_7.setObjectName(u"dbPlansPushButton_7")
-        self.dbPlansPushButton_7.setGeometry(QRect(20, 70, 141, 31))
-        self.dbPlansPushButton_7.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbEditPrepodPushButton = QPushButton(self.db_page)
-        self.dbEditPrepodPushButton.setObjectName(u"dbEditPrepodPushButton")
-        self.dbEditPrepodPushButton.setGeometry(QRect(360, 70, 131, 31))
-        self.dbEditPrepodPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbAddPrepodPushButton = QPushButton(self.db_page)
-        self.dbAddPrepodPushButton.setObjectName(u"dbAddPrepodPushButton")
-        self.dbAddPrepodPushButton.setGeometry(QRect(240, 70, 121, 31))
-        self.dbAddPrepodPushButton.setStyleSheet(u"")
-        self.dbDelPrepodPushButton = QPushButton(self.db_page)
-        self.dbDelPrepodPushButton.setObjectName(u"dbDelPrepodPushButton")
-        self.dbDelPrepodPushButton.setGeometry(QRect(490, 70, 121, 31))
-        self.dbDelPrepodPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbAddStarostaPushButton = QPushButton(self.db_page)
-        self.dbAddStarostaPushButton.setObjectName(u"dbAddStarostaPushButton")
-        self.dbAddStarostaPushButton.setGeometry(QRect(700, 10, 141, 31))
-        self.dbAddStarostaPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbEditStarostaPushButton = QPushButton(self.db_page)
-        self.dbEditStarostaPushButton.setObjectName(u"dbEditStarostaPushButton")
-        self.dbEditStarostaPushButton.setGeometry(QRect(700, 40, 141, 31))
-        self.dbEditStarostaPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-        self.dbDelStarostaPushButton = QPushButton(self.db_page)
-        self.dbDelStarostaPushButton.setObjectName(u"dbDelStarostaPushButton")
-        self.dbDelStarostaPushButton.setGeometry(QRect(700, 70, 141, 31))
-        self.dbDelStarostaPushButton.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
+
+        self.verticalLayout_6.addWidget(self.dataBaseTableView)
+
         self.mainStackedWidget.addWidget(self.db_page)
         self.otchet_page = QWidget()
         self.otchet_page.setObjectName(u"otchet_page")
@@ -335,16 +418,12 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_8.addLayout(self.horizontalLayout_6)
 
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_8.addItem(self.horizontalSpacer_2)
+
         self.horizontalLayout_7 = QHBoxLayout()
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.otch_nagr_btn = QPushButton(self.otchet_page)
-        self.otch_nagr_btn.setObjectName(u"otch_nagr_btn")
-        self.otch_nagr_btn.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-
-        self.horizontalLayout_7.addWidget(self.otch_nagr_btn)
-
         self.otch_pln_btn = QPushButton(self.otchet_page)
         self.otch_pln_btn.setObjectName(u"otch_pln_btn")
         self.otch_pln_btn.setStyleSheet(u"QPushButton{\n"
@@ -352,14 +431,6 @@ class Ui_MainWindow(object):
 "}")
 
         self.horizontalLayout_7.addWidget(self.otch_pln_btn)
-
-        self.otch_tbl_btn = QPushButton(self.otchet_page)
-        self.otch_tbl_btn.setObjectName(u"otch_tbl_btn")
-        self.otch_tbl_btn.setStyleSheet(u"QPushButton{\n"
-"    color: white;\n"
-"}")
-
-        self.horizontalLayout_7.addWidget(self.otch_tbl_btn)
 
 
         self.horizontalLayout_8.addLayout(self.horizontalLayout_7)
@@ -405,16 +476,21 @@ class Ui_MainWindow(object):
 "    color: white;\n"
 "    border: none;\n"
 "    font-size: 10pt;\n"
-"}")
+"}\n"
+"QTableView QLineEdit {\n"
+"        background-color: #333333;\n"
+"        color: white;\n"
+"    }")
 
         self.verticalLayout_5.addWidget(self.otchFirstTableView)
 
         self.stackedWidget.addWidget(self.page)
         self.page_2 = QWidget()
         self.page_2.setObjectName(u"page_2")
+        self.verticalLayout_10 = QVBoxLayout(self.page_2)
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
         self.otchSecondTableView = QTableView(self.page_2)
         self.otchSecondTableView.setObjectName(u"otchSecondTableView")
-        self.otchSecondTableView.setGeometry(QRect(0, 60, 881, 491))
         self.otchSecondTableView.setStyleSheet(u"QTableView {\n"
 "    background-color: rgba(255, 255, 255, 30);\n"
 "    border: 1px solid rgba(255, 255, 255, 40);\n"
@@ -437,13 +513,29 @@ class Ui_MainWindow(object):
 "    color: white;\n"
 "    border: none;\n"
 "    font-size: 10pt;\n"
-"}")
+"}\n"
+"QTableView QLineEdit {\n"
+"        background-color: #333333;\n"
+"        color: white;\n"
+"    }")
+
+        self.verticalLayout_10.addWidget(self.otchSecondTableView)
+
         self.stackedWidget.addWidget(self.page_2)
         self.page_3 = QWidget()
         self.page_3.setObjectName(u"page_3")
+        self.verticalLayout_9 = QVBoxLayout(self.page_3)
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.otch_next_btn_2 = QPushButton(self.page_3)
+        self.otch_next_btn_2.setObjectName(u"otch_next_btn_2")
+        self.otch_next_btn_2.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.verticalLayout_9.addWidget(self.otch_next_btn_2)
+
         self.otchThirdTableView = QTableView(self.page_3)
         self.otchThirdTableView.setObjectName(u"otchThirdTableView")
-        self.otchThirdTableView.setGeometry(QRect(0, 60, 881, 491))
         self.otchThirdTableView.setStyleSheet(u"QTableView {\n"
 "    background-color: rgba(255, 255, 255, 30);\n"
 "    border: 1px solid rgba(255, 255, 255, 40);\n"
@@ -466,13 +558,30 @@ class Ui_MainWindow(object):
 "    color: white;\n"
 "    border: none;\n"
 "    font-size: 10pt;\n"
-"}")
+"}\n"
+"QTableView QLineEdit {\n"
+"        background-color: #333333;\n"
+"        color: white;\n"
+"    }")
+
+        self.verticalLayout_9.addWidget(self.otchThirdTableView)
+
         self.stackedWidget.addWidget(self.page_3)
         self.page_4 = QWidget()
         self.page_4.setObjectName(u"page_4")
+        self.verticalLayout_8 = QVBoxLayout(self.page_4)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.otchAllAnotherButton = QPushButton(self.page_4)
+        self.otchAllAnotherButton.setObjectName(u"otchAllAnotherButton")
+        self.otchAllAnotherButton.setMaximumSize(QSize(100, 16777215))
+        self.otchAllAnotherButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.verticalLayout_8.addWidget(self.otchAllAnotherButton)
+
         self.otchFourthTableView = QTableView(self.page_4)
         self.otchFourthTableView.setObjectName(u"otchFourthTableView")
-        self.otchFourthTableView.setGeometry(QRect(0, 60, 881, 491))
         self.otchFourthTableView.setStyleSheet(u"QTableView {\n"
 "    background-color: rgba(255, 255, 255, 30);\n"
 "    border: 1px solid rgba(255, 255, 255, 40);\n"
@@ -495,7 +604,14 @@ class Ui_MainWindow(object):
 "    color: white;\n"
 "    border: none;\n"
 "    font-size: 10pt;\n"
-"}")
+"}\n"
+"QTableView QLineEdit {\n"
+"        background-color: #333333;\n"
+"        color: white;\n"
+"    }")
+
+        self.verticalLayout_8.addWidget(self.otchFourthTableView)
+
         self.stackedWidget.addWidget(self.page_4)
         self.page_5 = QWidget()
         self.page_5.setObjectName(u"page_5")
@@ -524,13 +640,47 @@ class Ui_MainWindow(object):
 "    color: white;\n"
 "    border: none;\n"
 "    font-size: 10pt;\n"
-"}")
+"}\n"
+"QTableView QLineEdit {\n"
+"        background-color: #333333;\n"
+"        color: white;\n"
+"    }")
         self.stackedWidget.addWidget(self.page_5)
         self.page_6 = QWidget()
         self.page_6.setObjectName(u"page_6")
+        self.verticalLayout_7 = QVBoxLayout(self.page_6)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.horizontalLayout_10 = QHBoxLayout()
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
+        self.otchAllUdlButton = QPushButton(self.page_6)
+        self.otchAllUdlButton.setObjectName(u"otchAllUdlButton")
+        self.otchAllUdlButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_10.addWidget(self.otchAllUdlButton)
+
+        self.otchAllXorButton = QPushButton(self.page_6)
+        self.otchAllXorButton.setObjectName(u"otchAllXorButton")
+        self.otchAllXorButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_10.addWidget(self.otchAllXorButton)
+
+        self.otchAllOtlButton = QPushButton(self.page_6)
+        self.otchAllOtlButton.setObjectName(u"otchAllOtlButton")
+        self.otchAllOtlButton.setStyleSheet(u"QPushButton{\n"
+"    color: white;\n"
+"}")
+
+        self.horizontalLayout_10.addWidget(self.otchAllOtlButton)
+
+
+        self.verticalLayout_7.addLayout(self.horizontalLayout_10)
+
         self.otchSixthTableView = QTableView(self.page_6)
         self.otchSixthTableView.setObjectName(u"otchSixthTableView")
-        self.otchSixthTableView.setGeometry(QRect(0, 60, 881, 491))
         self.otchSixthTableView.setStyleSheet(u"QTableView {\n"
 "    background-color: rgba(255, 255, 255, 30);\n"
 "    border: 1px solid rgba(255, 255, 255, 40);\n"
@@ -553,7 +703,14 @@ class Ui_MainWindow(object):
 "    color: white;\n"
 "    border: none;\n"
 "    font-size: 10pt;\n"
-"}")
+"}\n"
+"QTableView QLineEdit {\n"
+"        background-color: #333333;\n"
+"        color: white;\n"
+"    }")
+
+        self.verticalLayout_7.addWidget(self.otchSixthTableView)
+
         self.stackedWidget.addWidget(self.page_6)
 
         self.verticalLayout_3.addWidget(self.stackedWidget)
@@ -691,7 +848,11 @@ class Ui_MainWindow(object):
 "    color: white;\n"
 "    border: none;\n"
 "    font-size: 10pt;\n"
-"}")
+"}\n"
+"QTableView QLineEdit {\n"
+"        background-color: #333333;\n"
+"        color: white;\n"
+"    }")
 
         self.verticalLayout_2.addWidget(self.tableView)
 
@@ -878,6 +1039,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.mainStackedWidget.setCurrentIndex(1)
+        self.dbPageStackedWidget.setCurrentIndex(2)
         self.stackedWidget.setCurrentIndex(0)
 
 
@@ -898,12 +1060,9 @@ class Ui_MainWindow(object):
         self.dbPlansPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b", None))
         self.dbPrepodsPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u0438", None))
         self.dbStarostaPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u0442\u0430\u0440\u043e\u0441\u0442\u044b \u0433\u0440\u0443\u043f\u043f", None))
-        self.sa.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0449\u0438\u0442\u0430 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430", None))
-        self.dbPlansPushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
-        self.dbPlansPushButton_7.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
-        self.dbEditPrepodPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435\n"
-"\u043f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u044f", None))
         self.dbAddPrepodPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u0438\u0435\n"
+"\u043f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u044f", None))
+        self.dbEditPrepodPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435\n"
 "\u043f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u044f", None))
         self.dbDelPrepodPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435\n"
 "\u043f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u044f", None))
@@ -913,14 +1072,20 @@ class Ui_MainWindow(object):
 "\u0441\u0442\u0430\u0440\u043e\u0441\u0442\u044b", None))
         self.dbDelStarostaPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435\n"
 "\u0441\u0442\u0430\u0440\u043e\u0441\u0442\u044b", None))
+        self.sa.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0449\u0438\u0442\u0430 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430", None))
+        self.dbPlansPushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
+        self.dbPlansPushButton_7.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
         self.otch_lbl_page_info.setText(QCoreApplication.translate("MainWindow", u"\u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f \u043e\u0442\u0447\u0435\u0442\u0430", None))
         self.otch_lbl_stage.setText(QCoreApplication.translate("MainWindow", u"1 \u044d\u0442\u0430\u043f", None))
         self.otch_prev_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u0430\u0434", None))
         self.otch_next_btn.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0430\u043b\u0435\u0435", None))
-        self.otch_nagr_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0433\u0440\u0443\u0437\u043a\u0430", None))
         self.otch_pln_btn.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d", None))
-        self.otch_tbl_btn.setText(QCoreApplication.translate("MainWindow", u"\u0422\u0430\u0431\u043b\u0438\u0446\u0430", None))
         self.meeting_date_otch_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u043d\u0430\u0447\u0438\u0442\u044c \u0434\u0430\u0442\u0443 \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u044f \u0441\u043e\u0431\u0440\u0430\u043d\u0438\u044f", None))
+        self.otch_next_btn_2.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0434\u0438\u043d \u0440\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u0432\u0441\u0435\u043c", None))
+        self.otchAllAnotherButton.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0440\u0443\u0433\u043e\u0435", None))
+        self.otchAllUdlButton.setText(QCoreApplication.translate("MainWindow", u"\u0412\u0441\u0435\u043c \u0443\u0434\u043e\u0432\u043b", None))
+        self.otchAllXorButton.setText(QCoreApplication.translate("MainWindow", u"\u0412\u0441\u0435\u043c \u0445\u043e\u0440", None))
+        self.otchAllOtlButton.setText(QCoreApplication.translate("MainWindow", u"\u0412\u0441\u0435\u043c \u043e\u0442\u043b", None))
         self.loadTableButton.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0442\u0430\u0431\u043b\u0438\u0446\u0443", None))
         self.loadNagruzkaButton.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043d\u0430\u0433\u0440\u0443\u0437\u043a\u0443", None))
         self.loadPlanPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043f\u043b\u0430\u043d", None))

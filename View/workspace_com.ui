@@ -63,7 +63,34 @@ QLineEdit:focus {
 
 QLineEdit::placeholder {
     color: rgba(255, 255, 255, 0.5);
-}</string>
+}
+QTableView {
+    background-color: rgba(255, 255, 255, 30);
+    border: 1px solid rgba(255, 255, 255, 40);
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+}
+QTableView::item {
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 50);
+    padding: 5px;
+    color: white; /* чтобы проверить, точно ли стиль применяется */
+}
+QTableView::item:selected {
+    border: none;
+    color: white;
+    background-color: rgba(255, 255, 255, 80);
+}
+QHeaderView::section {
+    background-color: rgb(53, 53, 53);
+    color: white;
+    border: none;
+    font-size: 10pt;
+}
+QTableView QLineEdit {
+        background-color: #333333;
+        color: white;
+    }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -290,20 +317,194 @@ font-family: Consolas;</string>
     <item>
      <widget class="QStackedWidget" name="mainStackedWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="db_page">
-       <widget class="QTableView" name="dataBaseTableView">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>100</y>
-          <width>881</width>
-          <height>491</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QTableView {
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <widget class="QPushButton" name="dbPlansPushButton">
+            <property name="styleSheet">
+             <string notr="true">QPushButton{
+    color: white;
+}</string>
+            </property>
+            <property name="text">
+             <string>Документы</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="dbPrepodsPushButton">
+            <property name="styleSheet">
+             <string notr="true">QPushButton{
+    color: white;
+}</string>
+            </property>
+            <property name="text">
+             <string>Преподаватели</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="dbStarostaPushButton">
+            <property name="styleSheet">
+             <string notr="true">QPushButton{
+    color: white;
+}</string>
+            </property>
+            <property name="text">
+             <string>Старосты групп</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QStackedWidget" name="dbPageStackedWidget">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="currentIndex">
+           <number>2</number>
+          </property>
+          <widget class="QWidget" name="dbPrepodPage">
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="dbAddPrepodPushButton">
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string>Добавление
+преподавателя</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="dbEditPrepodPushButton">
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Редактирование
+преподавателя</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="dbDelPrepodPushButton">
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Удаление
+преподавателя</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="dbStarostaPage">
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="dbAddStarostaPushButton">
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Добавление
+старосты</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="dbEditStarostaPushButton">
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Редактирование
+старосты</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="dbDelStarostaPushButton">
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Удаление
+старосты</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="dbDocsPage">
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="sa">
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Защита документа</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="dbPlansPushButton_3">
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Открыть документ</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="dbPlansPushButton_7">
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Удалить документ</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="dataBaseTableView">
+          <property name="styleSheet">
+           <string notr="true">QTableView {
     background-color: rgba(255, 255, 255, 30);
     border: 1px solid rgba(255, 255, 255, 40);
     border-bottom-right-radius: 7px;
@@ -326,228 +527,10 @@ QHeaderView::section {
     border: none;
     font-size: 10pt;
 }</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbPlansPushButton">
-        <property name="geometry">
-         <rect>
-          <x>240</x>
-          <y>0</y>
-          <width>121</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Документы</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbPrepodsPushButton">
-        <property name="geometry">
-         <rect>
-          <x>360</x>
-          <y>0</y>
-          <width>121</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Преподаватели</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbStarostaPushButton">
-        <property name="geometry">
-         <rect>
-          <x>480</x>
-          <y>0</y>
-          <width>131</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Старосты групп</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="sa">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>10</y>
-          <width>141</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Защита документа</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbPlansPushButton_3">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>40</y>
-          <width>141</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Открыть документ</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbPlansPushButton_7">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>70</y>
-          <width>141</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Удалить документ</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbEditPrepodPushButton">
-        <property name="geometry">
-         <rect>
-          <x>360</x>
-          <y>70</y>
-          <width>131</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Редактирование
-преподавателя</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbAddPrepodPushButton">
-        <property name="geometry">
-         <rect>
-          <x>240</x>
-          <y>70</y>
-          <width>121</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string>Добавление
-преподавателя</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbDelPrepodPushButton">
-        <property name="geometry">
-         <rect>
-          <x>490</x>
-          <y>70</y>
-          <width>121</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Удаление
-преподавателя</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbAddStarostaPushButton">
-        <property name="geometry">
-         <rect>
-          <x>700</x>
-          <y>10</y>
-          <width>141</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Добавление
-старосты</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbEditStarostaPushButton">
-        <property name="geometry">
-         <rect>
-          <x>700</x>
-          <y>40</y>
-          <width>141</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Редактирование
-старосты</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="dbDelStarostaPushButton">
-        <property name="geometry">
-         <rect>
-          <x>700</x>
-          <y>70</y>
-          <width>141</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-    color: white;
-}</string>
-        </property>
-        <property name="text">
-         <string>Удаление
-старосты</string>
-        </property>
-       </widget>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="otchet_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -610,19 +593,23 @@ QHeaderView::section {
            </layout>
           </item>
           <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
-            <item>
-             <widget class="QPushButton" name="otch_nagr_btn">
-              <property name="styleSheet">
-               <string notr="true">QPushButton{
-    color: white;
-}</string>
-              </property>
-              <property name="text">
-               <string>Нагрузка</string>
-              </property>
-             </widget>
-            </item>
             <item>
              <widget class="QPushButton" name="otch_pln_btn">
               <property name="styleSheet">
@@ -632,18 +619,6 @@ QHeaderView::section {
               </property>
               <property name="text">
                <string>План</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="otch_tbl_btn">
-              <property name="styleSheet">
-               <string notr="true">QPushButton{
-    color: white;
-}</string>
-              </property>
-              <property name="text">
-               <string>Таблица</string>
               </property>
              </widget>
             </item>
@@ -695,24 +670,22 @@ QHeaderView::section {
     color: white;
     border: none;
     font-size: 10pt;
-}</string>
+}
+QTableView QLineEdit {
+        background-color: #333333;
+        color: white;
+    }</string>
               </property>
              </widget>
             </item>
            </layout>
           </widget>
           <widget class="QWidget" name="page_2">
-           <widget class="QTableView" name="otchSecondTableView">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>60</y>
-              <width>881</width>
-              <height>491</height>
-             </rect>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QTableView {
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <widget class="QTableView" name="otchSecondTableView">
+              <property name="styleSheet">
+               <string notr="true">QTableView {
     background-color: rgba(255, 255, 255, 30);
     border: 1px solid rgba(255, 255, 255, 40);
     border-bottom-right-radius: 7px;
@@ -734,22 +707,34 @@ QHeaderView::section {
     color: white;
     border: none;
     font-size: 10pt;
-}</string>
-            </property>
-           </widget>
+}
+QTableView QLineEdit {
+        background-color: #333333;
+        color: white;
+    }</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="page_3">
-           <widget class="QTableView" name="otchThirdTableView">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>60</y>
-              <width>881</width>
-              <height>491</height>
-             </rect>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QTableView {
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <item>
+             <widget class="QPushButton" name="otch_next_btn_2">
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Один руководитель всем</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableView" name="otchThirdTableView">
+              <property name="styleSheet">
+               <string notr="true">QTableView {
     background-color: rgba(255, 255, 255, 30);
     border: 1px solid rgba(255, 255, 255, 40);
     border-bottom-right-radius: 7px;
@@ -771,22 +756,40 @@ QHeaderView::section {
     color: white;
     border: none;
     font-size: 10pt;
-}</string>
-            </property>
-           </widget>
+}
+QTableView QLineEdit {
+        background-color: #333333;
+        color: white;
+    }</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="page_4">
-           <widget class="QTableView" name="otchFourthTableView">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>60</y>
-              <width>881</width>
-              <height>491</height>
-             </rect>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QTableView {
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+             <widget class="QPushButton" name="otchAllAnotherButton">
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: white;
+}</string>
+              </property>
+              <property name="text">
+               <string>Другое</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableView" name="otchFourthTableView">
+              <property name="styleSheet">
+               <string notr="true">QTableView {
     background-color: rgba(255, 255, 255, 30);
     border: 1px solid rgba(255, 255, 255, 40);
     border-bottom-right-radius: 7px;
@@ -808,9 +811,15 @@ QHeaderView::section {
     color: white;
     border: none;
     font-size: 10pt;
-}</string>
-            </property>
-           </widget>
+}
+QTableView QLineEdit {
+        background-color: #333333;
+        color: white;
+    }</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="page_5">
            <widget class="QTableView" name="otchFivethTableView">
@@ -845,22 +854,60 @@ QHeaderView::section {
     color: white;
     border: none;
     font-size: 10pt;
-}</string>
+}
+QTableView QLineEdit {
+        background-color: #333333;
+        color: white;
+    }</string>
             </property>
            </widget>
           </widget>
           <widget class="QWidget" name="page_6">
-           <widget class="QTableView" name="otchSixthTableView">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>60</y>
-              <width>881</width>
-              <height>491</height>
-             </rect>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QTableView {
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <item>
+               <widget class="QPushButton" name="otchAllUdlButton">
+                <property name="styleSheet">
+                 <string notr="true">QPushButton{
+    color: white;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Всем удовл</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="otchAllXorButton">
+                <property name="styleSheet">
+                 <string notr="true">QPushButton{
+    color: white;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Всем хор</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="otchAllOtlButton">
+                <property name="styleSheet">
+                 <string notr="true">QPushButton{
+    color: white;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Всем отл</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTableView" name="otchSixthTableView">
+              <property name="styleSheet">
+               <string notr="true">QTableView {
     background-color: rgba(255, 255, 255, 30);
     border: 1px solid rgba(255, 255, 255, 40);
     border-bottom-right-radius: 7px;
@@ -882,9 +929,15 @@ QHeaderView::section {
     color: white;
     border: none;
     font-size: 10pt;
-}</string>
-            </property>
-           </widget>
+}
+QTableView QLineEdit {
+        background-color: #333333;
+        color: white;
+    }</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
@@ -1069,7 +1122,11 @@ QHeaderView::section {
     color: white;
     border: none;
     font-size: 10pt;
-}</string>
+}
+QTableView QLineEdit {
+        background-color: #333333;
+        color: white;
+    }</string>
           </property>
          </widget>
         </item>

@@ -94,6 +94,41 @@ class PlanTableModel(QAbstractTableModel):
         """Get header."""
         return self._header
     
+    def add_info_to_cell_by_condition(self, check_col, condition, target_col, new_value):
+        """Добавляет new_value в target_col, если check_col удовлетворяет condition."""
+        changed_indexes = []  # Запоминаем изменённые ячейки для обновления View
+
+        for row in range(self.rowCount()):
+            check_val = self._data[row][check_col]
+
+            # Проверяем условие
+            if callable(condition):
+                condition_met = condition(check_val)  # Если condition — функция
+            else:
+                condition_met = (check_val == condition)  # Если condition — значение
+
+            if not condition_met:
+                continue  # Условие не выполнено — пропускаем строку
+
+            # Получаем текущее значение в target_col (если None, заменяем на 0 или "")
+            current_val = self._data[row][target_col]
+            if current_val is None:
+                current_val = 0 if isinstance(new_value, (int, float)) else ""
+
+            # Вычисляем новое значение
+            if callable(new_value):
+                add_val = new_value(check_val)  # Если new_value — функция
+            else:
+                add_val = new_value  # Если new_value — число/строка
+
+            # Записываем новое значение (сложение чисел или конкатенация строк)
+            self._data[row][target_col] = current_val + add_val
+            changed_indexes.append(self.index(row, target_col))  # Запоминаем изменённую ячейку
+
+        # Обновляем только изменённые ячейки в TableView
+        if changed_indexes:
+            self.dataChanged.emit(changed_indexes[0], changed_indexes[-1], [Qt.DisplayRole])
+
     def updateCellsByCondition(self, check_col, condition, target_col, new_value):
         for row in range(len(self._data)):
             check_val = self._data[row][check_col]
