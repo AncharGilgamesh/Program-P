@@ -108,9 +108,22 @@ def remove_teacher(id):
     query = "DELETE FROM teachers WHERE id = {}".format(id)
     execute_query(query)
 
+def remove_document(id):
+    query = "DELETE FROM documents WHERE id = {}".format(id)
+    execute_query(query)
+
+def defend_document(id, status):
+    query = ("""
+        UPDATE documents
+        SET protected = ?
+        WHERE id = ?
+    """)
+    execute_query(query, (status, id))
+
 def remove_user(username):
     query = "DELETE FROM users WHERE username = ?"
     execute_query(query, (username,))
+
 
 def insert_teacher(l_name, f_name, m_name, a_degree, a_title, email, phone):
     query = """
@@ -154,7 +167,7 @@ def remove_starosta(id):
     query = "DELETE FROM startostas WHERE id = {}".format(id)
     execute_query(query)
 
-def insert_document(year: int, doc_type: str, created: str, creator: str, file_path: str, protected: bool = False):
+def insert_document(year: int, doc_type: str, created: str, creator: str, file_path: str, protected: int = 0):
     query = """
         INSERT INTO documents (year, type, created, creator, protected, file_path)
         VALUES (?, ?, ?, ?, ?, ?);

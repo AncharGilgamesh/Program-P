@@ -1,9 +1,11 @@
 import sys
 import datetime
 import os
+import platform
+import subprocess
 
 import pandas as pd
-import datahandler as dh
+import Models.datahandler as dh
 import Models.dbhandler_new as dbh
 from docx import Document
 from docx.oxml import OxmlElement
@@ -14,7 +16,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderVie
 from PySide6.QtCore import QSortFilterProxyModel, Qt
 
 
-from model import PlanTableModel, ResultTableModel
+from Models.model import PlanTableModel, ResultTableModel
 
 from View.workspace import Ui_MainWindow
 from View.appearance_logic import AppearanceDialog
@@ -25,7 +27,7 @@ from View.prepod_dialog import PrepodDialog
 from View.startosta_dialog import StarostaDialog
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-help_path = os.path.join(base_dir, "View", "help.html")
+help_path = os.path.join(base_dir, "", "help.html")
 
 class MainWindow(QMainWindow):
     def __init__(self, user=None):
@@ -90,6 +92,16 @@ class MainWindow(QMainWindow):
         self.ui.otch_pln_btn.clicked.connect(self.load_plan)
         # first stage
         self.ui.meeting_date_otch_btn.clicked.connect(self.add_meting_date)
+        # second stage
+        self.ui.otchSecondStagePushButton.clicked.connect(self.otch_make_all_came)
+        # third stage
+        self.ui.otchOneRukVsemButton.clicked.connect(self.otch_all_ruk_vsem)
+        # fourth stage
+        self.ui.otchAllAnotherButton.clicked.connect(self.otch_refresh_drugoe)
+        # sixth stage
+        self.ui.otchAllUdlButton.clicked.connect(self.otch_vsem_three)
+        self.ui.otchAllXorButton.clicked.connect(self.otch_vsem_four)
+        self.ui.otchAllOtlButton.clicked.connect(self.otch_vsem_five)
 
 
         # Тут страница плана        
@@ -127,6 +139,10 @@ class MainWindow(QMainWindow):
         self.ui.dbAddStarostaPushButton.clicked.connect(self.add_db_starosta)
         self.ui.dbEditStarostaPushButton.clicked.connect(self.edit_db_starosta)
         self.ui.dbDelStarostaPushButton.clicked.connect(self.remove_db_starosta)
+
+        self.ui.delDocumentPushButton.clicked.connect(self.remove_document)
+        self.ui.defendDocumentPushButton.clicked.connect(self.defend_doucment)
+        self.ui.openDocumentPushButton.clicked.connect(self.open_document)
 
         # страница личного кабинта
         self.ui.lkChangePassPushButton.clicked.connect(self.lk_change_password)
@@ -186,6 +202,43 @@ class MainWindow(QMainWindow):
 
 
     # ==========================Код для работы с базой данных===============================================
+    def open_document(self):
+        index = self.ui.dataBaseTableView.selectedIndexes()[0]
+        row = index.row()
+        data = self._db_model.get_row(row)
+        file_path = data[-1]
+        system = platform.system()
+        if system == "Windows":
+            os.startfile(file_path)  # Самый простой способ для Windows
+        elif system == "Darwin":     # macOS
+            subprocess.run(["open", file_path])
+        else:                        # Linux и другие
+            subprocess.run(["xdg-open", file_path])
+
+    def defend_doucment(self):
+        index = self.ui.dataBaseTableView.selectedIndexes()[0]
+        row = index.row()
+        data = self._db_model.get_row(row)
+        id = data[0]
+        if data[-2] == 0:
+            dbh.defend_document(id, 1)
+        else:
+            dbh.defend_document(id, 0)
+        self.upload_db_docs()
+
+    
+    def remove_document(self):
+        index = self.ui.dataBaseTableView.selectedIndexes()[0]
+        row = index.row()
+        data = self._db_model.get_row(row)
+        id = data[0]
+        try:
+            dbh.remove_document(id)
+            os.remove(data[-1])
+            self.upload_db_docs()
+        except:
+            return
+
 
     def upload_db_starosta(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(1)
@@ -279,12 +332,38 @@ class MainWindow(QMainWindow):
     def upload_db_docs(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(2)
         data = dbh.load_docs()
-        headers = ["id", "Год", "Тип", "Дата создания", "Создатель", "Защищено", "Открыть"]
+        print(data)
+        headers = ["id", "Год", "Тип", "Дата создания", "Создатель", "Защищено", "Путь"]
         self._db_model = PlanTableModel(data, headers)
         self.ui.dataBaseTableView.setModel(self._db_model)
 
 
     # ==========================Код для работы с отчетом====================================================
+    def otch_vsem_five(self):
+       print("gay")
+       self._sixth_stg_model.fill_column_with_value(7, "+")
+       self._sixth_stg_model.fill_column_with_value(6, "")
+       self._sixth_stg_model.fill_column_with_value(5, "")
+
+    def otch_vsem_four(self):
+        self._sixth_stg_model.fill_column_with_value(7, "")
+        self._sixth_stg_model.fill_column_with_value(6, "+")
+        self._sixth_stg_model.fill_column_with_value(5, "")
+
+    def otch_vsem_three(self):
+        self._sixth_stg_model.fill_column_with_value(7, "")
+        self._sixth_stg_model.fill_column_with_value(6, "")
+        self._sixth_stg_model.fill_column_with_value(5, "+")
+
+    def otch_refresh_drugoe(self):
+        pass
+
+
+    def otch_all_ruk_vsem(self):
+        pass
+
+    def otch_make_all_came(self):
+        pass
 
     def set_otchet_resizing(self):
         self.ui.otchFirstTableView.resizeRowsToContents()
@@ -392,6 +471,7 @@ class MainWindow(QMainWindow):
         """Переключает страницу в QStackedWidget и обновляет состояние кнопок"""
         self.ui.mainStackedWidget.setCurrentIndex(index) 
     # ==========================Код для работы с планом====================================================
+
     def save_plan_as(self):
         doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
         data_for_save = self._plan_model.get_data_without_id()
@@ -409,12 +489,14 @@ class MainWindow(QMainWindow):
     def save_plan_new(self):
         year = datetime.datetime.now().year
         current_date = str(datetime.datetime.now().strftime("%Y.%m.%d"))
-        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
+        doc = Document("E:/Python/Magistr_Project/Shablons/shablon_plan.docx")
         data_for_save = self._plan_model.get_data_without_id()
         table = doc.tables[0]
         start_row = 2
         self.fill_the_table_rows(table, data_for_save, start_row)
-        dbh.insert_document(year,"План", current_date, "Вася Пупкин", f"Saves/{year}.docx", False)
+        creator = self.user
+        save_path = os.path.join(base_dir, "Saves", f"{year}.docx")
+        dbh.insert_document(year,"План", current_date, creator, save_path, 0)
         doc.save(f'Saves/{year}.docx')
         
 

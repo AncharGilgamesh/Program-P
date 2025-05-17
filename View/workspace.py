@@ -314,29 +314,29 @@ class Ui_MainWindow(object):
         self.dbDocsPage.setObjectName(u"dbDocsPage")
         self.gridLayout = QGridLayout(self.dbDocsPage)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.sa = QPushButton(self.dbDocsPage)
-        self.sa.setObjectName(u"sa")
-        self.sa.setStyleSheet(u"QPushButton{\n"
+        self.defendDocumentPushButton = QPushButton(self.dbDocsPage)
+        self.defendDocumentPushButton.setObjectName(u"defendDocumentPushButton")
+        self.defendDocumentPushButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
 
-        self.gridLayout.addWidget(self.sa, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.defendDocumentPushButton, 0, 0, 1, 1)
 
-        self.dbPlansPushButton_3 = QPushButton(self.dbDocsPage)
-        self.dbPlansPushButton_3.setObjectName(u"dbPlansPushButton_3")
-        self.dbPlansPushButton_3.setStyleSheet(u"QPushButton{\n"
+        self.openDocumentPushButton = QPushButton(self.dbDocsPage)
+        self.openDocumentPushButton.setObjectName(u"openDocumentPushButton")
+        self.openDocumentPushButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
 
-        self.gridLayout.addWidget(self.dbPlansPushButton_3, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.openDocumentPushButton, 0, 1, 1, 1)
 
-        self.dbPlansPushButton_7 = QPushButton(self.dbDocsPage)
-        self.dbPlansPushButton_7.setObjectName(u"dbPlansPushButton_7")
-        self.dbPlansPushButton_7.setStyleSheet(u"QPushButton{\n"
+        self.delDocumentPushButton = QPushButton(self.dbDocsPage)
+        self.delDocumentPushButton.setObjectName(u"delDocumentPushButton")
+        self.delDocumentPushButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
 
-        self.gridLayout.addWidget(self.dbPlansPushButton_7, 0, 2, 1, 1)
+        self.gridLayout.addWidget(self.delDocumentPushButton, 0, 2, 1, 1)
 
         self.dbPageStackedWidget.addWidget(self.dbDocsPage)
 
@@ -432,6 +432,21 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_7.addWidget(self.otch_pln_btn)
 
+        self.pushButton = QPushButton(self.otchet_page)
+        self.pushButton.setObjectName(u"pushButton")
+
+        self.horizontalLayout_7.addWidget(self.pushButton)
+
+        self.otchSavePushButton = QPushButton(self.otchet_page)
+        self.otchSavePushButton.setObjectName(u"otchSavePushButton")
+
+        self.horizontalLayout_7.addWidget(self.otchSavePushButton)
+
+        self.otchSaveAsPushButton = QPushButton(self.otchet_page)
+        self.otchSaveAsPushButton.setObjectName(u"otchSaveAsPushButton")
+
+        self.horizontalLayout_7.addWidget(self.otchSaveAsPushButton)
+
 
         self.horizontalLayout_8.addLayout(self.horizontalLayout_7)
 
@@ -489,6 +504,11 @@ class Ui_MainWindow(object):
         self.page_2.setObjectName(u"page_2")
         self.verticalLayout_10 = QVBoxLayout(self.page_2)
         self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.otchSecondStagePushButton = QPushButton(self.page_2)
+        self.otchSecondStagePushButton.setObjectName(u"otchSecondStagePushButton")
+
+        self.verticalLayout_10.addWidget(self.otchSecondStagePushButton)
+
         self.otchSecondTableView = QTableView(self.page_2)
         self.otchSecondTableView.setObjectName(u"otchSecondTableView")
         self.otchSecondTableView.setStyleSheet(u"QTableView {\n"
@@ -526,13 +546,13 @@ class Ui_MainWindow(object):
         self.page_3.setObjectName(u"page_3")
         self.verticalLayout_9 = QVBoxLayout(self.page_3)
         self.verticalLayout_9.setObjectName(u"verticalLayout_9")
-        self.otch_next_btn_2 = QPushButton(self.page_3)
-        self.otch_next_btn_2.setObjectName(u"otch_next_btn_2")
-        self.otch_next_btn_2.setStyleSheet(u"QPushButton{\n"
+        self.otchOneRukVsemButton = QPushButton(self.page_3)
+        self.otchOneRukVsemButton.setObjectName(u"otchOneRukVsemButton")
+        self.otchOneRukVsemButton.setStyleSheet(u"QPushButton{\n"
 "    color: white;\n"
 "}")
 
-        self.verticalLayout_9.addWidget(self.otch_next_btn_2)
+        self.verticalLayout_9.addWidget(self.otchOneRukVsemButton)
 
         self.otchThirdTableView = QTableView(self.page_3)
         self.otchThirdTableView.setObjectName(u"otchThirdTableView")
@@ -615,9 +635,10 @@ class Ui_MainWindow(object):
         self.stackedWidget.addWidget(self.page_4)
         self.page_5 = QWidget()
         self.page_5.setObjectName(u"page_5")
+        self.verticalLayout_11 = QVBoxLayout(self.page_5)
+        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
         self.otchFivethTableView = QTableView(self.page_5)
         self.otchFivethTableView.setObjectName(u"otchFivethTableView")
-        self.otchFivethTableView.setGeometry(QRect(0, 60, 881, 491))
         self.otchFivethTableView.setStyleSheet(u"QTableView {\n"
 "    background-color: rgba(255, 255, 255, 30);\n"
 "    border: 1px solid rgba(255, 255, 255, 40);\n"
@@ -645,6 +666,9 @@ class Ui_MainWindow(object):
 "        background-color: #333333;\n"
 "        color: white;\n"
 "    }")
+
+        self.verticalLayout_11.addWidget(self.otchFivethTableView)
+
         self.stackedWidget.addWidget(self.page_5)
         self.page_6 = QWidget()
         self.page_6.setObjectName(u"page_6")
@@ -1055,7 +1079,7 @@ class Ui_MainWindow(object):
         self.genOtchToolButton.setText(QCoreApplication.translate("MainWindow", u"\u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f\n"
 "\u043e\u0442\u0447\u0435\u0442\u0430", None))
         self.genPlanToolButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d", None))
-        self.faqToolButton.setText(QCoreApplication.translate("MainWindow", u"F.A.Q", None))
+        self.faqToolButton.setText(QCoreApplication.translate("MainWindow", u"\u0420\u0443\u043a\u043e\u0432\u043e\u0434\u0441\u0442\u0432\u043e", None))
         self.exitToolButton.setText(QCoreApplication.translate("MainWindow", u"\u0412\u044b\u0439\u0442\u0438", None))
         self.dbPlansPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b", None))
         self.dbPrepodsPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u0438", None))
@@ -1072,16 +1096,20 @@ class Ui_MainWindow(object):
 "\u0441\u0442\u0430\u0440\u043e\u0441\u0442\u044b", None))
         self.dbDelStarostaPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0435\u043d\u0438\u0435\n"
 "\u0441\u0442\u0430\u0440\u043e\u0441\u0442\u044b", None))
-        self.sa.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0449\u0438\u0442\u0430 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430", None))
-        self.dbPlansPushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
-        self.dbPlansPushButton_7.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
+        self.defendDocumentPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0449\u0438\u0442\u0430 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430", None))
+        self.openDocumentPushButton.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
+        self.delDocumentPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442", None))
         self.otch_lbl_page_info.setText(QCoreApplication.translate("MainWindow", u"\u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f \u043e\u0442\u0447\u0435\u0442\u0430", None))
         self.otch_lbl_stage.setText(QCoreApplication.translate("MainWindow", u"1 \u044d\u0442\u0430\u043f", None))
         self.otch_prev_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u0430\u0434", None))
         self.otch_next_btn.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0430\u043b\u0435\u0435", None))
-        self.otch_pln_btn.setText(QCoreApplication.translate("MainWindow", u"\u041f\u043b\u0430\u043d", None))
+        self.otch_pln_btn.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043f\u043b\u0430\u043d", None))
+        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043e\u0442\u0447\u0435\u0442", None))
+        self.otchSavePushButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c", None))
+        self.otchSaveAsPushButton.setText(QCoreApplication.translate("MainWindow", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a", None))
         self.meeting_date_otch_btn.setText(QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0437\u043d\u0430\u0447\u0438\u0442\u044c \u0434\u0430\u0442\u0443 \u043f\u0440\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u044f \u0441\u043e\u0431\u0440\u0430\u043d\u0438\u044f", None))
-        self.otch_next_btn_2.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0434\u0438\u043d \u0440\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u0432\u0441\u0435\u043c", None))
+        self.otchSecondStagePushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u0438\u0431\u044b\u043b\u0438 \u0432\u0441\u0435", None))
+        self.otchOneRukVsemButton.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0434\u0438\u043d \u0440\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u0432\u0441\u0435\u043c", None))
         self.otchAllAnotherButton.setText(QCoreApplication.translate("MainWindow", u"\u0414\u0440\u0443\u0433\u043e\u0435", None))
         self.otchAllUdlButton.setText(QCoreApplication.translate("MainWindow", u"\u0412\u0441\u0435\u043c \u0443\u0434\u043e\u0432\u043b", None))
         self.otchAllXorButton.setText(QCoreApplication.translate("MainWindow", u"\u0412\u0441\u0435\u043c \u0445\u043e\u0440", None))

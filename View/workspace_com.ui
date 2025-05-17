@@ -250,7 +250,7 @@ border:none;
 font-family: Consolas;</string>
         </property>
         <property name="text">
-         <string>F.A.Q</string>
+         <string>Руководство</string>
         </property>
         <property name="icon">
          <iconset resource="res_rc.qrc">
@@ -462,7 +462,7 @@ font-family: Consolas;</string>
           <widget class="QWidget" name="dbDocsPage">
            <layout class="QGridLayout" name="gridLayout">
             <item row="0" column="0">
-             <widget class="QPushButton" name="sa">
+             <widget class="QPushButton" name="defendDocumentPushButton">
               <property name="styleSheet">
                <string notr="true">QPushButton{
     color: white;
@@ -474,7 +474,7 @@ font-family: Consolas;</string>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QPushButton" name="dbPlansPushButton_3">
+             <widget class="QPushButton" name="openDocumentPushButton">
               <property name="styleSheet">
                <string notr="true">QPushButton{
     color: white;
@@ -486,7 +486,7 @@ font-family: Consolas;</string>
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QPushButton" name="dbPlansPushButton_7">
+             <widget class="QPushButton" name="delDocumentPushButton">
               <property name="styleSheet">
                <string notr="true">QPushButton{
     color: white;
@@ -618,7 +618,28 @@ QHeaderView::section {
 }</string>
               </property>
               <property name="text">
-               <string>План</string>
+               <string>Загрузить план</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>Загрузить отчет</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="otchSavePushButton">
+              <property name="text">
+               <string>Сохранить</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="otchSaveAsPushButton">
+              <property name="text">
+               <string>Сохранить как</string>
               </property>
              </widget>
             </item>
@@ -683,6 +704,13 @@ QTableView QLineEdit {
           <widget class="QWidget" name="page_2">
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
+             <widget class="QPushButton" name="otchSecondStagePushButton">
+              <property name="text">
+               <string>Прибыли все</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QTableView" name="otchSecondTableView">
               <property name="styleSheet">
                <string notr="true">QTableView {
@@ -720,7 +748,7 @@ QTableView QLineEdit {
           <widget class="QWidget" name="page_3">
            <layout class="QVBoxLayout" name="verticalLayout_9">
             <item>
-             <widget class="QPushButton" name="otch_next_btn_2">
+             <widget class="QPushButton" name="otchOneRukVsemButton">
               <property name="styleSheet">
                <string notr="true">QPushButton{
     color: white;
@@ -822,17 +850,11 @@ QTableView QLineEdit {
            </layout>
           </widget>
           <widget class="QWidget" name="page_5">
-           <widget class="QTableView" name="otchFivethTableView">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>60</y>
-              <width>881</width>
-              <height>491</height>
-             </rect>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QTableView {
+           <layout class="QVBoxLayout" name="verticalLayout_11">
+            <item>
+             <widget class="QTableView" name="otchFivethTableView">
+              <property name="styleSheet">
+               <string notr="true">QTableView {
     background-color: rgba(255, 255, 255, 30);
     border: 1px solid rgba(255, 255, 255, 40);
     border-bottom-right-radius: 7px;
@@ -859,8 +881,10 @@ QTableView QLineEdit {
         background-color: #333333;
         color: white;
     }</string>
-            </property>
-           </widget>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="page_6">
            <layout class="QVBoxLayout" name="verticalLayout_7">

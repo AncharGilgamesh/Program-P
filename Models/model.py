@@ -149,6 +149,19 @@ class PlanTableModel(QAbstractTableModel):
         bottom_right = self.index(self.rowCount()-1, self.columnCount()-1)
         self.dataChanged.emit(top_left, bottom_right, [Qt.DisplayRole])
 
+    def fill_column_with_value(self, column_index, value):
+        """Заполняет весь столбец заданным значением."""
+        if not 0 <= column_index < self.columnCount():
+            return  # Защита от выхода за границы
+
+        for row in range(self.rowCount()):
+            self._data[row][column_index] = value
+
+        # Уведомляем view об изменениях в столбце
+        top_left = self.index(0, column_index)
+        bottom_right = self.index(self.rowCount() - 1, column_index)
+        self.dataChanged.emit(top_left, bottom_right, [Qt.DisplayRole])
+
 class ResultTableModel(PlanTableModel):
     def __init__(self, data, headers):
         super().__init__(data, headers)
@@ -168,7 +181,7 @@ class ResultTableModel(PlanTableModel):
                 except Exception:
                     return "-"
             value = self._data[row][col]
-            return str(value) if value not in [None, ""] else "-"
+            return str(value) if value not in [None, "", 0, "0"] else "-"
 
         return super().data(index, role)
 
