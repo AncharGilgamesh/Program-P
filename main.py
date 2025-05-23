@@ -90,6 +90,8 @@ class MainWindow(QMainWindow):
         self.ui.otch_prev_btn.clicked.connect(self.to_prev_stage)
         self.ui.otch_next_btn.clicked.connect(self.to_next_stage)
         self.ui.otch_pln_btn.clicked.connect(self.load_plan)
+        self.ui.otchSaveAsPushButton.clicked.connect(self.save_otchet_as)
+        self.ui.otchSavePushButton.clicked.connect(self.save_otchet)
         # first stage
         self.ui.meeting_date_otch_btn.clicked.connect(self.add_meting_date)
         # second stage
@@ -339,6 +341,59 @@ class MainWindow(QMainWindow):
 
 
     # ==========================Код для работы с отчетом====================================================
+    def save_otchet_as(self):
+        doc = Document("E:/Python/Magistr_Project/Shablons/shablon_otchet.docx")
+        data_for_save = []
+        data_for_save.append(self._oth_frst_stg_model.get_data())
+        data_for_save.append(self._oth_scnd_std_model.get_data())
+        data_for_save.append(self._oth_thrd_stg_model.get_data())
+        data_for_save.append(self._fourth_stg_model.get_data())
+        data_for_save.append(self._fiveth_stg_model.get_data())
+        data_for_save.append(self._sixth_stg_model.get_data())
+        start_row = 2
+        for i in range(len(data_for_save)):
+            if i==0:
+                start_row = 1
+            if i==4:
+                start_row = 5
+            else:
+                start_row = 2
+            table = doc.tables[i]
+            self.fill_the_table_rows(table, data_for_save[i], start_row)
+        options = QFileDialog.Options()
+        fname, _ = QFileDialog.getSaveFileName(
+            self,
+            "Сохранить файл", "", "Word файлы (*.docx)", options=options)
+        if not fname:
+            return
+        doc.save(fname)
+
+    def save_otchet(self):
+        year = datetime.datetime.now().year
+        current_date = str(datetime.datetime.now().strftime("%Y.%m.%d"))
+        doc = Document("E:/Python/Magistr_Project/Shablons/shablon_otchet.docx")
+        data_for_save = []
+        data_for_save.append(self._oth_frst_stg_model.get_data())
+        data_for_save.append(self._oth_scnd_std_model.get_data())
+        data_for_save.append(self._oth_thrd_stg_model.get_data())
+        data_for_save.append(self._fourth_stg_model.get_data())
+        data_for_save.append(self._fiveth_stg_model.get_data())
+        data_for_save.append(self._sixth_stg_model.get_data())
+        start_row = 2
+        for i in range(len(data_for_save)):
+            if i==0:
+                start_row = 1
+            if i==4:
+                start_row = 5
+            else:
+                start_row = 2
+            table = doc.tables[i]
+            self.fill_the_table_rows(table, data_for_save[i], start_row)
+        creator = self.user
+        save_path = os.path.join(base_dir, "Saves", f"{year}_o.docx")
+        dbh.insert_document(year,"Отчет", current_date, creator, save_path, 0)
+        doc.save(f'Saves/{year}_o.docx')
+
     def otch_vsem_five(self):
        print("gay")
        self._sixth_stg_model.fill_column_with_value(7, "+")
@@ -446,7 +501,7 @@ class MainWindow(QMainWindow):
             "Студ.\n отряды", "Другое", "Оформление\nТБ на рабочем\nместе(да\нет)"
         ]
         headers_fiveth_stage = [
-            "Группа", "Всего\nчел.", "Отл.", "Хор.", "Неуд.", "Не\nзащитило", "Место\nзащиты"
+            "Группа", "Всего\nчел.", "Отл.", "Хор.", "Удовл.", "Неуд.", "Не\nзащитило", "Место\nзащиты"
         ]
         headers_sixth_stage = [
             "№", "Руководитель", "Должность", "Группа", "Вид\nпрактики", "Удовл.", "Хор.", "Отл."
@@ -495,9 +550,9 @@ class MainWindow(QMainWindow):
         start_row = 2
         self.fill_the_table_rows(table, data_for_save, start_row)
         creator = self.user
-        save_path = os.path.join(base_dir, "Saves", f"{year}.docx")
+        save_path = os.path.join(base_dir, "Saves", f"{year}_p.docx")
         dbh.insert_document(year,"План", current_date, creator, save_path, 0)
-        doc.save(f'Saves/{year}.docx')
+        doc.save(f'Saves/{year}_p.docx')
         
 
 

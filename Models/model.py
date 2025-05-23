@@ -173,15 +173,15 @@ class ResultTableModel(PlanTableModel):
         row, col = index.row(), index.column()
 
         if role == Qt.DisplayRole:
-            if col == 5:  # "Не защитило"
+            if col == 6:  # "Не защитило"
                 try:
                     total = int(self._data[row][1])
-                    scores = [int(self._data[row][i] or 0) for i in range(2, 5)]
+                    scores = [int(self._data[row][i] or 0) for i in range(2, 6)]
                     return str(max(total - sum(scores), 0))
                 except Exception:
                     return "-"
             value = self._data[row][col]
-            return str(value) if value not in [None, "", 0, "0"] else "-"
+            return str(value) if value not in [None, "", "0"] else "-"
 
         return super().data(index, role)
 
@@ -191,11 +191,11 @@ class ResultTableModel(PlanTableModel):
 
         row, col = index.row(), index.column()
 
-        if col == 5:
+        if col == 6:
             return False  # "Не защитило" вычисляется
 
         try:
-            if col in [1, 2, 3, 4]:
+            if col in [1, 2, 3, 4, 5]:
                 value_int = int(value)
                 if value_int < 0:
                     return False  # не разрешаем отрицательные значения
@@ -205,10 +205,10 @@ class ResultTableModel(PlanTableModel):
             return False  # не число — не сохраняем
 
         # Предварительно проверим сумму оценок
-        if col in [2, 3, 4]:
+        if col in [2, 3, 4, 5]:
             try:
                 new_score = int(value)
-                scores = [int(self._data[row][i] or 0) for i in [2, 3, 4]]
+                scores = [int(self._data[row][i] or 0) for i in [2, 3, 4, 5]]
                 scores[col - 2] = new_score  # заменим редактируемый
                 total = int(self._data[row][1])
                 if sum(scores) > total:
@@ -219,7 +219,7 @@ class ResultTableModel(PlanTableModel):
         if col == 1:  # при изменении "Всего" тоже проверим
             try:
                 total = int(value)
-                scores = [int(self._data[row][i] or 0) for i in [2, 3, 4]]
+                scores = [int(self._data[row][i] or 0) for i in [2, 3, 4, 5]]
                 if sum(scores) > total:
                     return False
             except:
@@ -229,8 +229,8 @@ class ResultTableModel(PlanTableModel):
         self.dataChanged.emit(index, index)
 
         # Обновим ячейку "Не защитило"
-        if col in [1, 2, 3, 4]:
-            self.dataChanged.emit(self.index(row, 5), self.index(row, 5))
+        if col in [1, 2, 3, 4, 5]:
+            self.dataChanged.emit(self.index(row, 6), self.index(row, 6))
 
         return True
 
@@ -239,7 +239,7 @@ class ResultTableModel(PlanTableModel):
             return Qt.NoItemFlags
 
         col = index.column()
-        if col == 0 or col == 5:
+        if col == 0 or col == 6:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable  # Только чтение
 
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
