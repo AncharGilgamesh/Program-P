@@ -85,6 +85,26 @@ class PlanTableModel(QAbstractTableModel):
 
     def get_row(self, row):
         return self._data[row]
+    
+    def get_col(self, col_index):
+        """Возвращает список значений из указанного столбца."""
+        if not (0 <= col_index < self.columnCount()):
+            return []
+        return [self._data[row][col_index] for row in range(self.rowCount())]
+
+    def set_col(self, col_index, values):
+        """Устанавливает переданные значения в указанный столбец (values — список)."""
+        if not (0 <= col_index < self.columnCount()):
+            return
+
+        row_count = self.rowCount()
+        for row in range(min(row_count, len(values))):
+            self._data[row][col_index] = values[row]
+
+        # Уведомляем представление о массовом изменении данных
+        top_left = self.index(0, col_index)
+        bottom_right = self.index(self.rowCount() - 1, col_index)
+        self.dataChanged.emit(top_left, bottom_right, [Qt.DisplayRole])
 
     def get_data_without_id(self):
         """Возвращает данные без первого столбца (id)."""

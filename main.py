@@ -8,11 +8,8 @@ import pandas as pd
 import Models.datahandler as dh
 import Models.dbhandler_new as dbh
 from docx import Document
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
-from docx.shared import Pt
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView, QMessageBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView, QMessageBox, QInputDialog
 from PySide6.QtCore import QSortFilterProxyModel, Qt
 
 
@@ -28,6 +25,8 @@ from View.startosta_dialog import StarostaDialog
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 help_path = os.path.join(base_dir, "", "help.html")
+shablon_plan_path = os.path.join(base_dir, "Shablons", "shablon_plan.docx" )
+shablon_otch_path = os.path.join(base_dir, "Shablons", "shablon_otchet.docx" )
 
 class MainWindow(QMainWindow):
     def __init__(self, user=None):
@@ -342,7 +341,7 @@ class MainWindow(QMainWindow):
 
     # ==========================Код для работы с отчетом====================================================
     def save_otchet_as(self):
-        doc = Document("E:/Python/Magistr_Project/Shablons/shablon_otchet.docx")
+        doc = Document(shablon_otch_path)
         data_for_save = []
         data_for_save.append(self._oth_frst_stg_model.get_data())
         data_for_save.append(self._oth_scnd_std_model.get_data())
@@ -359,7 +358,7 @@ class MainWindow(QMainWindow):
             else:
                 start_row = 2
             table = doc.tables[i]
-            self.fill_the_table_rows(table, data_for_save[i], start_row)
+            dh.fill_the_table_rows(table, data_for_save[i], start_row)
         options = QFileDialog.Options()
         fname, _ = QFileDialog.getSaveFileName(
             self,
@@ -371,7 +370,7 @@ class MainWindow(QMainWindow):
     def save_otchet(self):
         year = datetime.datetime.now().year
         current_date = str(datetime.datetime.now().strftime("%Y.%m.%d"))
-        doc = Document("E:/Python/Magistr_Project/Shablons/shablon_otchet.docx")
+        doc = Document(shablon_otch_path)
         data_for_save = []
         data_for_save.append(self._oth_frst_stg_model.get_data())
         data_for_save.append(self._oth_scnd_std_model.get_data())
@@ -388,14 +387,13 @@ class MainWindow(QMainWindow):
             else:
                 start_row = 2
             table = doc.tables[i]
-            self.fill_the_table_rows(table, data_for_save[i], start_row)
+            dh.fill_the_table_rows(table, data_for_save[i], start_row)
         creator = self.user
         save_path = os.path.join(base_dir, "Saves", f"{year}_o.docx")
         dbh.insert_document(year,"Отчет", current_date, creator, save_path, 0)
         doc.save(f'Saves/{year}_o.docx')
 
     def otch_vsem_five(self):
-       print("gay")
        self._sixth_stg_model.fill_column_with_value(7, "+")
        self._sixth_stg_model.fill_column_with_value(6, "")
        self._sixth_stg_model.fill_column_with_value(5, "")
@@ -411,14 +409,18 @@ class MainWindow(QMainWindow):
         self._sixth_stg_model.fill_column_with_value(5, "+")
 
     def otch_refresh_drugoe(self):
-        pass
-
+        values = self._oth_scnd_std_model.get_col(4)
+        self._fourth_stg_model.set_col(6, values)
 
     def otch_all_ruk_vsem(self):
-        pass
+        fio = show_fio_dialog(parent=self)  # Замените 'window' на вашу основную форму
+        if fio:
+            target_column = 2
+            self._oth_thrd_stg_model.set_col(target_column, [fio] * self._oth_thrd_stg_model.rowCount())  # Вставить ФИО во все строки
 
     def otch_make_all_came(self):
-        pass
+        values = self._oth_scnd_std_model.get_col(3)
+        self._oth_scnd_std_model.set_col(4, values)
 
     def set_otchet_resizing(self):
         self.ui.otchFirstTableView.resizeRowsToContents()
@@ -524,15 +526,17 @@ class MainWindow(QMainWindow):
     # Функция для переключения окон
     def switch_page(self, index):
         """Переключает страницу в QStackedWidget и обновляет состояние кнопок"""
-        self.ui.mainStackedWidget.setCurrentIndex(index) 
+        self.ui.mainStackedWidget.setCurrentIndex(index)
+        if index == 0:
+            self.upload_db_docs()
     # ==========================Код для работы с планом====================================================
 
     def save_plan_as(self):
-        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
+        doc = Document(shablon_plan_path)
         data_for_save = self._plan_model.get_data_without_id()
         table = doc.tables[0]
         start_row = 2
-        self.fill_the_table_rows(table, data_for_save, start_row)
+        dh.fill_the_table_rows(table, data_for_save, start_row)
         options = QFileDialog.Options()
         fname, _ = QFileDialog.getSaveFileName(
             self,
@@ -544,36 +548,16 @@ class MainWindow(QMainWindow):
     def save_plan_new(self):
         year = datetime.datetime.now().year
         current_date = str(datetime.datetime.now().strftime("%Y.%m.%d"))
-        doc = Document("E:/Python/Magistr_Project/Shablons/shablon_plan.docx")
+        doc = Document(shablon_plan_path)
         data_for_save = self._plan_model.get_data_without_id()
         table = doc.tables[0]
         start_row = 2
-        self.fill_the_table_rows(table, data_for_save, start_row)
+        dh.fill_the_table_rows(table, data_for_save, start_row)
         creator = self.user
         save_path = os.path.join(base_dir, "Saves", f"{year}_p.docx")
         dbh.insert_document(year,"План", current_date, creator, save_path, 0)
         doc.save(f'Saves/{year}_p.docx')
         
-
-
-    # Реализуем обычное сохранение
-    def save_plan_function(self):
-        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
-        data_for_save = self._plan_model.get_data_without_id()
-        table = doc.tables[0]
-        start_row = 2
-        self.fill_the_table_rows(table, data_for_save, start_row)
-        print("Сохранение успешно")
-        doc.save("Test_results/plan_zapolnen.docx")
-
-
-    # Открывает диалоговое окно с выбором групп и редактирования некоторых данных
-    def test_plan_dialog(self):
-        all_group_names = self._plan_model.get_column_values(1)
-        all_group_names = list(dict.fromkeys(all_group_names))
-        dialog = GroupEditDialog(all_group_names, field_label="Место проведения", title="Редактирование места проведения", parent=self)
-        if dialog.exec():
-            selected_groups, value = dialog.get_result()
             
         
 
@@ -602,11 +586,7 @@ class MainWindow(QMainWindow):
             col = dh.find_column_index_by_keyword(self._plan_model, keyword)
             for group in selected_groups:
                 self._plan_model.updateCellsByCondition(1, int(group), col, str(value))
-                
-
-    def test_adding_info(self):
-        self._plan_model.updateCellsByCondition(1, "B", 4, "Gay\nnot\nnatural")
-        self.ui.tableView.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)        
+                   
 
     def load_nagruzka(self):
         fname, _ = QFileDialog.getOpenFileName(
@@ -664,189 +644,6 @@ class MainWindow(QMainWindow):
             block_df = pd.DataFrame(block['data'])
             print(block_df.to_string(index=False, header=False))"""
 
-
-    # Функция для установки границ у ячейки
-    def set_cell_border(self, cell, **kwargs):
-        """
-        Устанавливает границы ячейки.
-        Параметры можно передавать как: top="single", bottom="single", left="single", right="single"
-        """
-        tc = cell._tc
-        tcPr = tc.get_or_add_tcPr()
-        tcBorders = OxmlElement('w:tcBorders')
-        for edge in ('top', 'left', 'bottom', 'right'):
-            edge_data = kwargs.get(edge)
-            if edge_data:
-                tag = f'w:{edge}'
-                element = OxmlElement(tag)
-                element.set(qn('w:val'), edge_data)         # тип линии
-                element.set(qn('w:sz'), '4')                # толщина (1/8 pt)
-                element.set(qn('w:space'), '0')             # отступ
-                element.set(qn('w:color'), '000000')        # цвет (чёрный)
-                tcBorders.append(element)
-        tcPr.append(tcBorders)
-
-    # Установка шрифта Times New Roman, размер 10 pt
-    def set_cell_font(self, cell, font_name="Times New Roman", font_size=10):
-        paragraph = cell.paragraphs[0]
-        run = paragraph.runs[0] if paragraph.runs else paragraph.add_run()
-        font = run.font
-        font.name = font_name
-        run._element.rPr.rFonts.set(qn('w:eastAsia'), font_name)
-        font.size = Pt(font_size)
-
-    def fill_the_shablon_rows(self):
-        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
-        data = [
-            ["ПМИ-101", "Иванов И.И.", "ООО Рога и Копыта"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-101", "Иванов И.И.", "ООО Рога и Копыта"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-101", "Иванов И.И.", "ООО Рога и Копыта"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-101", "Иванов И.И.", "ООО Рога и Копыта"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-            ["ПМИ-102", "Петров П.П.", "ООО Пример"],
-        ]
-        table = doc.tables[0]
-        start_row = 2
-        self.fill_the_table_rows(table, data, start_row)
-        print("Сохранение успешно")
-        doc.save("Test_results/plan_zapolnen.docx")
-
-    def fill_the_shablon(self):
-        doc = Document("E:/Python/Magistr_Project/Test_results/shablon_plan.docx")
-
-        # Предположим, что нужная таблица — первая в документе
-        table = doc.tables[0]
-
-        # Список номеров групп, которые нужно вставить
-        nomera_grupp = ["4218", "4321", "4332"]
-        other_data = ["gay","is", "sex", "real"]
-
-        # Найдём индекс столбца с заголовком "№ группы"
-        header_row = table.rows[0]
-        column_index = None
-        for i, cell in enumerate(header_row.cells):
-            if cell.text.strip() == "№ гр.":
-                column_index = i
-                break
-
-        # Проверка, что столбец найден
-        #Заполнение таблицы мой вариант
-        self.fill_the_table_col(table, column_index, nomera_grupp)
-        self.fill_the_table_col(table, column_index + 1, other_data)
-        doc.save("Результат_с_границами.docx")
-        print("Файл сохранён с границами.")
-        # Заполнение таблицы
-        """
-        if column_index is not None:
-            for i, group in enumerate(nomera_grupp):
-                row_index = i + 2  # начинаем с 3-й строки
-                if row_index >= len(table.rows):
-                    table.add_row()
-                cell = table.rows[row_index].cells[column_index]
-                cell.text = group
-                self.set_cell_font(cell, font_name="Times New Roman", font_size=10)
-                self.set_cell_border(cell, top="single", bottom="single", left="single", right="single")
-
-            doc.save("Результат_с_границами.docx")
-            print("Файл сохранён с границами.")
-        else:
-            print("Не найден столбец '№ группы'")"""
-
-    # Заполнение строки word
-    def fill_the_table_rows(self,table, data, start_row):
-        for i, row_data in enumerate(data):
-            # Если строки не хватает — добавляем
-            row_index = start_row + i
-            if start_row + i >= len(table.rows):
-                table.add_row()
-
-            for j, value in enumerate(row_data):
-                cell = table.cell(row_index, j)
-                cell.text = str(value)
-                self.set_cell_font(cell, font_name="Times New Roman", font_size=10)
-                self.set_cell_border(cell, top="single", bottom="single", left="single", right="single")
-
-    # Заполнение столбца word
-    def fill_the_table_col(self,table, column_index, data):
-        for i, group in enumerate(data):
-                row_index = i + 2  # начинаем с 3-й строки
-                if row_index >= len(table.rows):
-                    table.add_row()
-                cell = table.rows[row_index].cells[column_index]
-                cell.text = group
-                self.set_cell_font(cell, font_name="Times New Roman", font_size=10)
-                self.set_cell_border(cell, top="single", bottom="single", left="single", right="single")
-
-
-
-    def upload_word(self, df):
-        # Создаем документ Word
-        doc = Document()
-        doc.add_heading('Данные из Excel', level=1)
-
-        # Добавляем таблицу (с заголовками)
-        table = doc.add_table(rows=1, cols=len(df.columns))
-        table.style = 'Table Grid'
-
-        # Заголовки
-        hdr_cells = table.rows[0].cells
-        for i, column in enumerate(df.columns):
-            hdr_cells[i].text = str(column)
-
-        # Данные
-        for _, row in df.iterrows():
-            row_cells = table.add_row().cells
-            for i, cell in enumerate(row):
-                row_cells[i].text = str(cell)
-
-        # Сохраняем документ
-        doc.save("Результат.docx")
-
-
-    def load_table(self):
-        fname, _ = QFileDialog.getOpenFileName(
-            self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)")
-        if not fname:
-            return
-        excel_file = pd.ExcelFile(fname)
-        #sheet_names = excel_file.sheet_names
-        #sheet_data = {name: pd.read_excel(excel_file, sheet_name=name) for name in sheet_names}
-        sheet_names = excel_file.sheet_names
-        print("Листы в файле:")
-        for name in sheet_names:
-            print(f" - {name}")
-
-        # Читаем данные с каждого листа и выводим первые 3 строки
-        sheet_data = {}
-        for name in sheet_names:
-            df = pd.read_excel(excel_file, sheet_name=name)
-            sheet_data[name] = df
-            print(f"\nПервые строки с листа: {name}")
-            print(df.head(3))
-        #bakalavriat = pd.read_excel(fname, 0)
-        #magistratura = pd.read_excel(fname, 1)
-        print(sheet_data)
-
-    """
-    # функции для фильтрации tableView
-    def apply_filter(self):
-        text = self.ui.searchPlanLineEdit.text()
-        column = self.ui.planSearchComboBox.currentData()
-        self.proxy_model.setFilterKeyColumn(column)
-        self.proxy_model.setFilterFixedString(text)
-        self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-    """
-
     def exit_function(self):
         dbh.update_remember_status(self.user, 0)
         self.restart_auth = True
@@ -864,6 +661,12 @@ def check_for_appearance():
             sys.exit()
         return appearance.get_username()
 
+
+def show_fio_dialog(parent=None):
+        text, ok = QInputDialog.getText(parent, "Введите ФИО", "Фамилия и инициалы:")
+        if ok and text.strip():
+            return text.strip()
+        return None
 
 def run_application():
     while True:
