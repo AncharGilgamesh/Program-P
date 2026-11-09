@@ -5,30 +5,38 @@ from PySide6.QtWidgets import QFileDialog, QMessageBox
 import Models.datahandler as dh
 from Models.docx_writer import fill_the_table_rows
 from View.planaddingdialogs import GroupEditDialog
-from window_support import normalize_group, save_registered_copy, shablon_plan_path
+from window_support import log_exception, normalize_group, save_registered_copy, shablon_plan_path
 
 
 class PlanPage:
     def save_plan_as(self):
-        doc = Document(shablon_plan_path)
-        data_for_save = self._plan_model.get_data_without_id()
-        table = doc.tables[0]
-        start_row = 2
-        fill_the_table_rows(table, data_for_save, start_row)
         options = QFileDialog.Options()
         fname, _ = QFileDialog.getSaveFileName(
             self, "Сохранить файл", "", "Word файлы (*.docx)", options=options
         )
         if not fname:
             return
-        doc.save(fname)
+        try:
+            doc = Document(shablon_plan_path)
+            data_for_save = self._plan_model.get_data_without_id()
+            table = doc.tables[0]
+            start_row = 2
+            fill_the_table_rows(table, data_for_save, start_row)
+            doc.save(fname)
+        except Exception as exc:
+            log_exception()
+            QMessageBox.warning(self, "Ошибка", str(exc))
 
     def save_plan_new(self):
-        doc = Document(shablon_plan_path)
-        data_for_save = self._plan_model.get_data_without_id()
-        table = doc.tables[0]
-        fill_the_table_rows(table, data_for_save, 2)
-        save_registered_copy(self, doc, "План")
+        try:
+            doc = Document(shablon_plan_path)
+            data_for_save = self._plan_model.get_data_without_id()
+            table = doc.tables[0]
+            fill_the_table_rows(table, data_for_save, 2)
+            save_registered_copy(self, doc, "План")
+        except Exception as exc:
+            log_exception()
+            QMessageBox.warning(self, "Ошибка", str(exc))
 
     def open_group_dialog(self):
         """Этот метод используется в плане для редактирования столбцов"""
@@ -87,6 +95,11 @@ class PlanPage:
             else:
                 extracted_data = dh.extract_data(data)
         except (OSError, ValueError, IndexError, KeyError) as exc:
+            log_exception()
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            return
+        except Exception as exc:
+            log_exception()
             QMessageBox.warning(self, "Ошибка", str(exc))
             return
         if self._table_loaded:
@@ -131,6 +144,11 @@ class PlanPage:
             blocks_maga_tr = dh.transform_practice_data(blocks_maga, len(blocks_baka_tr))
             combined_blocks = blocks_baka_tr + blocks_maga_tr
         except (OSError, ValueError, IndexError, KeyError) as exc:
+            log_exception()
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            return
+        except Exception as exc:
+            log_exception()
             QMessageBox.warning(self, "Ошибка", str(exc))
             return
         self._plan_model.clear()

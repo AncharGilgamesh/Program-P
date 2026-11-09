@@ -1,10 +1,10 @@
-"""Проверки пароля и SQL на копии базы. Запуск: uv run python tests/test_accounts.py"""
+"""Проверки пароля и SQL на временной схеме. Запуск: uv run python tests/test_accounts.py"""
 
 import os
-import shutil
 import sqlite3
 import sys
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -19,14 +19,51 @@ from View.appearance_logic import (
     registration_failure,
 )
 
-SOURCE_DB = Path(__file__).resolve().parents[1] / "DB" / "maindatabase.db"
+
+def _seed_account_db():
+    dbh.execute_query(
+        """
+        INSERT INTO teachers (
+            last_name, first_name, middle_name, academic_degree, academic_title, email, phone
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        ("Иванов", "Иван", "Иванович", "к.т.н.", "доцент", "ivanov@example.com", "1"),
+    )
+    teacher_id = dbh.execute_query("SELECT id FROM teachers LIMIT 1", fetch=True)[0][0]
+    dbh.execute_query(
+        """
+        INSERT INTO users (
+            teacher_id, username, password, last_name, first_name, middle_name
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (teacher_id, "user", "secret", "Иванов", "Иван", "Иванович"),
+    )
+    dbh.execute_query(
+        """
+        INSERT INTO startostas (
+            teacher_id, last_name, first_name, middle_name, group_num, email, phone
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (teacher_id, "Петров", "Пётр", "Петрович", "4411", "starosta@example.com", "2"),
+    )
+    dbh.insert_document(2026, "План", "2026.11.09", "user", "Saves/fixture.docx", 0)
 
 
-def use_copy(directory):
-    copy_path = Path(directory) / "maindatabase.db"
-    shutil.copy(SOURCE_DB, copy_path)
-    dbh.DB_PATH = str(copy_path)
-    return copy_path
+@contextmanager
+def account_db():
+    """Временная база со схемой приложения. Пароль пользователя — открытый текст secret."""
+    previous = dbh.DB_PATH
+    with tempfile.TemporaryDirectory() as directory:
+        dbh.DB_PATH = str(Path(directory) / "accounts.db")
+        try:
+            dbh.create_tables()
+            _seed_account_db()
+            yield
+        finally:
+            dbh.DB_PATH = previous
 
 
 def test_hash_password_round_trip():
@@ -37,8 +74,7 @@ def test_hash_password_round_trip():
 
 
 def test_plaintext_login_is_replaced_by_hash():
-    with tempfile.TemporaryDirectory() as directory:
-        use_copy(directory)
+    with account_db():
         row = dbh.execute_query(
             "SELECT username, password FROM users LIMIT 1", fetch=True
         )[0]
@@ -72,8 +108,7 @@ def test_password_change_accepts_current_and_new():
 
 
 def test_update_user_password_stores_hash():
-    with tempfile.TemporaryDirectory() as directory:
-        use_copy(directory)
+    with account_db():
         username = dbh.execute_query("SELECT username FROM users LIMIT 1", fetch=True)[0][0]
         dbh.execute_query(
             "UPDATE users SET password = ? WHERE username = ?",
@@ -114,8 +149,7 @@ def test_registration_without_code_is_refused():
 
 
 def test_referenced_teacher_is_kept():
-    with tempfile.TemporaryDirectory() as directory:
-        use_copy(directory)
+    with account_db():
         teacher_id = dbh.execute_query(
             """
             SELECT teacher_id FROM startostas WHERE teacher_id IS NOT NULL
@@ -140,8 +174,7 @@ def test_referenced_teacher_is_kept():
 
 
 def test_protected_document_stays_and_open_one_is_removed():
-    with tempfile.TemporaryDirectory() as directory:
-        use_copy(directory)
+    with account_db():
         dbh.insert_document(2026, "План", "2026.11.09", "user", "Saves/stage-protected.docx", 1)
         dbh.insert_document(2026, "План", "2026.11.09", "user", "Saves/stage-open.docx", 0)
         protected_id = dbh.execute_query(
@@ -170,8 +203,7 @@ def test_protected_document_stays_and_open_one_is_removed():
 
 
 def test_document_id_is_a_parameter():
-    with tempfile.TemporaryDirectory() as directory:
-        use_copy(directory)
+    with account_db():
         before = dbh.execute_query("SELECT COUNT(*) FROM documents", fetch=True)[0][0]
         dbh.remove_document("1 OR 1=1")
         after = dbh.execute_query("SELECT COUNT(*) FROM documents", fetch=True)[0][0]

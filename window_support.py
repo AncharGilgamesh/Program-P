@@ -1,6 +1,7 @@
 import datetime
 import os
 import sqlite3
+import traceback
 
 from PySide6.QtWidgets import QMessageBox
 
@@ -56,6 +57,16 @@ def saves_filename(year, doc_type, moment=None):
     marker = "p" if doc_type == "План" else "o"
     stamp = moment.strftime("%Y%m%d_%H%M%S_%f")
     return f"{year}_{marker}_{stamp}.docx"
+
+
+def log_exception():
+    """Дописывает время и трассу текущего исключения. Пароли и поля ввода не пишет."""
+    folder = os.path.join(base_dir, "logs")
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, "app.log")
+    moment = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(path, "a", encoding="utf-8") as handle:
+        handle.write(f"{moment}\n{traceback.format_exc()}\n")
 
 
 def normalize_group(value):

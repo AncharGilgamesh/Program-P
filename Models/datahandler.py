@@ -7,6 +7,8 @@ from docx import Document
 from datetime import datetime
 from collections import defaultdict
 
+from window_support import normalize_group
+
 
 # Для превращения относительного пути в абсолютный
 def resource_path(relative_path):
@@ -22,15 +24,17 @@ def parse_sixth_table(data_rows):
     # Те же строки, что у первого этапа: короче 9 ячеек пропускаются.
     # Руководитель лежит в столбце 5 этой же строки. Пустая ячейка остаётся пустой.
     result = []
-    for i, row in enumerate(data_rows):
+    number = 0
+    for row in data_rows:
         if len(row) < 9:
             continue
+        number += 1
         teacher = ""
         if len(row) > 5 and row[5] not in (None, ""):
             teacher = str(row[5]).strip()
         group = row[0].strip() if row[0] is not None else ""
         practice = extract_practice_type(str(row[1] or ""))
-        result.append([str(i + 1), teacher, "", group, practice, "", "", ""])
+        result.append([str(number), teacher, "", group, practice, "", "", ""])
     return result
 
 
@@ -577,21 +581,25 @@ def _student_counts(row):
 
 
 def extract_additional_info_form_nagruzka(df):
-    result_dict = {}
+    totals = {}
     for idx, row in df.iterrows():
         if idx == 0:
             continue
         group = row[4]
-
         if pd.isna(group):
             continue
+        key = normalize_group(group)
         budget, paid, targeted = _student_counts(row)
-        student_info = f"\nГ/б - {budget}\nПл. - {paid}\nЦелевики - {targeted}"
-        if group not in result_dict:
-            result_dict[group] = student_info
-        else:
-            continue
-    return result_dict
+        previous = totals.get(key, (0, 0, 0))
+        totals[key] = (
+            previous[0] + budget,
+            previous[1] + paid,
+            previous[2] + targeted,
+        )
+    return {
+        key: f"\nГ/б - {budget}\nПл. - {paid}\nЦелевики - {targeted}"
+        for key, (budget, paid, targeted) in totals.items()
+    }
 
 
 def extract_data(df):

@@ -5,7 +5,12 @@ import Models.datahandler as dh
 from Models.docx_writer import fill_the_table_rows
 from Models.model import PlanTableModel, ResultTableModel
 from View.meetingdatedialog import MeetingDateDialog
-from window_support import OTCHET_TABLE_START_ROWS, save_registered_copy, shablon_otch_path
+from window_support import (
+    OTCHET_TABLE_START_ROWS,
+    log_exception,
+    save_registered_copy,
+    shablon_otch_path,
+)
 
 
 def show_fio_dialog(parent=None):
@@ -35,18 +40,26 @@ class ReportPage:
         return doc
 
     def save_otchet_as(self):
-        doc = self.build_otchet_document()
         options = QFileDialog.Options()
         fname, _ = QFileDialog.getSaveFileName(
             self, "Сохранить файл", "", "Word файлы (*.docx)", options=options
         )
         if not fname:
             return
-        doc.save(fname)
+        try:
+            doc = self.build_otchet_document()
+            doc.save(fname)
+        except Exception as exc:
+            log_exception()
+            QMessageBox.warning(self, "Ошибка", str(exc))
 
     def save_otchet(self):
-        doc = self.build_otchet_document()
-        save_registered_copy(self, doc, "Отчет")
+        try:
+            doc = self.build_otchet_document()
+            save_registered_copy(self, doc, "Отчет")
+        except Exception as exc:
+            log_exception()
+            QMessageBox.warning(self, "Ошибка", str(exc))
 
     def otch_vsem_five(self):
         self._sixth_stg_model.fill_column_with_value(7, "+")
@@ -106,22 +119,26 @@ class ReportPage:
         fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Word файлы (*.docx)")
         if not fname:
             return
-        data = dh.read_plan_from_docx(fname)
-        # Вот эту функцию нужно переработать, чтобы даты не брались
-        table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
-        table2 = dh.parse_second_table(data[1:])
-        table3 = dh.parse_third_table(data[1:])
-        table4 = dh.parse_fourth_table(table2)
-        table5, skipped_groups = dh.parse_fiveth_table(table2)
-        table6 = dh.parse_sixth_table(data[1:])
-        loaded = (
-            (self._oth_frst_stg_model, table1),
-            (self._oth_scnd_std_model, table2),
-            (self._oth_thrd_stg_model, table3),
-            (self._fourth_stg_model, table4),
-            (self._fiveth_stg_model, table5),
-            (self._sixth_stg_model, table6),
-        )
+        try:
+            data = dh.read_plan_from_docx(fname)
+            table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
+            table2 = dh.parse_second_table(data[1:])
+            table3 = dh.parse_third_table(data[1:])
+            table4 = dh.parse_fourth_table(table2)
+            table5, skipped_groups = dh.parse_fiveth_table(table2)
+            table6 = dh.parse_sixth_table(data[1:])
+            loaded = (
+                (self._oth_frst_stg_model, table1),
+                (self._oth_scnd_std_model, table2),
+                (self._oth_thrd_stg_model, table3),
+                (self._fourth_stg_model, table4),
+                (self._fiveth_stg_model, table5),
+                (self._sixth_stg_model, table6),
+            )
+        except Exception as exc:
+            log_exception()
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            return
         for model, rows in loaded:
             model.clear()
             if rows:

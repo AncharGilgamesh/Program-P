@@ -268,13 +268,6 @@ def select_user_by_username(username):
     return execute_query(query, (username,), fetch=True)
 
 
-def select_remembered_user():
-    query = """SELECT * FROM users
-        WHERE is_remembered = 1
-    """
-    return execute_query(query, fetch=True)
-
-
 def update_user_password(username, new_password):
     query = """
         UPDATE users
@@ -295,19 +288,6 @@ def authenticate(username, password):
     if not is_password_hash(str(stored)):
         update_user_password(username, password)
     return True
-
-
-def update_remember_status(username, status):
-    if int(status):
-        execute_query("UPDATE users SET is_remembered = 0 WHERE username != ?", (username,))
-    execute_query(
-        """
-        UPDATE users
-        SET is_remembered = ?
-        WHERE username = ?
-        """,
-        (int(status), username),
-    )
 
 
 def load_docs():

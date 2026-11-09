@@ -4,6 +4,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+import pandas as pd
 from docx import Document
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -11,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from Models.datahandler import (  # noqa: E402
     apply_student_block,
     count_directed_students,
+    extract_additional_info_form_nagruzka,
     parse_fiveth_table,
     parse_practice_table,
     parse_second_table,
@@ -79,6 +81,7 @@ def test_short_row_does_not_shift_following_teacher():
     second = practice_row("4412", "01.02.2025-28.02.2025", "Производственная практика")
     second[5] = "Петров П.П."
     parsed = parse_sixth_table([first, ["короткая"], second])
+    assert [row[0] for row in parsed] == ["1", "2"]
     assert [row[3] for row in parsed] == ["4411", "4412"]
     assert [row[1] for row in parsed] == ["Иванов И.И.", "Петров П.П."]
 
@@ -111,6 +114,29 @@ def test_apply_student_block_replaces_numbers_and_keeps_year():
 
 def test_group_keys_match_after_normalization():
     assert normalize_group(4111) == normalize_group("4111.0")
+
+
+def _nagruzka_frame(rows):
+    header = [None] * 8
+    body = []
+    for group, budget in rows:
+        row = [None] * 8
+        row[4] = group
+        row[5] = budget
+        body.append(row)
+    return pd.DataFrame([header, *body])
+
+
+def test_repeated_group_counts_are_summed():
+    same = extract_additional_info_form_nagruzka(_nagruzka_frame([(4411, 10), (4411, 3)]))
+    assert list(same) == ["4411"]
+    assert same["4411"].count("Г/б") == 1
+    assert "Г/б - 13" in same["4411"]
+
+    merged = extract_additional_info_form_nagruzka(_nagruzka_frame([(4111, 10), ("4111.0", 3)]))
+    assert list(merged) == ["4111"]
+    assert "Г/б - 13" in merged["4111"]
+    assert "Г/б - 10" not in merged["4111"]
 
 
 def test_plan_without_group_code_does_not_raise():
@@ -155,6 +181,7 @@ def main():
     test_short_and_broken_report_rows_do_not_raise()
     test_apply_student_block_replaces_numbers_and_keeps_year()
     test_group_keys_match_after_normalization()
+    test_repeated_group_counts_are_summed()
     test_plan_without_group_code_does_not_raise()
     print("parse-checks-ok")
 
