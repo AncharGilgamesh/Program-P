@@ -21,26 +21,35 @@ def resource_path(relative_path):
 
 # Шестой этап
 def parse_sixth_table(data, prepods):
-    # data - table1
-    # prepods - берем из общего плана
+    # data — разобранный план практик, prepods — строки исходного плана вместе с шапкой.
+    # Руководитель лежит в столбце 5 следующей строки. Если её нет, ячейка остаётся пустой.
     result = []
-    for i in range(0, len(data)):
-        result.append(
-            [str(i + 1), prepods[i + 1][5].strip(), "", data[i][1], data[i][4], "", "", ""]
-        )
+    for i, row in enumerate(data):
+        teacher = ""
+        prepod_index = i + 1
+        if prepod_index < len(prepods) and len(prepods[prepod_index]) > 5:
+            teacher = str(prepods[prepod_index][5] or "").strip()
+        group = row[1] if len(row) > 1 else ""
+        practice = row[4] if len(row) > 4 else ""
+        result.append([str(i + 1), teacher, "", group, practice, "", "", ""])
     return result
 
 
 # Пятый этап отчета
 def parse_fiveth_table(data):
-    # i just wonder can i handle it
-    # сюда передаю table2
+    # Сюда передаётся table2. Номер группы берётся только из текста вида 4xxx.
+    # Строка без такого номера пропускается, чтобы загрузка не падала.
     result = []
+    skipped = 0
     for row in data:
-        group = re.search(r"\b4\d{3}\b", row[2]).group()
-        people_amount = row[3]
-        result.append([group, people_amount, "", "", "", "", "", "в КНИТУ-КАИ"])
-    return result
+        place = str(row[2]) if len(row) > 2 and row[2] is not None else ""
+        match = re.search(r"\b4\d{3}\b", place)
+        if not match:
+            skipped += 1
+            continue
+        people_amount = row[3] if len(row) > 3 else ""
+        result.append([match.group(), people_amount, "", "", "", "", "", "в КНИТУ-КАИ"])
+    return result, skipped
 
 
 # Четвертый этап отчета
@@ -109,9 +118,9 @@ def parse_second_table(data_rows):
         else:
             location = f"Учебная каф. ПМИ, гр. {group}"
 
-        # 4. Сколько человек направлено — ищем все числа в practice_text
-        numbers = [int(n) for n in re.findall(r"\d+", practice_text)]
-        people_count = sum(numbers)
+        # 4. Сколько человек направлено — только строки «Г/б», «Пл.», «Целевики».
+        # Год и номер в названии практики в сумму не входят.
+        people_count = count_directed_students(practice_text)
 
         # 5. Пустая строка
         placeholder = ""
@@ -122,6 +131,20 @@ def parse_second_table(data_rows):
         result.append([number, city, location, people_count, placeholder, start_date, end_date])
 
     return result
+
+
+def count_directed_students(practice_text):
+    """Сумма студентов из строк, которые формирует extract_data."""
+    total = 0
+    for line in str(practice_text).splitlines():
+        match = re.search(
+            r"(?:Г/б|Пл\.|Целевики)\s*[-–—:]?\s*(\d+)",
+            line,
+            flags=re.IGNORECASE,
+        )
+        if match:
+            total += int(match.group(1))
+    return total
 
 
 def extract_start_end_dates(text):
@@ -157,7 +180,7 @@ def extract_start_end_dates(text):
 
     try:
         start = datetime(day=day1, month=month1, year=year1).strftime("%d.%m.%Y")
-    except Exception:
+    except (TypeError, ValueError):
         start = ""
 
     try:
@@ -166,7 +189,7 @@ def extract_start_end_dates(text):
             if day2 and month2
             else ""
         )
-    except Exception:
+    except (TypeError, ValueError):
         end = ""
 
     return start, end
@@ -249,16 +272,14 @@ def parse_practice_table(data_rows):
             course_digit = None
 
         month = extract_first_month(raw_dates)
+        # Вторая цифра номера группы — курс. Осень (месяцы 7–12) — нечётный семестр,
+        # весна (1–6) — чётный. Группа *4** в сентябре даёт 7, в феврале — 8.
         semester = None
         if course_digit:
             if month and 1 <= month <= 6:
                 semester = course_digit * 2
             elif month and 6 < month <= 12:
                 semester = course_digit * 2 - 1
-
-            # поправка для 8 семестра (второй семестр 4 курса)
-            if semester == 7 and course_digit == 4:
-                semester = 8
 
         # ===== 2. Вид практики =====
         practice_type = extract_practice_type(practice_text)

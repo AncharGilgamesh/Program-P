@@ -1,12 +1,43 @@
 import os
 import sqlite3
 
+import bcrypt as bcrypt_lib
+
+# bcrypt 4.x убрал __about__, а passlib 1.7.4 всё ещё читает его при первом вызове.
+if not hasattr(bcrypt_lib, "__about__"):
+
+    class _BcryptAbout:
+        __version__ = getattr(bcrypt_lib, "__version__", "4")
+
+    bcrypt_lib.__about__ = _BcryptAbout()
+
+from passlib.hash import bcrypt
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "..", "DB", "maindatabase.db")
 
 
+def is_password_hash(stored):
+    return isinstance(stored, str) and stored.startswith(("$2a$", "$2b$", "$2y$"))
+
+
+def hash_password(password):
+    return bcrypt.hash(password)
+
+
+def password_matches(password, stored):
+    if stored is None:
+        return False
+    stored = str(stored)
+    if is_password_hash(stored):
+        return bcrypt.verify(password, stored)
+    return password == stored
+
+
 def execute_query(query, params=(), fetch=False, many=False):
-    with sqlite3.connect(DB_PATH) as con:
+    con = sqlite3.connect(DB_PATH)
+    try:
+        con.execute("PRAGMA foreign_keys = ON")
         cur = con.cursor()
         if many:
             cur.executemany(query, params)
@@ -15,6 +46,8 @@ def execute_query(query, params=(), fetch=False, many=False):
         con.commit()
         if fetch:
             return cur.fetchall()
+    finally:
+        con.close()
 
 
 def create_tables():
@@ -78,7 +111,7 @@ def create_users_table():
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              teacher_id INTEGER,
              username VARCHAR(50) UNIQUE,
-             password VARCHAR(50) NOT NULL,
+             password TEXT NOT NULL,
              last_name VARCHAR(50) NOT NULL,
              first_name VARCHAR(50) NOT NULL,
              middle_name VARCHAR(50),
@@ -90,8 +123,7 @@ def create_users_table():
 
 
 def update_teacher(id, data):
-    query = (
-        """
+    query = """
         UPDATE teachers
         SET last_name = ?,
             first_name = ?,
@@ -100,20 +132,35 @@ def update_teacher(id, data):
             academic_title = ?,
             email = ?,
             phone = ?
-        WHERE id = {}
+        WHERE id = ?
     """
-    ).format(id)
-    execute_query(query, data)
+    execute_query(query, tuple(data) + (id,))
+
+
+def teacher_has_references(teacher_id):
+    rows = execute_query(
+        """
+        SELECT 1 FROM startostas WHERE teacher_id = ?
+        UNION
+        SELECT 1 FROM users WHERE teacher_id = ?
+        LIMIT 1
+        """,
+        (teacher_id, teacher_id),
+        fetch=True,
+    )
+    return bool(rows)
 
 
 def remove_teacher(id):
-    query = "DELETE FROM teachers WHERE id = {}".format(id)
-    execute_query(query)
+    if teacher_has_references(id):
+        raise sqlite3.IntegrityError(
+            "Нельзя удалить преподавателя: на него ссылаются староста или пользователь"
+        )
+    execute_query("DELETE FROM teachers WHERE id = ?", (id,))
 
 
 def remove_document(id):
-    query = "DELETE FROM documents WHERE id = {}".format(id)
-    execute_query(query)
+    execute_query("DELETE FROM documents WHERE id = ?", (id,))
 
 
 def defend_document(id, status):
@@ -144,7 +191,7 @@ def insert_user(teacher_id, username, password, l_name, f_name, m_name):
         INSERT INTO users (teacher_id, username, password, last_name, first_name, middle_name)
         VALUES (?, ?, ?, ?, ?, ?);
     """
-    params = (teacher_id, username, password, l_name, f_name, m_name)
+    params = (teacher_id, username, hash_password(password), l_name, f_name, m_name)
     execute_query(query, params)
 
 
@@ -158,8 +205,7 @@ def insert_starosta(teacher_id, l_name, f_name, m_name, group, email, phone):
 
 
 def update_starosta(id, data):
-    query = (
-        """
+    query = """
         UPDATE startostas
         SET teacher_id = ?,
             last_name = ?,
@@ -168,15 +214,13 @@ def update_starosta(id, data):
             group_num = ?,
             email = ?,
             phone = ?
-        WHERE id = {}
+        WHERE id = ?
     """
-    ).format(id)
-    execute_query(query, data)
+    execute_query(query, tuple(data) + (id,))
 
 
 def remove_starosta(id):
-    query = "DELETE FROM startostas WHERE id = {}".format(id)
-    execute_query(query)
+    execute_query("DELETE FROM startostas WHERE id = ?", (id,))
 
 
 def insert_document(
@@ -225,16 +269,33 @@ def update_user_password(username, new_password):
         SET password = ?
         WHERE username = ?
     """
-    execute_query(query, (new_password, username))
+    execute_query(query, (hash_password(new_password), username))
+
+
+def authenticate(username, password):
+    """True, если пара верна. Открытый старый пароль после успеха заменяется хешем."""
+    users = select_user_by_username(username)
+    if not users:
+        return False
+    stored = users[0][3]
+    if not password_matches(password, stored):
+        return False
+    if not is_password_hash(str(stored)):
+        update_user_password(username, password)
+    return True
 
 
 def update_remember_status(username, status):
-    query = """
+    if int(status):
+        execute_query("UPDATE users SET is_remembered = 0 WHERE username != ?", (username,))
+    execute_query(
+        """
         UPDATE users
         SET is_remembered = ?
         WHERE username = ?
-    """
-    execute_query(query, (status, username))
+        """,
+        (int(status), username),
+    )
 
 
 def load_docs():

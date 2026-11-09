@@ -2,6 +2,7 @@ import sys
 import datetime
 import os
 import platform
+import sqlite3
 import subprocess
 
 import pandas as pd
@@ -29,6 +30,29 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 help_path = os.path.join(base_dir, "", "help.html")
 shablon_plan_path = os.path.join(base_dir, "Shablons", "shablon_plan.docx")
 shablon_otch_path = os.path.join(base_dir, "Shablons", "shablon_otchet.docx")
+# Строки шаблона отчёта, с которых пишутся данные: у первой таблицы одна строка
+# шапки, у пятой — четыре. Остальные таблицы начинаются после двух строк шапки.
+OTCHET_TABLE_START_ROWS = (1, 2, 2, 2, 4, 2)
+
+
+def normalize_group(value):
+    """Номер группы к строке: Excel часто отдаёт 4111.0 или строку с пробелами."""
+    text = str(value).strip()
+    if text.endswith(".0") and text[:-2].isdigit():
+        return text[:-2]
+    return text
+
+
+def remembered_username():
+    """Логин с включённым «запомнить меня». Пустой список — не ошибка."""
+    try:
+        rows = dbh.select_remembered_user()
+    except sqlite3.Error as exc:
+        QMessageBox.warning(None, "Ошибка", f"Не удалось прочитать базу: {exc}")
+        return None
+    if not rows or not rows[0] or not rows[0][3]:
+        return None
+    return rows[0][2]
 
 
 class MainWindow(QMainWindow):
@@ -170,10 +194,10 @@ class MainWindow(QMainWindow):
 
         try:
             dbh.update_user_password(self.user, password)
-            QMessageBox.information(self, "Успешно", "Успешная смена пароля")
-        except Exception:
-            QMessageBox.warning(self, "Ошибка", "Что-то пошло не так")
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось сменить пароль: {exc}")
             return
+        QMessageBox.information(self, "Успешно", "Успешная смена пароля")
 
     def go_to_lk(self):
         self.switch_page(4)
@@ -190,41 +214,55 @@ class MainWindow(QMainWindow):
         self.ui.lkPhoneLine.setText(user_data[-1])
 
     # ==========================Код для работы с базой данных===============================================
+    def selected_db_row(self):
+        indexes = self.ui.dataBaseTableView.selectedIndexes()
+        if self._db_model is None or not indexes:
+            QMessageBox.warning(self, "Ошибка", "Выберите строку в таблице")
+            return None
+        return self._db_model.get_row(indexes[0].row())
+
     def open_document(self):
-        index = self.ui.dataBaseTableView.selectedIndexes()[0]
-        row = index.row()
-        data = self._db_model.get_row(row)
+        data = self.selected_db_row()
+        if data is None:
+            return
         file_path = data[-1]
         system = platform.system()
-        if system == "Windows":
-            os.startfile(file_path)  # Самый простой способ для Windows
-        elif system == "Darwin":  # macOS
-            subprocess.run(["open", file_path])
-        else:  # Linux и другие
-            subprocess.run(["xdg-open", file_path])
+        try:
+            if system == "Windows":
+                os.startfile(file_path)
+            elif system == "Darwin":
+                subprocess.run(["open", file_path], check=True)
+            else:
+                subprocess.run(["xdg-open", file_path], check=True)
+        except (OSError, subprocess.CalledProcessError) as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось открыть файл: {exc}")
 
     def defend_doucment(self):
-        index = self.ui.dataBaseTableView.selectedIndexes()[0]
-        row = index.row()
-        data = self._db_model.get_row(row)
-        id = data[0]
-        if data[-2] == 0:
-            dbh.defend_document(id, 1)
-        else:
-            dbh.defend_document(id, 0)
+        data = self.selected_db_row()
+        if data is None:
+            return
+        new_status = 1 if data[-2] == 0 else 0
+        try:
+            dbh.defend_document(data[0], new_status)
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось изменить защиту: {exc}")
+            return
         self.upload_db_docs()
 
     def remove_document(self):
-        index = self.ui.dataBaseTableView.selectedIndexes()[0]
-        row = index.row()
-        data = self._db_model.get_row(row)
-        id = data[0]
-        try:
-            dbh.remove_document(id)
-            os.remove(data[-1])
-            self.upload_db_docs()
-        except Exception:
+        data = self.selected_db_row()
+        if data is None:
             return
+        try:
+            dbh.remove_document(data[0])
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось удалить запись: {exc}")
+            return
+        try:
+            os.remove(data[-1])
+        except OSError as exc:
+            QMessageBox.warning(self, "Ошибка", f"Запись удалена, но файл не удалён: {exc}")
+        self.upload_db_docs()
 
     def upload_db_starosta(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(1)
@@ -236,39 +274,40 @@ class MainWindow(QMainWindow):
     def add_db_starosta(self):
         teachers = dbh.load_teachers()
         dialog = StarostaDialog(teachers=teachers, parent=self)
-        if dialog.exec():
-            data = dialog.get_data()
-        try:
-            dbh.insert_starosta(*data)
-            self.upload_db_starosta()
-        except Exception:
+        if not dialog.exec():
             return
+        try:
+            dbh.insert_starosta(*dialog.get_data())
+        except (sqlite3.Error, TypeError, ValueError) as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось добавить старосту: {exc}")
+            return
+        self.upload_db_starosta()
 
     def edit_db_starosta(self):
         teachers = dbh.load_teachers()
-        index = self.ui.dataBaseTableView.selectedIndexes()[0]
-        row = index.row()
-        data = self._db_model.get_row(row)
-        id = data[0]
-        dialog = StarostaDialog(teachers=teachers, starosta_data=list(data[1:]), parent=self)
-        if dialog.exec():
-            data = dialog.get_data()
-        try:
-            dbh.update_starosta(id, data)
-            self.upload_db_starosta()
-        except Exception:
+        row = self.selected_db_row()
+        if row is None:
             return
+        dialog = StarostaDialog(teachers=teachers, starosta_data=list(row[1:]), parent=self)
+        if not dialog.exec():
+            return
+        try:
+            dbh.update_starosta(row[0], dialog.get_data())
+        except (sqlite3.Error, TypeError, ValueError) as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось изменить старосту: {exc}")
+            return
+        self.upload_db_starosta()
 
     def remove_db_starosta(self):
-        index = self.ui.dataBaseTableView.selectedIndexes()[0]
-        row = index.row()
-        data = self._db_model.get_row(row)
-        id = data[0]
-        try:
-            dbh.remove_starosta(id)
-            self.upload_db_starosta()
-        except Exception:
+        row = self.selected_db_row()
+        if row is None:
             return
+        try:
+            dbh.remove_starosta(row[0])
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось удалить старосту: {exc}")
+            return
+        self.upload_db_starosta()
 
     def upload_db_teachers(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(0)
@@ -279,38 +318,39 @@ class MainWindow(QMainWindow):
 
     def add_db_prepod(self):
         dialog = PrepodDialog(parent=self)
-        if dialog.exec():
-            data = dialog.get_data()
-        try:
-            dbh.insert_teacher(*data)
-            self.upload_db_teachers()
-        except Exception:
+        if not dialog.exec():
             return
+        try:
+            dbh.insert_teacher(*dialog.get_data())
+        except (sqlite3.Error, TypeError, ValueError) as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось добавить преподавателя: {exc}")
+            return
+        self.upload_db_teachers()
 
     def edit_db_prepod(self):
-        index = self.ui.dataBaseTableView.selectedIndexes()[0]
-        row = index.row()
-        data = self._db_model.get_row(row)
-        id = data[0]
-        dialog = PrepodDialog(data=data[1:], parent=self)
-        if dialog.exec():
-            data = dialog.get_data()
-        try:
-            dbh.update_teacher(id, data)
-            self.upload_db_teachers()
-        except Exception:
+        row = self.selected_db_row()
+        if row is None:
             return
+        dialog = PrepodDialog(data=row[1:], parent=self)
+        if not dialog.exec():
+            return
+        try:
+            dbh.update_teacher(row[0], dialog.get_data())
+        except (sqlite3.Error, TypeError, ValueError) as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось изменить преподавателя: {exc}")
+            return
+        self.upload_db_teachers()
 
     def remove_db_prepod(self):
-        index = self.ui.dataBaseTableView.selectedIndexes()[0]
-        row = index.row()
-        data = self._db_model.get_row(row)
-        id = data[0]
-        try:
-            dbh.remove_teacher(id)
-            self.upload_db_teachers()
-        except Exception:
+        row = self.selected_db_row()
+        if row is None:
             return
+        try:
+            dbh.remove_teacher(row[0])
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось удалить преподавателя: {exc}")
+            return
+        self.upload_db_teachers()
 
     def upload_db_docs(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(2)
@@ -321,27 +361,26 @@ class MainWindow(QMainWindow):
         self.ui.dataBaseTableView.setModel(self._db_model)
 
     # ==========================Код для работы с отчетом====================================================
-    def save_otchet_as(self):
+    def _otchet_models(self):
+        return (
+            self._oth_frst_stg_model,
+            self._oth_scnd_std_model,
+            self._oth_thrd_stg_model,
+            self._fourth_stg_model,
+            self._fiveth_stg_model,
+            self._sixth_stg_model,
+        )
+
+    def build_otchet_document(self):
         doc = Document(shablon_otch_path)
-        data_for_save = []
-        data_for_save.append(self._oth_frst_stg_model.get_data())
-        data_for_save.append(self._oth_scnd_std_model.get_data())
-        data_for_save.append(self._oth_thrd_stg_model.get_data())
-        data_for_save.append(self._fourth_stg_model.get_data())
-        data_for_save.append(self._fiveth_stg_model.get_data())
-        date = self._fiveth_stg_model.get_data()
-        print(date[1])
-        data_for_save.append(self._sixth_stg_model.get_data())
-        start_row = 2
-        for i in range(len(data_for_save)):
-            if i == 0:
-                start_row = 0
-            if i == 4:
-                start_row = 5
-            else:
-                start_row = 2
-            table = doc.tables[i]
-            dh.fill_the_table_rows(table, data_for_save[i], start_row)
+        for table, model, start_row in zip(
+            doc.tables, self._otchet_models(), OTCHET_TABLE_START_ROWS
+        ):
+            dh.fill_the_table_rows(table, model.get_data(), start_row)
+        return doc
+
+    def save_otchet_as(self):
+        doc = self.build_otchet_document()
         options = QFileDialog.Options()
         fname, _ = QFileDialog.getSaveFileName(
             self, "Сохранить файл", "", "Word файлы (*.docx)", options=options
@@ -353,24 +392,7 @@ class MainWindow(QMainWindow):
     def save_otchet(self):
         year = datetime.datetime.now().year
         current_date = str(datetime.datetime.now().strftime("%Y.%m.%d"))
-        doc = Document(shablon_otch_path)
-        data_for_save = []
-        data_for_save.append(self._oth_frst_stg_model.get_data())
-        data_for_save.append(self._oth_scnd_std_model.get_data())
-        data_for_save.append(self._oth_thrd_stg_model.get_data())
-        data_for_save.append(self._fourth_stg_model.get_data())
-        data_for_save.append(self._fiveth_stg_model.get_data())
-        data_for_save.append(self._sixth_stg_model.get_data())
-        start_row = 2
-        for i in range(len(data_for_save)):
-            if i == 0:
-                start_row = 0
-            if i == 4:
-                start_row = 4
-            else:
-                start_row = 2
-            table = doc.tables[i]
-            dh.fill_the_table_rows(table, data_for_save[i], start_row)
+        doc = self.build_otchet_document()
         creator = self.user
         save_path = os.path.join(base_dir, "Saves", f"{year}_o.docx")
         dbh.insert_document(year, "Отчет", current_date, creator, save_path, 0)
@@ -432,25 +454,36 @@ class MainWindow(QMainWindow):
 
     # Переработал первый этап, эта функция будет пополняться по мере заполнения этапов
     def load_plan(self):
-        fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Excel Files (*.docx)")
+        fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Word файлы (*.docx)")
         if not fname:
             return
         data = dh.read_plan_from_docx(fname)
         # Вот эту функцию нужно переработать, чтобы даты не брались
         table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
-        self._oth_frst_stg_model.insertRows(0, len(table1), table1)
         table2 = dh.parse_second_table(data[1:])
-        self._oth_scnd_std_model.insertRows(0, len(table2), table2)
         table3 = dh.parse_third_table(data[1:])
-        self._oth_thrd_stg_model.insertRows(0, len(table3), table3)
         table4 = dh.parse_fourth_table(table2)
-        self._fourth_stg_model.insertRows(0, len(table4), table4)
-
-        table5 = dh.parse_fiveth_table(table2)
-        self._fiveth_stg_model.insertRows(0, len(table5), table5)
+        table5, skipped_groups = dh.parse_fiveth_table(table2)
         table6 = dh.parse_sixth_table(table1, data)
-        self._sixth_stg_model.insertRows(0, len(table6), table6)
+        loaded = (
+            (self._oth_frst_stg_model, table1),
+            (self._oth_scnd_std_model, table2),
+            (self._oth_thrd_stg_model, table3),
+            (self._fourth_stg_model, table4),
+            (self._fiveth_stg_model, table5),
+            (self._sixth_stg_model, table6),
+        )
+        for model, rows in loaded:
+            model.clear()
+            if rows:
+                model.insertRows(0, len(rows), rows)
         self.set_otchet_resizing()
+        if skipped_groups:
+            QMessageBox.warning(
+                self,
+                "Предупреждение",
+                f"Пропущено строк без номера группы 4xxx: {skipped_groups}.",
+            )
 
         # self._fourth_stg_model.insertRows(0, len(table4), table4)
         # вот тут представлены варианты изменения размера, нужно это все рассмотреть получше
@@ -553,7 +586,7 @@ class MainWindow(QMainWindow):
         dh.fill_the_table_rows(table, data_for_save, start_row)
         options = QFileDialog.Options()
         fname, _ = QFileDialog.getSaveFileName(
-            self, "Сохранить файл", "", "Excel файлы (*.docx)", options=options
+            self, "Сохранить файл", "", "Word файлы (*.docx)", options=options
         )
         if not fname:
             return
@@ -597,7 +630,13 @@ class MainWindow(QMainWindow):
             # print(selected_groups, value)
             col = dh.find_column_index_by_keyword(self._plan_model, keyword)
             for group in selected_groups:
-                self._plan_model.updateCellsByCondition(1, int(group), col, str(value))
+                key = normalize_group(group)
+                self._plan_model.updateCellsByCondition(
+                    1,
+                    lambda cell, key=key: normalize_group(cell) == key,
+                    col,
+                    str(value),
+                )
 
     def load_nagruzka(self):
         fname, _ = QFileDialog.getOpenFileName(
@@ -613,7 +652,9 @@ class MainWindow(QMainWindow):
                 self._plan_model.add_info_to_cell_by_condition(1, key, 2, additional_data[key])
         else:
             extracted_data = dh.extract_data(data)
-            self._plan_model.insertRows(0, len(extracted_data), extracted_data)
+            self._plan_model.clear()
+            if extracted_data:
+                self._plan_model.insertRows(0, len(extracted_data), extracted_data)
         self._nagruzka_loaded = True
         self.ui.tableView.resizeRowsToContents()
 
@@ -645,7 +686,9 @@ class MainWindow(QMainWindow):
         blocks_baka_tr = dh.transform_practice_data(blocks)
         blocks_maga_tr = dh.transform_practice_data(blocks_maga, len(blocks_baka_tr))
         combined_blocks = blocks_baka_tr + blocks_maga_tr
-        self._plan_model.insertRows(0, len(combined_blocks), combined_blocks)
+        self._plan_model.clear()
+        if combined_blocks:
+            self._plan_model.insertRows(0, len(combined_blocks), combined_blocks)
         self._table_loaded = True
         self.ui.tableView.resizeRowsToContents()
         """
@@ -663,16 +706,14 @@ class MainWindow(QMainWindow):
 
 
 def check_for_appearance():
-    try:
-        user = dbh.select_remembered_user()[0]
-        if user:
-            return user[2]
-    except Exception:
-        appearance = AppearanceDialog()
-        appearance.exec()
-        if not appearance.get_success_status():
-            sys.exit()
-        return appearance.get_username()
+    username = remembered_username()
+    if username:
+        return username
+    appearance = AppearanceDialog()
+    appearance.exec()
+    if not appearance.get_success_status():
+        sys.exit()
+    return appearance.get_username()
 
 
 def show_fio_dialog(parent=None):
@@ -685,18 +726,12 @@ def show_fio_dialog(parent=None):
 def run_application():
     while True:
         # 1. Проверка, запомнен ли пользователь
-        try:
-            user = dbh.select_remembered_user()[0]
-            if user and user[3]:  # если есть флаг remember_me
-                username = user[2]
-            else:
-                raise Exception("Требуется авторизация")
-        except Exception:
-            # 2. Открываем окно авторизации
+        username = remembered_username()
+        if username is None:
             appearance = AppearanceDialog()
             appearance.exec()
             if not appearance.get_success_status():
-                break  # выход из цикла и завершение приложения
+                break
             username = appearance.get_username()
 
         # 3. Запускаем основное окно

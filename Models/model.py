@@ -58,6 +58,12 @@ class PlanTableModel(QAbstractTableModel):
         self.endInsertRows()
         return True
 
+    def clear(self):
+        """Сбрасывает строки через reset, не подменяя _data снаружи модели."""
+        self.beginResetModel()
+        self._data = []
+        self.endResetModel()
+
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole and index.isValid():
             return self._data[index.row()][index.column()]
@@ -194,7 +200,7 @@ class ResultTableModel(PlanTableModel):
                     total = int(self._data[row][1])
                     scores = [int(self._data[row][i] or 0) for i in range(2, 6)]
                     return str(max(total - sum(scores), 0))
-                except Exception:
+                except (TypeError, ValueError):
                     return "-"
             value = self._data[row][col]
             return str(value) if value not in [None, "", "0"] else "-"
@@ -229,7 +235,7 @@ class ResultTableModel(PlanTableModel):
                 total = int(self._data[row][1])
                 if sum(scores) > total:
                     return False
-            except Exception:
+            except (TypeError, ValueError):
                 return False
 
         if col == 1:  # при изменении "Всего" тоже проверим
@@ -238,7 +244,7 @@ class ResultTableModel(PlanTableModel):
                 scores = [int(self._data[row][i] or 0) for i in [2, 3, 4, 5]]
                 if sum(scores) > total:
                     return False
-            except Exception:
+            except (TypeError, ValueError):
                 return False
 
         self._data[row][col] = str(value).strip()
