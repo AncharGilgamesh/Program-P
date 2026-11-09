@@ -5,7 +5,12 @@ from PySide6.QtWidgets import QFileDialog, QMessageBox
 import Models.datahandler as dh
 from Models.docx_writer import fill_the_table_rows
 from View.planaddingdialogs import GroupEditDialog
-from window_support import log_exception, normalize_group, save_registered_copy, shablon_plan_path
+from window_support import log_exception, save_registered_copy, shablon_plan_path
+
+
+def plan_replace_needs_confirm(row_count, replaces_rows):
+    """Истина, когда загрузка сотрёт уже заполненную таблицу."""
+    return row_count > 0 and bool(replaces_rows)
 
 
 class PlanPage:
@@ -61,28 +66,40 @@ class PlanPage:
             # print(selected_groups, value)
             col = dh.find_column_index_by_keyword(self._plan_model, keyword)
             for group in selected_groups:
-                key = normalize_group(group)
+                key = dh.normalize_group(group)
                 self._plan_model.updateCellsByCondition(
                     1,
-                    lambda cell, key=key: normalize_group(cell) == key,
+                    lambda cell, key=key: dh.normalize_group(cell) == key,
                     col,
                     str(value),
                 )
 
     def _merge_student_blocks(self, additional_data):
-        by_group = {normalize_group(key): block for key, block in additional_data.items()}
         groups = self._plan_model.get_col(1)
         practices = self._plan_model.get_col(2)
         updated = []
         for group, practice in zip(groups, practices):
-            block = by_group.get(normalize_group(group))
+            block = dh.choose_student_block(additional_data, group, practice)
             if block is None:
                 updated.append(practice)
             else:
                 updated.append(dh.apply_student_block(practice, block))
         self._plan_model.set_col(2, updated)
 
+    def _ask_replace_plan(self):
+        answer = QMessageBox.question(
+            self,
+            "Заменить текущий план?",
+            "Заменить текущий план?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        return answer == QMessageBox.Yes
+
     def load_nagruzka(self):
+        if plan_replace_needs_confirm(self._plan_model.rowCount(), not self._table_loaded):
+            if not self._ask_replace_plan():
+                return
         fname, _ = QFileDialog.getOpenFileName(
             self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)"
         )
@@ -112,6 +129,9 @@ class PlanPage:
         self.ui.tableView.resizeRowsToContents()
 
     def load_table_new(self):
+        if plan_replace_needs_confirm(self._plan_model.rowCount(), True):
+            if not self._ask_replace_plan():
+                return
         fname, _ = QFileDialog.getOpenFileName(
             self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)"
         )

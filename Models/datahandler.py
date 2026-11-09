@@ -4,10 +4,8 @@ import sys
 import os
 from PySide6.QtCore import Qt
 from docx import Document
-from datetime import datetime
+from datetime import date, datetime
 from collections import defaultdict
-
-from window_support import normalize_group
 
 
 # Для превращения относительного пути в абсолютный
@@ -88,7 +86,7 @@ def parse_third_table(data_rows):
         grouped[key].add(group)
 
     for (place, teacher), groups in grouped.items():
-        place_with_groups = f"{place}, " + ", ".join(groups)
+        place_with_groups = f"{place}, " + ", ".join(sorted(groups, key=str))
         result.append([place_with_groups, teacher, ""])
 
     return result
@@ -150,7 +148,41 @@ def count_directed_students(practice_text):
     return total
 
 
+_LEADING_DAY_MONTH = re.compile(r"^\d{1,2}[./]\d{1,2}")
+_ISO_DATE = re.compile(r"(\d{4})-(\d{2})-(\d{2})(?:[ T]\d{2}:\d{2}:\d{2})?")
+
+
+def normalize_practice_period(value):
+    """Дата Excel и ГГГГ-ММ-ДД становятся дд.мм.гггг. Уже записанный диапазон не трогает."""
+    if isinstance(value, datetime):
+        return "" if pd.isna(value) else value.strftime("%d.%m.%Y")
+    if isinstance(value, date):
+        return value.strftime("%d.%m.%Y")
+    if value is None or pd.isna(value):
+        return ""
+    text = str(value).strip()
+    if not text or _LEADING_DAY_MONTH.match(text):
+        return text
+    if not re.match(r"^\d{4}-\d{2}-\d{2}", text):
+        return text
+    replaced = 0
+
+    def _as_day_first(match):
+        nonlocal replaced
+        if replaced >= 2:
+            return match.group(0)
+        replaced += 1
+        try:
+            parsed = datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        except ValueError:
+            return match.group(0)
+        return parsed.strftime("%d.%m.%Y")
+
+    return _ISO_DATE.sub(_as_day_first, text)
+
+
 def extract_start_end_dates(text):
+    text = normalize_practice_period(text)
     text = text.replace("\n", " ").replace("г.", "").replace("г", "").strip()
     date_matches = re.findall(r"(\d{1,2})[./-](\d{1,2})(?:[./-](\d{4}))?", text)
 
@@ -309,12 +341,22 @@ def parse_practice_table(data_rows):
 
 def extract_practice_type(text):
     # Оставляем только "Учебная практика ..." или "Производственная практика ..."
-    match = re.search(r"(Учебная практика|Производственная практика)[^\n]*", text, re.IGNORECASE)
-    return match.group(0).strip().capitalize() if match else ""
+    source = "" if text is None else str(text)
+    match = re.search(
+        r"(Учебная практика|Производственная практика)[^\n]*", source, re.IGNORECASE
+    )
+    if match:
+        return match.group(0).strip().capitalize()
+    without = _STUDENT_BLOCK_AT_END.sub("", source)
+    for line in without.splitlines():
+        if line.strip():
+            return line.strip()
+    return ""
 
 
 def extract_first_month(text):
     # Ищем первую дату в формате дд.мм или дд.мм.гггг
+    text = normalize_practice_period(text)
     match = re.search(r"\b(\d{1,2})[./](\d{1,2})([./](\d{4}))?", text)
     if match:
         month = int(match.group(2))
@@ -324,6 +366,7 @@ def extract_first_month(text):
 
 def extract_meeting_date(text):
 
+    text = normalize_practice_period(text)
     text = text.replace("\n", " ").replace("г.", "").replace("г", "").strip()
 
     # Ищем все даты (одна или две)
@@ -436,9 +479,12 @@ def transform_practice_data(data, start_id=0):
         # Пропускаем строку заголовков (первую строку в data)
         for row in practice["data"][1:]:
             if len(row) >= 5:  # Проверяем, что в строке достаточно данных
+                group_cell = row[1]
+                if group_cell is None or pd.isna(group_cell) or str(group_cell).strip() == "":
+                    continue
                 transformed_row = [
                     current_id,  # Уникальный ID
-                    row[1],  # № группы
+                    normalize_group(group_cell),  # № группы
                     clean_practice_name(title),  # Название практики из title
                     row[4],  # Сроки прохождения
                     "Кафедра",  # Кафедра (везде одинаково)
@@ -507,6 +553,49 @@ def format_teacher_name(name: str) -> str:
     return " ".join(p.capitalize() for p in parts)
 
 
+def parse_workload_teacher(value):
+    """ФИО из ячейки нагрузки: оба инициала или полное имя. Чужой текст — пустая строка."""
+    if value is None or pd.isna(value):
+        return ""
+    text = str(value).strip()
+    if not text:
+        return ""
+    spaced = re.sub(r"\.(\S)", r". \1", text)
+    tokens = [token.strip(",;") for token in spaced.split()]
+    tokens = [token for token in tokens if token]
+    if not tokens or not re.fullmatch(r"[A-Za-zА-ЯЁа-яё\-]{2,}", tokens[0]):
+        return ""
+    initials = []
+    words = []
+    for token in tokens[1:]:
+        if re.fullmatch(r"[A-Za-zА-ЯЁа-яё]\.", token):
+            if words:
+                break
+            initials.append(token)
+        elif re.fullmatch(r"[A-Za-zА-ЯЁа-яё\-]{2,}", token):
+            if initials:
+                break
+            words.append(token)
+        else:
+            break
+    if initials:
+        parsed = " ".join([tokens[0], *initials[:2]])
+    elif words:
+        parsed = " ".join([tokens[0], *words[:2]])
+    else:
+        return ""
+    formatted = format_teacher_name(parsed)
+    return re.sub(r"(?<=\.)\s+(?=[A-Za-zА-ЯЁа-яё]\.)", "", formatted)
+
+
+def normalize_group(value):
+    """Номер группы к строке: Excel часто отдаёт 4111.0 или строку с пробелами."""
+    text = str(value).strip()
+    if text.endswith(".0") and text[:-2].isdigit():
+        return text[:-2]
+    return text
+
+
 def normalize_practice_type(practice: str) -> str:
     """Преобразует названия практик согласно правилам."""
     practice = practice.strip().lower()
@@ -570,12 +659,51 @@ def _count_cell(row, index):
     return int(number)
 
 
+def _workload_practice_type(row):
+    if len(row) <= 12:
+        return ""
+    value = row[12]
+    if pd.isna(value):
+        return ""
+    return normalize_practice_type(str(value))
+
+
+def practice_type_from_plan_cell(value):
+    """Вид практики из ячейки плана: без хвостового блока студентов."""
+    text = "" if value is None else str(value)
+    without = _STUDENT_BLOCK_AT_END.sub("", text).strip()
+    return normalize_practice_type(without)
+
+
+def choose_student_block(blocks, group, practice_cell):
+    """Блок студентов для ячейки плана. Пусто, если у группы несколько несовпавших видов."""
+    group_key = normalize_group(group)
+    exact = blocks.get((group_key, practice_type_from_plan_cell(practice_cell)))
+    if exact is not None:
+        return exact
+    same_group = [
+        block
+        for key, block in blocks.items()
+        if isinstance(key, tuple) and len(key) == 2 and key[0] == group_key
+    ]
+    if len(same_group) == 1:
+        return same_group[0]
+    return None
+
+
 def _student_counts(row):
     budget = _count_cell(row, 5)
     paid = _count_cell(row, 6)
+    total_cell = _cell(row, 7)
+    if pd.isna(total_cell):
+        return budget, paid, 0
     total = _count_cell(row, 7)
-    if pd.isna(_cell(row, 7)):
-        total = budget + paid
+    if total < budget + paid:
+        group_cell = row[4] if len(row) > 4 else ""
+        group = "" if pd.isna(group_cell) else normalize_group(group_cell)
+        raise ValueError(
+            f"Группа {group}: всего {total} меньше суммы бюджета {budget} и платного {paid}"
+        )
     targeted = total - budget - paid if total > budget + paid else 0
     return budget, paid, targeted
 
@@ -588,7 +716,7 @@ def extract_additional_info_form_nagruzka(df):
         group = row[4]
         if pd.isna(group):
             continue
-        key = normalize_group(group)
+        key = (normalize_group(group), _workload_practice_type(row))
         budget, paid, targeted = _student_counts(row)
         previous = totals.get(key, (0, 0, 0))
         totals[key] = (
@@ -610,8 +738,9 @@ def extract_data(df):
         if idx == 0:
             continue
         group = row[4]
-        if pd.isna(group):
+        if pd.isna(group) or str(group).strip() == "":
             continue
+        group = normalize_group(group)
 
         num = len(bachelor_list) + len(master_list) + 1
         practice_raw = str(row[12]) if not pd.isna(row[12]) else ""
@@ -621,11 +750,7 @@ def extract_data(df):
         student_info = f"Г/б - {budget}\nПл. - {paid}\nЦелевики - {targeted}"
         practice_full = f"{practice_type}\n{student_info}"
 
-        teacher_raw = str(row[16]) if not pd.isna(row[16]) else ""
-        teacher_match = re.match(
-            r"^([А-ЯЁа-яёA-Za-z\-]+(?:\s+[А-ЯЁа-яёA-Za-z]\.){1,2})", teacher_raw.strip()
-        )
-        teacher = format_teacher_name(teacher_match.group(1)) if teacher_match else ""
+        teacher = parse_workload_teacher(row[16])
 
         specialty_raw = str(row[8]) if not pd.isna(row[8]) else ""
         specialty = specialty_raw.split()[0] if specialty_raw else ""
@@ -633,7 +758,7 @@ def extract_data(df):
         note_cell = _cell(row, 29)
         note = "" if pd.isna(note_cell) else note_cell
 
-        sroki = str(row[13]) if not pd.isna(row[13]) else ""
+        sroki = normalize_practice_period(row[13])
 
         # Сроки пока оставим пустыми (нужен анализ), заполним позже
         edu_lvl = str(row[10]).strip().lower()

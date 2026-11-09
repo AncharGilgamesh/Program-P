@@ -61,20 +61,15 @@ def saves_filename(year, doc_type, moment=None):
 
 def log_exception():
     """Дописывает время и трассу текущего исключения. Пароли и поля ввода не пишет."""
-    folder = os.path.join(base_dir, "logs")
-    os.makedirs(folder, exist_ok=True)
-    path = os.path.join(folder, "app.log")
-    moment = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(path, "a", encoding="utf-8") as handle:
-        handle.write(f"{moment}\n{traceback.format_exc()}\n")
-
-
-def normalize_group(value):
-    """Номер группы к строке: Excel часто отдаёт 4111.0 или строку с пробелами."""
-    text = str(value).strip()
-    if text.endswith(".0") and text[:-2].isdigit():
-        return text[:-2]
-    return text
+    try:
+        folder = os.path.join(base_dir, "logs")
+        os.makedirs(folder, exist_ok=True)
+        path = os.path.join(folder, "app.log")
+        moment = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(f"{moment}\n{traceback.format_exc()}\n")
+    except OSError:
+        return
 
 
 def save_registered_copy(window, doc, doc_type):
@@ -85,12 +80,14 @@ def save_registered_copy(window, doc, doc_type):
     try:
         doc.save(save_path)
     except OSError as exc:
+        log_exception()
         QMessageBox.warning(window, "Ошибка", f"Не удалось сохранить файл: {exc}")
         return
     created = datetime.datetime.now().strftime("%Y.%m.%d")
     try:
         dbh.insert_document(year, doc_type, created, window.user, save_path, 0)
     except sqlite3.Error as exc:
+        log_exception()
         QMessageBox.warning(
             window,
             "Ошибка",
