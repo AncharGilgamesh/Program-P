@@ -348,11 +348,13 @@ class MainWindow(QMainWindow):
         data_for_save.append(self._oth_thrd_stg_model.get_data())
         data_for_save.append(self._fourth_stg_model.get_data())
         data_for_save.append(self._fiveth_stg_model.get_data())
+        date = self._fiveth_stg_model.get_data()
+        print(date[1])
         data_for_save.append(self._sixth_stg_model.get_data())
         start_row = 2
         for i in range(len(data_for_save)):
             if i==0:
-                start_row = 1
+                start_row = 0
             if i==4:
                 start_row = 5
             else:
@@ -381,9 +383,9 @@ class MainWindow(QMainWindow):
         start_row = 2
         for i in range(len(data_for_save)):
             if i==0:
-                start_row = 1
+                start_row = 0
             if i==4:
-                start_row = 5
+                start_row = 4
             else:
                 start_row = 2
             table = doc.tables[i]
@@ -391,7 +393,7 @@ class MainWindow(QMainWindow):
         creator = self.user
         save_path = os.path.join(base_dir, "Saves", f"{year}_o.docx")
         dbh.insert_document(year,"Отчет", current_date, creator, save_path, 0)
-        doc.save(f'Saves/{year}_o.docx')
+        doc.save(save_path)
 
     def otch_vsem_five(self):
        self._sixth_stg_model.fill_column_with_value(7, "+")
@@ -428,7 +430,8 @@ class MainWindow(QMainWindow):
         self.ui.otchThirdTableView.resizeRowsToContents()
         self.ui.otchFourthTableView.resizeRowsToContents()
 
-        self.ui.otchFivethTableView.resizeRowsToContents()
+        #self.ui.otchFivethTableView.resizeRowsToContents()
+        self.ui.otchFivethTableView.verticalHeader().setDefaultSectionSize(40)
         self.ui.otchSixthTableView.resizeRowsToContents()
 
 
@@ -556,7 +559,8 @@ class MainWindow(QMainWindow):
         creator = self.user
         save_path = os.path.join(base_dir, "Saves", f"{year}_p.docx")
         dbh.insert_document(year,"План", current_date, creator, save_path, 0)
-        doc.save(f'Saves/{year}_p.docx')
+        #doc.save(f'Saves/{year}_p.docx')
+        doc.save(save_path)
         
             
         

@@ -263,3 +263,16 @@ class ResultTableModel(PlanTableModel):
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable  # Только чтение
 
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
+
+    def get_data(self):
+        result = []
+        for row in range(self.rowCount()):
+            row_data = []
+            for col in range(self.columnCount()):
+                index = self.index(row, col)
+                value = self.data(index, Qt.DisplayRole)
+                if value == "-":
+                    value = ""
+                row_data.append(value)
+            result.append(row_data)
+        return result

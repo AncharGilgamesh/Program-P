@@ -1,13 +1,15 @@
 from PySide6.QtWidgets import (
     QDialog, QLabel, QLineEdit, QComboBox, QPushButton, QFormLayout, QVBoxLayout, QMessageBox
 )
+from Models.datahandler import resource_path
 
 class StarostaDialog(QDialog):
     def __init__(self, teachers, starosta_data=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Редактировать старосту" if starosta_data else "Добавить старосту")
         self.teachers = teachers  # список кортежей: (id, фамилия, имя, отчество)
-        with open("View/dialogstyle.qss", "r") as f:
+        
+        with open(resource_path("View/dialogstyle.qss"), "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
 
         # Элементы интерфейса

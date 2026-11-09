@@ -9,7 +9,14 @@ from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
+import sys, os
 
+# Для превращения относительного пути в абсолютный
+def resource_path(relative_path):
+    """ Получение абсолютного пути к ресурсу для PyInstaller """
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 # Шестой этап
 def parse_sixth_table(data, prepods):

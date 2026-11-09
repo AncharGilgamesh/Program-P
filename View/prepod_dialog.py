@@ -2,12 +2,13 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QFormLayout, QLineEdit, QComboBox,
     QPushButton, QHBoxLayout
 )
+from Models.datahandler import resource_path
 
 class PrepodDialog(QDialog):
     def __init__(self, parent=None, data=None):
         super().__init__(parent)
         self.setWindowTitle("Добавить/Редактировать преподавателя")
-        with open("View/dialogstyle.qss", "r") as f:
+        with open(resource_path("View/dialogstyle.qss"), "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
         
         # Поля

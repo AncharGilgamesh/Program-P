@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QLineEdit, QLabel, QWidget, QMessageBox, QComboBox
 )
 from PySide6.QtCore import QStringListModel, Qt
+from Models.datahandler import resource_path
 
 
 class GroupEditDialog(QDialog):
@@ -11,7 +12,7 @@ class GroupEditDialog(QDialog):
         self.setWindowTitle(title)
         self.resize(600, 400)
 
-        with open("View/dialogstyle.qss", "r") as f:
+        with open(resource_path("View/dialogstyle.qss"), "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
 
         # Полные списки
