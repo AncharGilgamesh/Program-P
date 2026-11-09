@@ -1,16 +1,18 @@
 from PySide6.QtWidgets import QDialog, QMessageBox
 from View.appearance import Ui_Dialog
-from passlib.hash import bcrypt
+
+# from passlib.hash import bcrypt  # returns when passwords are stored as hashes
 import Models.dbhandler_new as dbh
 
 SECRET_REG_CODE_HASH = "секрет123"
+
 
 class AppearanceDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
-        
+
         self.success = False
         self.user = None
         self.go_to_auth()
@@ -43,7 +45,7 @@ class AppearanceDialog(QDialog):
         password = self.ui.authPassLine.text()
         try:
             user = dbh.select_user_by_username(username)[0]
-        except:
+        except Exception:
             QMessageBox.warning(self, "Ошибка", "Неправильный логин")
             return
         if username == user[2] and password == user[3]:
@@ -55,8 +57,7 @@ class AppearanceDialog(QDialog):
         else:
             QMessageBox.warning(self, "Ошибка", "Неправильный пароль")
             return
-            
-    
+
     def register_user(self):
         username = self.ui.regUsernamLine.text()
         password = self.ui.regPassLine.text()
@@ -76,12 +77,14 @@ class AppearanceDialog(QDialog):
         try:
             teacher = dbh.select_teacher_by_name(sec_name, name, middle_name)[0]
             teacher_id = teacher[0]
-        except:
+        except Exception:
             teacher_id = ""
         try:
             dbh.insert_user(teacher_id, username, password, sec_name, name, middle_name)
-        except:
-            QMessageBox.warning(self, "Ошибка", "Что-то пошло не так. Попробуйте поменять имя пользователя")
+        except Exception:
+            QMessageBox.warning(
+                self, "Ошибка", "Что-то пошло не так. Попробуйте поменять имя пользователя"
+            )
         QMessageBox.information(self, "Успешно", "Пользователь зарегистрирован")
 
     def check_recover(self):
@@ -91,7 +94,7 @@ class AppearanceDialog(QDialog):
         repeat_password = self.ui.recoverRepeatPassLine.text()
         try:
             dbh.select_user_by_username(username)[0]
-        except:
+        except Exception:
             QMessageBox.warning(self, "Ошибка", "Неправильный логин")
             return
         if not self.is_valid_registration_code(recoverCode):
@@ -103,14 +106,12 @@ class AppearanceDialog(QDialog):
         try:
             dbh.update_user_password(username, password)
             QMessageBox.information(self, "Успешно", "Успешная смена пароля")
-        except:
+        except Exception:
             QMessageBox.warning(self, "Ошибка", "Что-то пошло не так")
             return
 
     def get_username(self):
         return self.user
-    
+
     def get_success_status(self):
         return self.success
-
-    

@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QTableView, QMenu, QApplication
-from PySide6.QtCore import Qt, QModelIndex
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeyEvent, QKeySequence
+
 
 class SmartTableView(QTableView):
     def __init__(self, parent=None):

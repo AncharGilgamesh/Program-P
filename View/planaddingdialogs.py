@@ -1,6 +1,13 @@
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QListView, QPushButton, QTextEdit,
-    QLineEdit, QLabel, QWidget, QMessageBox, QComboBox
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QListView,
+    QPushButton,
+    QTextEdit,
+    QLineEdit,
+    QLabel,
+    QComboBox,
 )
 from PySide6.QtCore import QStringListModel, Qt
 from Models.datahandler import resource_path
@@ -25,11 +32,9 @@ class GroupEditDialog(QDialog):
 
         # Элементы управления
         self.search_filter_combo = QComboBox()
-        self.search_filter_combo.addItems([
-            "Искать везде",
-            "Только в доступных группах",
-            "Только в выбранных группах"
-        ])
+        self.search_filter_combo.addItems(
+            ["Искать везде", "Только в доступных группах", "Только в выбранных группах"]
+        )
 
         self.search_line = QLineEdit()
         self.search_line.setPlaceholderText("Поиск группы...")
@@ -109,7 +114,9 @@ class GroupEditDialog(QDialog):
         if index:
             selected = [self.all_model.data(index, Qt.DisplayRole)]
         else:
-            selected = [self.all_model.data(i, Qt.DisplayRole) for i in self.all_list.selectedIndexes()]
+            selected = [
+                self.all_model.data(i, Qt.DisplayRole) for i in self.all_list.selectedIndexes()
+            ]
         if not selected:
             return
         self._full_selected_list = sorted(set(self._full_selected_list).union(selected))
@@ -120,13 +127,15 @@ class GroupEditDialog(QDialog):
         if index:
             selected = [self.selected_model.data(index, Qt.DisplayRole)]
         else:
-            selected = [self.selected_model.data(i, Qt.DisplayRole) for i in self.selected_list.selectedIndexes()]
+            selected = [
+                self.selected_model.data(i, Qt.DisplayRole)
+                for i in self.selected_list.selectedIndexes()
+            ]
         if not selected:
             return
         self._full_all_list = sorted(set(self._full_all_list).union(selected))
         self._full_selected_list = [g for g in self._full_selected_list if g not in selected]
         self.filter_groups(self.search_line.text())
-
 
     def get_result(self):
         return self._full_selected_list, self.input_edit.toPlainText()

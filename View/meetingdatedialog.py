@@ -1,9 +1,15 @@
 from PySide6.QtWidgets import (
-    QDialog, QListView, QPushButton, QVBoxLayout, QHBoxLayout, QLabel,
-    QDateEdit, QAbstractItemView
+    QDialog,
+    QListView,
+    QPushButton,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QDateEdit,
+    QAbstractItemView,
 )
 from PySide6.QtCore import QStringListModel, QDate
-from datetime import datetime
+
 
 class MeetingDateDialog(QDialog):
     def __init__(self, group_practice_list, parent=None):

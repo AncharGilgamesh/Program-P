@@ -1,9 +1,9 @@
 import os
 import sqlite3
-from PySide6.QtCore import QDate
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, '..', 'DB', 'maindatabase.db')
+DB_PATH = os.path.join(BASE_DIR, "..", "DB", "maindatabase.db")
+
 
 def execute_query(query, params=(), fetch=False, many=False):
     with sqlite3.connect(DB_PATH) as con:
@@ -16,6 +16,7 @@ def execute_query(query, params=(), fetch=False, many=False):
         if fetch:
             return cur.fetchall()
 
+
 def create_tables():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     create_docs_table()
@@ -23,8 +24,9 @@ def create_tables():
     create_starosta_table()
     create_users_table()
 
+
 def create_starosta_table():
-    query = ("""
+    query = """
         CREATE TABLE IF NOT EXISTS startostas(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             teacher_id INTEGER,
@@ -35,11 +37,12 @@ def create_starosta_table():
             email VARCHAR(100) UNIQUE,
             phone VARCHAR(20)
         );
-    """)
+    """
     execute_query(query)
 
+
 def create_teachers_table():
-    query = ("""
+    query = """
         CREATE TABLE IF NOT EXISTS teachers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             last_name VARCHAR(50) NOT NULL,
@@ -50,11 +53,12 @@ def create_teachers_table():
             email VARCHAR(100) UNIQUE,
             phone VARCHAR(20)
         );
-    """)
+    """
     execute_query(query)
 
+
 def create_docs_table():
-    query = ("""
+    query = """
         CREATE TABLE IF NOT EXISTS documents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             year INTEGER,
@@ -64,11 +68,12 @@ def create_docs_table():
             protected INTEGER,
             file_path TEXT
         );
-    """)
+    """
     execute_query(query)
 
+
 def create_users_table():
-    query = ("""
+    query = """
         CREATE TABLE IF NOT EXISTS users (
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              teacher_id INTEGER,
@@ -80,18 +85,13 @@ def create_users_table():
              is_remembered INTEGER DEFAULT 0,
              FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE SET NULL
         );
-    """)
+    """
     execute_query(query)
 
-def insert_user(data):
-    query = """
-        INSERT INTO startostas (teacher_id, username, password, last_name, first_name, middle_name)
-        VALUES (?, ?, ?, ?, ?, ?);
-    """
-    execute_query(query, data) 
 
 def update_teacher(id, data):
-    query = ("""
+    query = (
+        """
         UPDATE teachers
         SET last_name = ?,
             first_name = ?,
@@ -101,24 +101,29 @@ def update_teacher(id, data):
             email = ?,
             phone = ?
         WHERE id = {}
-    """).format(id)
+    """
+    ).format(id)
     execute_query(query, data)
+
 
 def remove_teacher(id):
     query = "DELETE FROM teachers WHERE id = {}".format(id)
     execute_query(query)
 
+
 def remove_document(id):
     query = "DELETE FROM documents WHERE id = {}".format(id)
     execute_query(query)
 
+
 def defend_document(id, status):
-    query = ("""
+    query = """
         UPDATE documents
         SET protected = ?
         WHERE id = ?
-    """)
+    """
     execute_query(query, (status, id))
+
 
 def remove_user(username):
     query = "DELETE FROM users WHERE username = ?"
@@ -133,6 +138,7 @@ def insert_teacher(l_name, f_name, m_name, a_degree, a_title, email, phone):
     params = (l_name, f_name, m_name, a_degree, a_title, email, phone)
     execute_query(query, params)
 
+
 def insert_user(teacher_id, username, password, l_name, f_name, m_name):
     query = """
         INSERT INTO users (teacher_id, username, password, last_name, first_name, middle_name)
@@ -140,6 +146,7 @@ def insert_user(teacher_id, username, password, l_name, f_name, m_name):
     """
     params = (teacher_id, username, password, l_name, f_name, m_name)
     execute_query(query, params)
+
 
 def insert_starosta(teacher_id, l_name, f_name, m_name, group, email, phone):
     query = """
@@ -149,8 +156,10 @@ def insert_starosta(teacher_id, l_name, f_name, m_name, group, email, phone):
     params = (teacher_id, l_name, f_name, m_name, group, email, phone)
     execute_query(query, params)
 
+
 def update_starosta(id, data):
-    query = ("""
+    query = (
+        """
         UPDATE startostas
         SET teacher_id = ?,
             last_name = ?,
@@ -160,14 +169,19 @@ def update_starosta(id, data):
             email = ?,
             phone = ?
         WHERE id = {}
-    """).format(id)
+    """
+    ).format(id)
     execute_query(query, data)
+
 
 def remove_starosta(id):
     query = "DELETE FROM startostas WHERE id = {}".format(id)
     execute_query(query)
 
-def insert_document(year: int, doc_type: str, created: str, creator: str, file_path: str, protected: int = 0):
+
+def insert_document(
+    year: int, doc_type: str, created: str, creator: str, file_path: str, protected: int = 0
+):
     query = """
         INSERT INTO documents (year, type, created, creator, protected, file_path)
         VALUES (?, ?, ?, ?, ?, ?);
@@ -175,57 +189,65 @@ def insert_document(year: int, doc_type: str, created: str, creator: str, file_p
     params = (year, doc_type, created, creator, int(protected), file_path)
     execute_query(query, params)
 
+
 def select_teacher_by_name(l_name, f_name, m_name):
-    query = ("""SELECT * FROM teachers
+    query = """SELECT * FROM teachers
         WHERE last_name = ? AND first_name = ? AND middle_name = ?
-    """)
+    """
     params = (l_name, f_name, m_name)
     return execute_query(query, params=params, fetch=True)
 
+
 def select_teacher_by_id(id):
-    query = ("""SELECT * FROM teachers
+    query = """SELECT * FROM teachers
         WHERE id = ?
-    """)
+    """
     return execute_query(query, (id,), fetch=True)
 
+
 def select_user_by_username(username):
-    query = ("""SELECT * FROM users
+    query = """SELECT * FROM users
         WHERE username = ?
-    """)
+    """
     return execute_query(query, (username,), fetch=True)
 
+
 def select_remembered_user():
-    query = ("""SELECT * FROM users
+    query = """SELECT * FROM users
         WHERE is_remembered = 1
-    """)
+    """
     return execute_query(query, fetch=True)
 
+
 def update_user_password(username, new_password):
-    query = ("""
+    query = """
         UPDATE users
         SET password = ?
         WHERE username = ?
-    """)
+    """
     execute_query(query, (new_password, username))
 
+
 def update_remember_status(username, status):
-    query = ("""
+    query = """
         UPDATE users
         SET is_remembered = ?
         WHERE username = ?
-    """)
+    """
     execute_query(query, (status, username))
+
 
 def load_docs():
     query = "SELECT id, year, type, created, creator, protected, file_path FROM documents"
     result = execute_query(query, fetch=True)
     return [list(row) for row in result]
 
+
 def load_teachers():
     query = "SELECT * FROM teachers"
     return execute_query(query, fetch=True)
 
+
 def load_starostas():
     query = "SELECT * FROM startostas"
     return execute_query(query, fetch=True)
-

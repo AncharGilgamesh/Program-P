@@ -8,25 +8,28 @@ import pandas as pd
 import Models.datahandler as dh
 import Models.dbhandler_new as dbh
 from docx import Document
-from PySide6 import QtWidgets
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView, QMessageBox, QInputDialog
-from PySide6.QtCore import QSortFilterProxyModel, Qt
-
+from PySide6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QFileDialog,
+    QHeaderView,
+    QMessageBox,
+    QInputDialog,
+)
 
 from Models.model import PlanTableModel, ResultTableModel
 
 from View.workspace import Ui_MainWindow
 from View.appearance_logic import AppearanceDialog
 from View.planaddingdialogs import GroupEditDialog
-from View.smartTableView import SmartTableView
-from View.meetingdatedialog import MeetingDateDialog
 from View.prepod_dialog import PrepodDialog
 from View.startosta_dialog import StarostaDialog
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 help_path = os.path.join(base_dir, "", "help.html")
-shablon_plan_path = os.path.join(base_dir, "Shablons", "shablon_plan.docx" )
-shablon_otch_path = os.path.join(base_dir, "Shablons", "shablon_otchet.docx" )
+shablon_plan_path = os.path.join(base_dir, "Shablons", "shablon_plan.docx")
+shablon_otch_path = os.path.join(base_dir, "Shablons", "shablon_otchet.docx")
+
 
 class MainWindow(QMainWindow):
     def __init__(self, user=None):
@@ -35,7 +38,6 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.load_help_html()
-        
 
         # Создаем базы данных
         dbh.create_tables()
@@ -56,35 +58,23 @@ class MainWindow(QMainWindow):
         self._plan_data = None
         self._plan_headers = [
             "id",
-            "№\nгр.", "Вид практики\n(кол-во студентов)", "Сроки\nпроведения\n(кол-во часов)", "Место\nпроведения\n(предприятие, кафедра)",
-            "№ договора\nс предприя-\nтием\n(числа)","Руководитель от\nуниверситета(ф.и.о.,\nдолжность, звание,\n контактный тел.)",
-            "Руководитель от\nпредпр-я(ф.и.о.,\nдолж.,контакт.\nТел.)", "Наименование\nспециальности и ее\nшифр",
-              "Необходимо\nсть закупки\n(есть, нет)", "Примечан\nие"]
+            "№\nгр.",
+            "Вид практики\n(кол-во студентов)",
+            "Сроки\nпроведения\n(кол-во часов)",
+            "Место\nпроведения\n(предприятие, кафедра)",
+            "№ договора\nс предприя-\nтием\n(числа)",
+            "Руководитель от\nуниверситета(ф.и.о.,\nдолжность, звание,\n контактный тел.)",
+            "Руководитель от\nпредпр-я(ф.и.о.,\nдолж.,контакт.\nТел.)",
+            "Наименование\nспециальности и ее\nшифр",
+            "Необходимо\nсть закупки\n(есть, нет)",
+            "Примечан\nие",
+        ]
         self._plan_model = PlanTableModel(self._plan_data, self._plan_headers)
         self.ui.tableView.setModel(self._plan_model)
         self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.tableView.hideColumn(0)
         # Определяем заголовки для таблиц
         self.set_otchet_tables_models()
-        # Новый участок кода
-        """
-        Этот участок кода реализует поиск в таблице. Пока не знаю. нужно ли это вообще мне
-        self.proxy_model = QSortFilterProxyModel(self)
-        self.proxy_model.setSourceModel(self._plan_model)
-        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
-        self.proxy_model.setFilterKeyColumn(-1)  # по умолчанию — все столбцы
-        self.ui.tableView.setModel(self.proxy_model)
-        self.ui.planSearchComboBox.addItem("Все столбцы", -1)
-        self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.ui.tableView.hideColumn(0)
-        for i in range(self._plan_model.columnCount()):
-            header = self._plan_model.headerData(i, Qt.Horizontal)
-            self.ui.planSearchComboBox.addItem(header, i)
-        # Сигналы
-        self.ui.searchPlanLineEdit.textChanged.connect(self.apply_filter)
-        self.ui.planSearchComboBox.currentIndexChanged.connect(self.apply_filter)
-        #Конец нового участка кода
-        """
         # Тут страница отчета
         self.ui.otch_prev_btn.clicked.connect(self.to_prev_stage)
         self.ui.otch_next_btn.clicked.connect(self.to_next_stage)
@@ -104,8 +94,7 @@ class MainWindow(QMainWindow):
         self.ui.otchAllXorButton.clicked.connect(self.otch_vsem_four)
         self.ui.otchAllOtlButton.clicked.connect(self.otch_vsem_five)
 
-
-        # Тут страница плана        
+        # Тут страница плана
         self.ui.loadTableButton.clicked.connect(self.load_table_new)
         self.ui.loadNagruzkaButton.clicked.connect(self.load_nagruzka)
         # проверяю insert rows для модели
@@ -149,7 +138,6 @@ class MainWindow(QMainWindow):
         self.ui.lkChangePassPushButton.clicked.connect(self.lk_change_password)
         self.ui.lkDelAccPushButton.clicked.connect(self.lk_del_account)
 
-
     def load_help_html(self):
         with open(help_path, "r", encoding="utf-8") as f:
             html = f.read()
@@ -158,10 +146,11 @@ class MainWindow(QMainWindow):
     # ==========================Код для работы с личным кабинетом ==========================================
     def lk_del_account(self):
         reply = QMessageBox.question(
-            self, "Подтверждение",
+            self,
+            "Подтверждение",
             "Вы уверены, что хотите удалить этот аккаунт?",
             QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No  # По умолчанию выделена кнопка "Нет"
+            QMessageBox.No,  # По умолчанию выделена кнопка "Нет"
         )
 
         if reply == QMessageBox.Yes:
@@ -182,10 +171,10 @@ class MainWindow(QMainWindow):
         try:
             dbh.update_user_password(self.user, password)
             QMessageBox.information(self, "Успешно", "Успешная смена пароля")
-        except:
+        except Exception:
             QMessageBox.warning(self, "Ошибка", "Что-то пошло не так")
             return
-    
+
     def go_to_lk(self):
         self.switch_page(4)
         user = dbh.select_user_by_username(self.user)[0]
@@ -200,8 +189,6 @@ class MainWindow(QMainWindow):
         self.ui.lkEmailLine.setText(user_data[-2])
         self.ui.lkPhoneLine.setText(user_data[-1])
 
-
-
     # ==========================Код для работы с базой данных===============================================
     def open_document(self):
         index = self.ui.dataBaseTableView.selectedIndexes()[0]
@@ -211,9 +198,9 @@ class MainWindow(QMainWindow):
         system = platform.system()
         if system == "Windows":
             os.startfile(file_path)  # Самый простой способ для Windows
-        elif system == "Darwin":     # macOS
+        elif system == "Darwin":  # macOS
             subprocess.run(["open", file_path])
-        else:                        # Linux и другие
+        else:  # Linux и другие
             subprocess.run(["xdg-open", file_path])
 
     def defend_doucment(self):
@@ -227,7 +214,6 @@ class MainWindow(QMainWindow):
             dbh.defend_document(id, 0)
         self.upload_db_docs()
 
-    
     def remove_document(self):
         index = self.ui.dataBaseTableView.selectedIndexes()[0]
         row = index.row()
@@ -237,14 +223,13 @@ class MainWindow(QMainWindow):
             dbh.remove_document(id)
             os.remove(data[-1])
             self.upload_db_docs()
-        except:
+        except Exception:
             return
-
 
     def upload_db_starosta(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(1)
         data = dbh.load_starostas()
-        headers = ["id","id_Куратора", "Фамилия", "Имя", "Отчество", "Группа", "Почта", "Номер"]
+        headers = ["id", "id_Куратора", "Фамилия", "Имя", "Отчество", "Группа", "Почта", "Номер"]
         self._db_model = PlanTableModel(data, headers)
         self.ui.dataBaseTableView.setModel(self._db_model)
 
@@ -256,9 +241,9 @@ class MainWindow(QMainWindow):
         try:
             dbh.insert_starosta(*data)
             self.upload_db_starosta()
-        except:
+        except Exception:
             return
-        
+
     def edit_db_starosta(self):
         teachers = dbh.load_teachers()
         index = self.ui.dataBaseTableView.selectedIndexes()[0]
@@ -271,7 +256,7 @@ class MainWindow(QMainWindow):
         try:
             dbh.update_starosta(id, data)
             self.upload_db_starosta()
-        except:
+        except Exception:
             return
 
     def remove_db_starosta(self):
@@ -282,9 +267,8 @@ class MainWindow(QMainWindow):
         try:
             dbh.remove_starosta(id)
             self.upload_db_starosta()
-        except:
+        except Exception:
             return
-
 
     def upload_db_teachers(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(0)
@@ -292,7 +276,6 @@ class MainWindow(QMainWindow):
         headers = ["id", "Фамилия", "Имя", "Отчество", "Степень", "Должность", "Почта", "Номер"]
         self._db_model = PlanTableModel(data, headers)
         self.ui.dataBaseTableView.setModel(self._db_model)
-        
 
     def add_db_prepod(self):
         dialog = PrepodDialog(parent=self)
@@ -301,7 +284,7 @@ class MainWindow(QMainWindow):
         try:
             dbh.insert_teacher(*data)
             self.upload_db_teachers()
-        except:
+        except Exception:
             return
 
     def edit_db_prepod(self):
@@ -315,7 +298,7 @@ class MainWindow(QMainWindow):
         try:
             dbh.update_teacher(id, data)
             self.upload_db_teachers()
-        except:
+        except Exception:
             return
 
     def remove_db_prepod(self):
@@ -326,9 +309,8 @@ class MainWindow(QMainWindow):
         try:
             dbh.remove_teacher(id)
             self.upload_db_teachers()
-        except:
+        except Exception:
             return
-
 
     def upload_db_docs(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(2)
@@ -337,7 +319,6 @@ class MainWindow(QMainWindow):
         headers = ["id", "Год", "Тип", "Дата создания", "Создатель", "Защищено", "Путь"]
         self._db_model = PlanTableModel(data, headers)
         self.ui.dataBaseTableView.setModel(self._db_model)
-
 
     # ==========================Код для работы с отчетом====================================================
     def save_otchet_as(self):
@@ -353,9 +334,9 @@ class MainWindow(QMainWindow):
         data_for_save.append(self._sixth_stg_model.get_data())
         start_row = 2
         for i in range(len(data_for_save)):
-            if i==0:
+            if i == 0:
                 start_row = 0
-            if i==4:
+            if i == 4:
                 start_row = 5
             else:
                 start_row = 2
@@ -363,8 +344,8 @@ class MainWindow(QMainWindow):
             dh.fill_the_table_rows(table, data_for_save[i], start_row)
         options = QFileDialog.Options()
         fname, _ = QFileDialog.getSaveFileName(
-            self,
-            "Сохранить файл", "", "Word файлы (*.docx)", options=options)
+            self, "Сохранить файл", "", "Word файлы (*.docx)", options=options
+        )
         if not fname:
             return
         doc.save(fname)
@@ -382,9 +363,9 @@ class MainWindow(QMainWindow):
         data_for_save.append(self._sixth_stg_model.get_data())
         start_row = 2
         for i in range(len(data_for_save)):
-            if i==0:
+            if i == 0:
                 start_row = 0
-            if i==4:
+            if i == 4:
                 start_row = 4
             else:
                 start_row = 2
@@ -392,13 +373,13 @@ class MainWindow(QMainWindow):
             dh.fill_the_table_rows(table, data_for_save[i], start_row)
         creator = self.user
         save_path = os.path.join(base_dir, "Saves", f"{year}_o.docx")
-        dbh.insert_document(year,"Отчет", current_date, creator, save_path, 0)
+        dbh.insert_document(year, "Отчет", current_date, creator, save_path, 0)
         doc.save(save_path)
 
     def otch_vsem_five(self):
-       self._sixth_stg_model.fill_column_with_value(7, "+")
-       self._sixth_stg_model.fill_column_with_value(6, "")
-       self._sixth_stg_model.fill_column_with_value(5, "")
+        self._sixth_stg_model.fill_column_with_value(7, "+")
+        self._sixth_stg_model.fill_column_with_value(6, "")
+        self._sixth_stg_model.fill_column_with_value(5, "")
 
     def otch_vsem_four(self):
         self._sixth_stg_model.fill_column_with_value(7, "")
@@ -418,7 +399,9 @@ class MainWindow(QMainWindow):
         fio = show_fio_dialog(parent=self)  # Замените 'window' на вашу основную форму
         if fio:
             target_column = 2
-            self._oth_thrd_stg_model.set_col(target_column, [fio] * self._oth_thrd_stg_model.rowCount())  # Вставить ФИО во все строки
+            self._oth_thrd_stg_model.set_col(
+                target_column, [fio] * self._oth_thrd_stg_model.rowCount()
+            )  # Вставить ФИО во все строки
 
     def otch_make_all_came(self):
         values = self._oth_scnd_std_model.get_col(3)
@@ -430,10 +413,9 @@ class MainWindow(QMainWindow):
         self.ui.otchThirdTableView.resizeRowsToContents()
         self.ui.otchFourthTableView.resizeRowsToContents()
 
-        #self.ui.otchFivethTableView.resizeRowsToContents()
+        # self.ui.otchFivethTableView.resizeRowsToContents()
         self.ui.otchFivethTableView.verticalHeader().setDefaultSectionSize(40)
         self.ui.otchSixthTableView.resizeRowsToContents()
-
 
     def add_meting_date(self):
         data_for_meeting = self._oth_frst_stg_model.get_data()
@@ -447,16 +429,16 @@ class MainWindow(QMainWindow):
             for row in rows_to_update:
                 # столбец 5 — это "Дата проведения собрания"
                 self._oth_frst_stg_model.setData(self._oth_frst_stg_model.index(row, 5), date_str)
+
     # Переработал первый этап, эта функция будет пополняться по мере заполнения этапов
     def load_plan(self):
-        fname, _ = QFileDialog.getOpenFileName(
-            self, "Choose file", "", "Excel Files (*.docx)")
+        fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Excel Files (*.docx)")
         if not fname:
             return
         data = dh.read_plan_from_docx(fname)
         # Вот эту функцию нужно переработать, чтобы даты не брались
         table1 = dh.parse_practice_table(data[1:])  # пропускаем заголовки
-        self._oth_frst_stg_model.insertRows(0,len(table1), table1)
+        self._oth_frst_stg_model.insertRows(0, len(table1), table1)
         table2 = dh.parse_second_table(data[1:])
         self._oth_scnd_std_model.insertRows(0, len(table2), table2)
         table3 = dh.parse_third_table(data[1:])
@@ -469,47 +451,76 @@ class MainWindow(QMainWindow):
         table6 = dh.parse_sixth_table(table1, data)
         self._sixth_stg_model.insertRows(0, len(table6), table6)
         self.set_otchet_resizing()
-    
-        #self._fourth_stg_model.insertRows(0, len(table4), table4)
+
+        # self._fourth_stg_model.insertRows(0, len(table4), table4)
         # вот тут представлены варианты изменения размера, нужно это все рассмотреть получше
-        #self.ui.otchThirdTableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        #self.ui.otchThirdTableView.resizeRowsToContents()
-        #Для четвертой таблицы попробуй взять инфу из второй таблицы и надо подредактировать
-        #Сделать диалоговое окно, чтобы можно было заполнять таблицу из второй таблицы
-            
+        # self.ui.otchThirdTableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # self.ui.otchThirdTableView.resizeRowsToContents()
+        # Для четвертой таблицы попробуй взять инфу из второй таблицы и надо подредактировать
+        # Сделать диалоговое окно, чтобы можно было заполнять таблицу из второй таблицы
+
     def to_next_stage(self):
-        index = self.ui.stackedWidget.currentIndex()+1
+        index = self.ui.stackedWidget.currentIndex() + 1
         if index == 6:
             return
-        self.ui.otch_lbl_stage.setText(f'{index + 1} этап')
+        self.ui.otch_lbl_stage.setText(f"{index + 1} этап")
         self.ui.stackedWidget.setCurrentIndex(index)
 
     def to_prev_stage(self):
-        index = self.ui.stackedWidget.currentIndex()-1
+        index = self.ui.stackedWidget.currentIndex() - 1
         if index == -1:
             return
-        self.ui.otch_lbl_stage.setText(f'{index + 1} этап')
+        self.ui.otch_lbl_stage.setText(f"{index + 1} этап")
         self.ui.stackedWidget.setCurrentIndex(index)
 
     def set_otchet_tables_models(self):
         headers_for_first_stage = [
-            "№", "Группа", "Направление\n/Специальность", "Семестр", "Вид практики", "Дата\nпроведения\nсобрания"
-            ]
+            "№",
+            "Группа",
+            "Направление\n/Специальность",
+            "Семестр",
+            "Вид практики",
+            "Дата\nпроведения\nсобрания",
+        ]
         headers_for_second_stage = [
-            "№\nп/п", "Город", "Место проведения", "Направлено", "Прибыло", "Инструктаж по ТБ", "Факт. конец"
+            "№\nп/п",
+            "Город",
+            "Место проведения",
+            "Направлено",
+            "Прибыло",
+            "Инструктаж по ТБ",
+            "Факт. конец",
         ]
-        headers_for_third_stage = [
-            "Место", "Рук. от КАИ", "Рук. от предприятия"
-        ]
+        headers_for_third_stage = ["Место", "Рук. от КАИ", "Рук. от предприятия"]
         headers_fourth_stage = [
-            "Место\nпроведения\nпрактики", "В цехах", "Офис", "Инженерно-\nтехнические\nдолжности", "Научные\nлаборатории",
-            "Студ.\n отряды", "Другое", "Оформление\nТБ на рабочем\nместе(да\нет)"
+            "Место\nпроведения\nпрактики",
+            "В цехах",
+            "Офис",
+            "Инженерно-\nтехнические\nдолжности",
+            "Научные\nлаборатории",
+            "Студ.\n отряды",
+            "Другое",
+            "Оформление\nТБ на рабочем\nместе(да\нет)",
         ]
         headers_fiveth_stage = [
-            "Группа", "Всего\nчел.", "Отл.", "Хор.", "Удовл.", "Неуд.", "Не\nзащитило", "Место\nзащиты"
+            "Группа",
+            "Всего\nчел.",
+            "Отл.",
+            "Хор.",
+            "Удовл.",
+            "Неуд.",
+            "Не\nзащитило",
+            "Место\nзащиты",
         ]
         headers_sixth_stage = [
-            "№", "Руководитель", "Должность", "Группа", "Вид\nпрактики", "Удовл.", "Хор.", "Отл."
+            "№",
+            "Руководитель",
+            "Должность",
+            "Группа",
+            "Вид\nпрактики",
+            "Удовл.",
+            "Хор.",
+            "Отл.",
         ]
         first_data = None
         self._oth_frst_stg_model = PlanTableModel(first_data, headers_for_first_stage)
@@ -525,13 +536,13 @@ class MainWindow(QMainWindow):
         self._sixth_stg_model = PlanTableModel(first_data, headers_sixth_stage)
         self.ui.otchSixthTableView.setModel(self._sixth_stg_model)
 
-
     # Функция для переключения окон
     def switch_page(self, index):
         """Переключает страницу в QStackedWidget и обновляет состояние кнопок"""
         self.ui.mainStackedWidget.setCurrentIndex(index)
         if index == 0:
             self.upload_db_docs()
+
     # ==========================Код для работы с планом====================================================
 
     def save_plan_as(self):
@@ -542,8 +553,8 @@ class MainWindow(QMainWindow):
         dh.fill_the_table_rows(table, data_for_save, start_row)
         options = QFileDialog.Options()
         fname, _ = QFileDialog.getSaveFileName(
-            self,
-            "Сохранить файл", "", "Excel файлы (*.docx)", options=options)
+            self, "Сохранить файл", "", "Excel файлы (*.docx)", options=options
+        )
         if not fname:
             return
         doc.save(fname)
@@ -558,12 +569,9 @@ class MainWindow(QMainWindow):
         dh.fill_the_table_rows(table, data_for_save, start_row)
         creator = self.user
         save_path = os.path.join(base_dir, "Saves", f"{year}_p.docx")
-        dbh.insert_document(year,"План", current_date, creator, save_path, 0)
-        #doc.save(f'Saves/{year}_p.docx')
+        dbh.insert_document(year, "План", current_date, creator, save_path, 0)
+        # doc.save(f'Saves/{year}_p.docx')
         doc.save(save_path)
-        
-            
-        
 
     # Модифицируем метод для открытия редактирования
     def open_group_dialog(self):
@@ -590,11 +598,11 @@ class MainWindow(QMainWindow):
             col = dh.find_column_index_by_keyword(self._plan_model, keyword)
             for group in selected_groups:
                 self._plan_model.updateCellsByCondition(1, int(group), col, str(value))
-                   
 
     def load_nagruzka(self):
         fname, _ = QFileDialog.getOpenFileName(
-            self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)")
+            self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)"
+        )
         if not fname:
             return
         data = pd.read_excel(fname, header=None)
@@ -608,16 +616,16 @@ class MainWindow(QMainWindow):
             self._plan_model.insertRows(0, len(extracted_data), extracted_data)
         self._nagruzka_loaded = True
         self.ui.tableView.resizeRowsToContents()
-        
 
     def load_table_new(self):
         fname, _ = QFileDialog.getOpenFileName(
-            self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)")
+            self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)"
+        )
         if not fname:
             return
         baka = pd.read_excel(fname, 0, header=None)
         maga = pd.read_excel(fname, 1, header=None)
-        #keywords = ["практика", "магистратура"]
+        # keywords = ["практика", "магистратура"]
 
         # Проход по всем ячейкам датафрейма
         """
@@ -632,8 +640,8 @@ class MainWindow(QMainWindow):
         blocks_maga = dh.extract_practice_blocks_with_empty_stop(maga)
 
         # Вывод результатов
-        
-        #print(blocks_maga)
+
+        # print(blocks_maga)
         blocks_baka_tr = dh.transform_practice_data(blocks)
         blocks_maga_tr = dh.transform_practice_data(blocks_maga, len(blocks_baka_tr))
         combined_blocks = blocks_baka_tr + blocks_maga_tr
@@ -653,12 +661,13 @@ class MainWindow(QMainWindow):
         self.restart_auth = True
         self.close()  # просто закрываем окно, не sys.exit()
 
+
 def check_for_appearance():
     try:
         user = dbh.select_remembered_user()[0]
         if user:
             return user[2]
-    except:
+    except Exception:
         appearance = AppearanceDialog()
         appearance.exec()
         if not appearance.get_success_status():
@@ -667,10 +676,11 @@ def check_for_appearance():
 
 
 def show_fio_dialog(parent=None):
-        text, ok = QInputDialog.getText(parent, "Введите ФИО", "Фамилия и инициалы:")
-        if ok and text.strip():
-            return text.strip()
-        return None
+    text, ok = QInputDialog.getText(parent, "Введите ФИО", "Фамилия и инициалы:")
+    if ok and text.strip():
+        return text.strip()
+    return None
+
 
 def run_application():
     while True:
@@ -681,7 +691,7 @@ def run_application():
                 username = user[2]
             else:
                 raise Exception("Требуется авторизация")
-        except:
+        except Exception:
             # 2. Открываем окно авторизации
             appearance = AppearanceDialog()
             appearance.exec()
@@ -702,12 +712,13 @@ def run_application():
         else:
             break  # обычный выход, завершаем
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     run_application()
-    '''
+    """
     username = check_for_appearance()
     window = MainWindow(user=username)
     window.show()
 
-    sys.exit(app.exec())'''
+    sys.exit(app.exec())"""

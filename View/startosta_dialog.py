@@ -1,14 +1,21 @@
 from PySide6.QtWidgets import (
-    QDialog, QLabel, QLineEdit, QComboBox, QPushButton, QFormLayout, QVBoxLayout, QMessageBox
+    QDialog,
+    QLineEdit,
+    QComboBox,
+    QPushButton,
+    QFormLayout,
+    QVBoxLayout,
+    QMessageBox,
 )
 from Models.datahandler import resource_path
+
 
 class StarostaDialog(QDialog):
     def __init__(self, teachers, starosta_data=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Редактировать старосту" if starosta_data else "Добавить старосту")
         self.teachers = teachers  # список кортежей: (id, фамилия, имя, отчество)
-        
+
         with open(resource_path("View/dialogstyle.qss"), "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
 
@@ -34,12 +41,12 @@ class StarostaDialog(QDialog):
             if index != -1:
                 self.teacher_combo.setCurrentIndex(index)
 
-            self.last_name_edit.setText(starosta_data[1])     # last_name
-            self.first_name_edit.setText(starosta_data[2])    # first_name
-            self.middle_name_edit.setText(starosta_data[3])   # middle_name
-            self.group_edit.setText(starosta_data[4])         # group_num
-            self.email_edit.setText(starosta_data[5])         # email
-            self.phone_edit.setText(starosta_data[6])         # phone
+            self.last_name_edit.setText(starosta_data[1])  # last_name
+            self.first_name_edit.setText(starosta_data[2])  # first_name
+            self.middle_name_edit.setText(starosta_data[3])  # middle_name
+            self.group_edit.setText(starosta_data[4])  # group_num
+            self.email_edit.setText(starosta_data[5])  # email
+            self.phone_edit.setText(starosta_data[6])  # phone
 
         # Layout
         form_layout = QFormLayout()
@@ -75,13 +82,5 @@ class StarostaDialog(QDialog):
             QMessageBox.warning(self, "Ошибка", "Пожалуйста, заполните обязательные поля.")
             return
 
-        self.result = [
-            teacher_id,
-            last_name,
-            first_name,
-            middle_name,
-            group,
-            email,
-            phone
-        ]
+        self.result = [teacher_id, last_name, first_name, middle_name, group, email, phone]
         self.accept()

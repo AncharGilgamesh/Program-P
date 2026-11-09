@@ -1,8 +1,14 @@
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QFormLayout, QLineEdit, QComboBox,
-    QPushButton, QHBoxLayout
+    QDialog,
+    QVBoxLayout,
+    QFormLayout,
+    QLineEdit,
+    QComboBox,
+    QPushButton,
+    QHBoxLayout,
 )
 from Models.datahandler import resource_path
+
 
 class PrepodDialog(QDialog):
     def __init__(self, parent=None, data=None):
@@ -10,7 +16,7 @@ class PrepodDialog(QDialog):
         self.setWindowTitle("Добавить/Редактировать преподавателя")
         with open(resource_path("View/dialogstyle.qss"), "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
-        
+
         # Поля
         self.last_name_edit = QLineEdit()
         self.first_name_edit = QLineEdit()
@@ -18,7 +24,9 @@ class PrepodDialog(QDialog):
         self.degree_combo = QComboBox()
         self.degree_combo.addItems(["", "к.т.н", "к.ф.м.н", "д.ф.м.н", "д.т.н.", "-"])
         self.position_combo = QComboBox()
-        self.position_combo.addItems(["", "доцент", "профессор", "ассистент", "Зав. кафедрой", "ст. преподаватель"])
+        self.position_combo.addItems(
+            ["", "доцент", "профессор", "ассистент", "Зав. кафедрой", "ст. преподаватель"]
+        )
         self.email_edit = QLineEdit()
         self.phone_edit = QLineEdit()
 
@@ -65,5 +73,5 @@ class PrepodDialog(QDialog):
             self.degree_combo.currentText(),
             self.position_combo.currentText(),
             self.email_edit.text(),
-            self.phone_edit.text()
+            self.phone_edit.text(),
         ]

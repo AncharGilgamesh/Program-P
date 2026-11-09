@@ -3,33 +3,29 @@
 from PySide6.QtCore import QAbstractTableModel, Qt, QModelIndex
 
 
-
 class PlanTableModel(QAbstractTableModel):
-    def __init__(self, data = [], header=None):
+    def __init__(self, data=[], header=None):
         super(PlanTableModel, self).__init__()
         self._data = data if data else []
         self._header = header if header else []
-    
 
     def setData(self, index, value, role=Qt.EditRole):
         if not index.isValid() or role != Qt.EditRole:
             return False
-        
+
         row, col = index.row(), index.column()
-        
+
         # Изменяем данные во внутренней структуре
         self._data[row][col] = value
-        
+
         # Уведомляем View об изменении (ВАЖНО!)
         self.dataChanged.emit(index, index, [role])
-        
+
         return True
 
     def flags(self, index):
         return (
-            Qt.ItemIsEnabled | 
-            Qt.ItemIsSelectable | 
-            Qt.ItemIsEditable  # Разрешаем редактирование
+            Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable  # Разрешаем редактирование
         )
 
     def rowCount(self, index=None):
@@ -51,32 +47,31 @@ class PlanTableModel(QAbstractTableModel):
                 if section < len(self._header):
                     return self._header[section]
                 else:
-                    return 'Проверка'
-
+                    return "Проверка"
 
     def insertRows(self, position, rows, values=None, parent=QModelIndex()):
         """Ваша функция с небольшими изменениями"""
         self.beginInsertRows(parent, position, position + rows - 1)
         if values is None:
-            values = [['' for _ in range(self.columnCount())] for _ in range(rows)]
+            values = [["" for _ in range(self.columnCount())] for _ in range(rows)]
         self._data[position:position] = values  # Вставляем в нужную позицию
         self.endInsertRows()
         return True
 
     def data(self, index, role=Qt.DisplayRole):
-       if role == Qt.DisplayRole and index.isValid():
-           return self._data[index.row()][index.column()]
-       if role == Qt.EditRole:
+        if role == Qt.DisplayRole and index.isValid():
+            return self._data[index.row()][index.column()]
+        if role == Qt.EditRole:
             row = index.row()
             column = index.column()
             return self._data[row][column]
-       return None
+        return None
 
     def get_column_values(self, column_index):
         """Возвращает список значений из указанного столбца."""
         if not 0 <= column_index < self.columnCount():
             return []  # Проверка на выход за границы
-        
+
         return [str(row[column_index]) for row in self._data]
 
     def get_data(self):
@@ -85,7 +80,7 @@ class PlanTableModel(QAbstractTableModel):
 
     def get_row(self, row):
         return self._data[row]
-    
+
     def get_col(self, col_index):
         """Возвращает список значений из указанного столбца."""
         if not (0 <= col_index < self.columnCount()):
@@ -113,7 +108,7 @@ class PlanTableModel(QAbstractTableModel):
     def get_header(self):
         """Get header."""
         return self._header
-    
+
     def add_info_to_cell_by_condition(self, check_col, condition, target_col, new_value):
         """Добавляет new_value в target_col, если check_col удовлетворяет condition."""
         changed_indexes = []  # Запоминаем изменённые ячейки для обновления View
@@ -125,7 +120,7 @@ class PlanTableModel(QAbstractTableModel):
             if callable(condition):
                 condition_met = condition(check_val)  # Если condition — функция
             else:
-                condition_met = (check_val == condition)  # Если condition — значение
+                condition_met = check_val == condition  # Если condition — значение
 
             if not condition_met:
                 continue  # Условие не выполнено — пропускаем строку
@@ -152,21 +147,21 @@ class PlanTableModel(QAbstractTableModel):
     def updateCellsByCondition(self, check_col, condition, target_col, new_value):
         for row in range(len(self._data)):
             check_val = self._data[row][check_col]
-            
+
             if callable(condition):
                 meets_cond = condition(check_val)
             else:
-                meets_cond = (check_val == condition)
-            
+                meets_cond = check_val == condition
+
             if meets_cond:
                 if callable(new_value):
                     self._data[row][target_col] = new_value(check_val)
                 else:
                     self._data[row][target_col] = new_value
-        
+
         # Уведомляем view об изменениях
         top_left = self.index(0, 0)
-        bottom_right = self.index(self.rowCount()-1, self.columnCount()-1)
+        bottom_right = self.index(self.rowCount() - 1, self.columnCount() - 1)
         self.dataChanged.emit(top_left, bottom_right, [Qt.DisplayRole])
 
     def fill_column_with_value(self, column_index, value):
@@ -181,6 +176,7 @@ class PlanTableModel(QAbstractTableModel):
         top_left = self.index(0, column_index)
         bottom_right = self.index(self.rowCount() - 1, column_index)
         self.dataChanged.emit(top_left, bottom_right, [Qt.DisplayRole])
+
 
 class ResultTableModel(PlanTableModel):
     def __init__(self, data, headers):
@@ -233,7 +229,7 @@ class ResultTableModel(PlanTableModel):
                 total = int(self._data[row][1])
                 if sum(scores) > total:
                     return False
-            except:
+            except Exception:
                 return False
 
         if col == 1:  # при изменении "Всего" тоже проверим
@@ -242,7 +238,7 @@ class ResultTableModel(PlanTableModel):
                 scores = [int(self._data[row][i] or 0) for i in [2, 3, 4, 5]]
                 if sum(scores) > total:
                     return False
-            except:
+            except Exception:
                 return False
 
         self._data[row][col] = str(value).strip()

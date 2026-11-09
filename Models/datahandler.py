@@ -1,22 +1,23 @@
 import pandas as pd
 import re
+import sys
+import os
 from PySide6.QtCore import Qt
-from docx.opc.exceptions import PackageNotFoundError
 from docx import Document
 from datetime import datetime
 from collections import defaultdict
-from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
-import sys, os
+
 
 # Для превращения относительного пути в абсолютный
 def resource_path(relative_path):
-    """ Получение абсолютного пути к ресурсу для PyInstaller """
-    if hasattr(sys, '_MEIPASS'):
+    """Получение абсолютного пути к ресурсу для PyInstaller"""
+    if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
+
 
 # Шестой этап
 def parse_sixth_table(data, prepods):
@@ -24,8 +25,11 @@ def parse_sixth_table(data, prepods):
     # prepods - берем из общего плана
     result = []
     for i in range(0, len(data)):
-        result.append([str(i+1), prepods[i+1][5].strip(), "", data[i][1], data[i][4], "","", ""])
+        result.append(
+            [str(i + 1), prepods[i + 1][5].strip(), "", data[i][1], data[i][4], "", "", ""]
+        )
     return result
+
 
 # Пятый этап отчета
 def parse_fiveth_table(data):
@@ -33,19 +37,23 @@ def parse_fiveth_table(data):
     # сюда передаю table2
     result = []
     for row in data:
-        group = re.search(r'\b4\d{3}\b', row[2]).group()
+        group = re.search(r"\b4\d{3}\b", row[2]).group()
         people_amount = row[3]
         result.append([group, people_amount, "", "", "", "", "", "в КНИТУ-КАИ"])
     return result
+
+
 # Четвертый этап отчета
 def parse_fourth_table(data):
     # сюда передаю table2
     result = []
     for row in data:
-        result.append([row[2],"","","","","","", "да"])
+        result.append([row[2], "", "", "", "", "", "", "да"])
     return result
 
+
 # Третий этап отчета
+
 
 def parse_third_table(data_rows):
     result = []
@@ -60,7 +68,7 @@ def parse_third_table(data_rows):
         teacher = row[5].strip()
 
         if "кафедра" in location.lower():
-            final_place = f"Учебная лаборатория кафедры ПМИ"
+            final_place = "Учебная лаборатория кафедры ПМИ"
         else:
             final_place = f"{location}, Учебная каф. ПМИ"
 
@@ -73,7 +81,8 @@ def parse_third_table(data_rows):
 
     return result
 
-#Второй этап отчета
+
+# Второй этап отчета
 def parse_second_table(data_rows):
     result = []
 
@@ -110,22 +119,14 @@ def parse_second_table(data_rows):
         # 6-7. Даты начала и конца практики
         start_date, end_date = extract_start_end_dates(date_text)
 
-        result.append([
-            number,
-            city,
-            location,
-            people_count,
-            placeholder,
-            start_date,
-            end_date
-        ])
+        result.append([number, city, location, people_count, placeholder, start_date, end_date])
 
     return result
 
 
 def extract_start_end_dates(text):
-    text = text.replace('\n', ' ').replace('г.', '').replace('г', '').strip()
-    date_matches = re.findall(r'(\d{1,2})[./-](\d{1,2})(?:[./-](\d{4}))?', text)
+    text = text.replace("\n", " ").replace("г.", "").replace("г", "").strip()
+    date_matches = re.findall(r"(\d{1,2})[./-](\d{1,2})(?:[./-](\d{4}))?", text)
 
     if not date_matches:
         return "", ""
@@ -156,15 +157,20 @@ def extract_start_end_dates(text):
 
     try:
         start = datetime(day=day1, month=month1, year=year1).strftime("%d.%m.%Y")
-    except:
+    except Exception:
         start = ""
 
     try:
-        end = datetime(day=day2, month=month2, year=year2).strftime("%d.%m.%Y") if day2 and month2 else ""
-    except:
+        end = (
+            datetime(day=day2, month=month2, year=year2).strftime("%d.%m.%Y")
+            if day2 and month2
+            else ""
+        )
+    except Exception:
         end = ""
 
     return start, end
+
 
 # Первый этап отчета
 # Эта функция принимает данные из модели первого этапа отчета и разделяет группа - практика, для
@@ -181,12 +187,10 @@ def get_group_practice_keys_frst_stg(data):
         practice = str(row[4]).strip()
 
         # Сокращения
-        practice_short = practice.replace(
-            "по получению навыков научно-исследовательской работы", "ППНИР"
-        ).replace(
-            "научно-исследовательская работа", "НИР"
-        ).replace(
-            "научно-исследовательская  работа", "НИР"
+        practice_short = (
+            practice.replace("по получению навыков научно-исследовательской работы", "ППНИР")
+            .replace("научно-исследовательская работа", "НИР")
+            .replace("научно-исследовательская  работа", "НИР")
         )
 
         key = f"{group} – {practice_short}"
@@ -195,6 +199,7 @@ def get_group_practice_keys_frst_stg(data):
             group_practice_list.append(key)
 
     return group_practice_list
+
 
 def get_target_row_indices(data, selected_keys):
     """
@@ -211,12 +216,10 @@ def get_target_row_indices(data, selected_keys):
         practice = str(row[4]).strip()
 
         # Сокращения
-        practice_short = practice.replace(
-            "по получению навыков научно-исследовательской работы", "ППНИР"
-        ).replace(
-            "научно-исследовательская работа", "НИР"
-        ).replace(
-            "научно-исследовательская  работа", "НИР"
+        practice_short = (
+            practice.replace("по получению навыков научно-исследовательской работы", "ППНИР")
+            .replace("научно-исследовательская работа", "НИР")
+            .replace("научно-исследовательская  работа", "НИР")
         )
 
         key = f"{group} – {practice_short}"
@@ -226,11 +229,10 @@ def get_target_row_indices(data, selected_keys):
     return target_indices
 
 
-
 # Обработка плана для отчета
 def parse_practice_table(data_rows):
     result = []
-    
+
     for i, row in enumerate(data_rows):
         if len(row) < 9:
             continue  # пропускаем пустые строки
@@ -264,38 +266,44 @@ def parse_practice_table(data_rows):
         # ===== 3. Дата собрания =====
         meeting_date = extract_meeting_date(raw_dates)
 
-        result.append([
-            i + 1,            # №
-            group,
-            direction,
-            semester or "",
-            practice_type,
-            meeting_date
-        ])
+        result.append(
+            [
+                i + 1,  # №
+                group,
+                direction,
+                semester or "",
+                practice_type,
+                meeting_date,
+            ]
+        )
 
     return result
 
+
 # --- Вспомогательные функции:
+
 
 def extract_practice_type(text):
     # Оставляем только "Учебная практика ..." или "Производственная практика ..."
     match = re.search(r"(Учебная практика|Производственная практика)[^\n]*", text, re.IGNORECASE)
     return match.group(0).strip().capitalize() if match else ""
 
+
 def extract_first_month(text):
     # Ищем первую дату в формате дд.мм или дд.мм.гггг
     match = re.search(r"\b(\d{1,2})[./](\d{1,2})([./](\d{4}))?", text)
     if match:
-        day, month = int(match.group(1)), int(match.group(2))
+        month = int(match.group(2))
         return month
     return None
 
+
 def extract_meeting_date(text):
 
-    text = text.replace('\n', ' ').replace('г.', '').replace('г', '').strip()
+    text = text.replace("\n", " ").replace("г.", "").replace("г", "").strip()
 
     # Ищем все даты (одна или две)
-    date_matches = re.findall(r'(\d{1,2})[./-](\d{1,2})(?:[./-](\d{4}))?', text)
+    date_matches = re.findall(r"(\d{1,2})[./-](\d{1,2})(?:[./-](\d{4}))?", text)
 
     if not date_matches:
         return ""
@@ -324,7 +332,6 @@ def extract_meeting_date(text):
         return ""
 
 
-
 # Функция для чтения плана
 def read_plan_from_docx(docx_path):
     """
@@ -351,6 +358,7 @@ def read_plan_from_docx(docx_path):
 
     return data
 
+
 def find_column_index_by_keyword(model, keyword: str) -> int:
     """Ищет столбец, в заголовке которого содержится keyword (без учёта регистра)."""
     keyword = keyword.lower()
@@ -360,111 +368,112 @@ def find_column_index_by_keyword(model, keyword: str) -> int:
             return col
     return -1
 
+
 def clean_practice_name(text):
     """
     Удаляет из строки слова "курс", "семестр" и все цифры.
-    
+
     Args:
         text (str): Исходная строка.
-    
+
     Returns:
         str: Очищенная строка.
     """
     # Удаляем слова "курс" и "семестр" (регистронезависимо)
-    text = re.sub(r'\b(курс|семестр)\b', '', text, flags=re.IGNORECASE)
-    
-    # Удаляем все цифры
-    text = re.sub(r'\d+', '', text)
+    text = re.sub(r"\b(курс|семестр)\b", "", text, flags=re.IGNORECASE)
 
-    text = text.replace(':', '')
-    
+    # Удаляем все цифры
+    text = re.sub(r"\d+", "", text)
+
+    text = text.replace(":", "")
+
     # Удаляем лишние пробелы и возвращаем результат
-    return ' '.join(text.split()).strip()
+    return " ".join(text.split()).strip()
+
 
 # функция для обработки данных, загруженных из Excel таблицы
 def transform_practice_data(data, start_id=0):
     """
     Преобразует иерархические данные о практиках в плоский список списков.
-    
+
     Args:
         data: Исходные данные (список словарей с ключами 'title' и 'data')
         start_id: Начальное значение ID (по умолчанию 0)
-    
+
     Returns:
         Список списков с заданной структурой:
         [id, № группы, сроки, "Кафедра", "", ФИО, "", направление, "нет", "", название практики]
     """
     result = []
     current_id = start_id
-    
+
     for practice in data:
-        title = practice['title']
+        title = practice["title"]
         # Пропускаем строку заголовков (первую строку в data)
-        for row in practice['data'][1:]:
+        for row in practice["data"][1:]:
             if len(row) >= 5:  # Проверяем, что в строке достаточно данных
                 transformed_row = [
-                    current_id,               # Уникальный ID
-                    row[1],                  # № группы
-                    clean_practice_name(title),                   # Название практики из title
-                    row[4],                  # Сроки прохождения
-                    "Кафедра",               # Кафедра (везде одинаково)
-                    "",                      # Пустая строка
-                    row[2].strip(),          # ФИО преподавателя (убираем лишние пробелы)
-                    "",                      # Пустая строка
-                    row[3],                  # Направление
-                    "нет",                   # "нет" (везде одинаково)
-                    ""                       # Пустая строка
-
+                    current_id,  # Уникальный ID
+                    row[1],  # № группы
+                    clean_practice_name(title),  # Название практики из title
+                    row[4],  # Сроки прохождения
+                    "Кафедра",  # Кафедра (везде одинаково)
+                    "",  # Пустая строка
+                    row[2].strip(),  # ФИО преподавателя (убираем лишние пробелы)
+                    "",  # Пустая строка
+                    row[3],  # Направление
+                    "нет",  # "нет" (везде одинаково)
+                    "",  # Пустая строка
                 ]
                 result.append(transformed_row)
                 current_id += 1
-    
+
     return result
+
 
 # Функция для вычленения блоков из таблицы с практиками
 def extract_practice_blocks_with_empty_stop(df):
-            practice_blocks = []
-            current_block = None
-            cols_to_extract = 5  # Количество столбцов для вывода
-            inside_block = False  # Флаг нахождения внутри блока данных
+    practice_blocks = []
+    current_block = None
+    cols_to_extract = 5  # Количество столбцов для вывода
+    inside_block = False  # Флаг нахождения внутри блока данных
 
-            for index, row in df.iterrows():
-                # Проверяем первую ячейку строки на пустоту
-                first_cell_empty = pd.isna(row[0]) or str(row[0]).strip() == ''
+    for index, row in df.iterrows():
+        # Проверяем первую ячейку строки на пустоту
+        first_cell_empty = pd.isna(row[0]) or str(row[0]).strip() == ""
 
-                # Если встретили заголовок практики
-                if not first_cell_empty and any(phrase in str(row[0]).lower() 
-                                            for phrase in ['учебная практика', 'производственная практика']):
-                    # Сохраняем предыдущий блок (если есть)
-                    if current_block:
-                        practice_blocks.append(current_block)
-                    
-                    # Начинаем новый блок
-                    current_block = {
-                        'title': str(row[0]),
-                        'data': []
-                    }
-                    inside_block = True  # Входим в режим сбора данных
-                    continue
-
-                # Если внутри блока данных и встретили пустую ячейку в первом столбце
-                if inside_block and first_cell_empty:
-                    inside_block = False  # Прекращаем сбор
-                    continue
-
-                # Если находимся внутри блока и строка не пустая
-                if inside_block and current_block:
-                    # Берем данные из первых 5 столбцов
-                    row_data = list(row[:cols_to_extract].values)
-                    # Проверяем, что в строке есть данные (хотя бы одна непустая ячейка)
-                    if any(pd.notna(x) and str(x).strip() != '' for x in row_data):
-                        current_block['data'].append(row_data)
-
-            # Добавляем последний блок, если он не был добавлен
+        # Если встретили заголовок практики
+        if not first_cell_empty and any(
+            phrase in str(row[0]).lower()
+            for phrase in ["учебная практика", "производственная практика"]
+        ):
+            # Сохраняем предыдущий блок (если есть)
             if current_block:
                 practice_blocks.append(current_block)
 
-            return practice_blocks
+            # Начинаем новый блок
+            current_block = {"title": str(row[0]), "data": []}
+            inside_block = True  # Входим в режим сбора данных
+            continue
+
+        # Если внутри блока данных и встретили пустую ячейку в первом столбце
+        if inside_block and first_cell_empty:
+            inside_block = False  # Прекращаем сбор
+            continue
+
+        # Если находимся внутри блока и строка не пустая
+        if inside_block and current_block:
+            # Берем данные из первых 5 столбцов
+            row_data = list(row[:cols_to_extract].values)
+            # Проверяем, что в строке есть данные (хотя бы одна непустая ячейка)
+            if any(pd.notna(x) and str(x).strip() != "" for x in row_data):
+                current_block["data"].append(row_data)
+
+    # Добавляем последний блок, если он не был добавлен
+    if current_block:
+        practice_blocks.append(current_block)
+
+    return practice_blocks
 
 
 # Тут порпобую грузить нагрузку
@@ -472,6 +481,7 @@ def format_teacher_name(name: str) -> str:
     """Форматирует ФИО преподавателя — делает заглавными только первые буквы."""
     parts = name.strip().split()
     return " ".join(p.capitalize() for p in parts)
+
 
 def normalize_practice_type(practice: str) -> str:
     """Преобразует названия практик согласно правилам."""
@@ -489,13 +499,14 @@ def normalize_practice_type(practice: str) -> str:
         return "Производственная практика по получению навыков научно-исследовательской работы"
     return practice  # если не найдено соответствие — оставить как есть
 
+
 def extract_additional_info_form_nagruzka(df):
     result_dict = {}
     for idx, row in df.iterrows():
         if idx == 0:
             continue
         group = row[4]
-        
+
         if pd.isna(group):
             continue
         budget = int(row[5]) if not pd.isna(row[5]) else 0
@@ -533,12 +544,14 @@ def extract_data(df):
         practice_full = f"{practice_type}\n{student_info}"
 
         teacher_raw = str(row[16]) if not pd.isna(row[16]) else ""
-        teacher_match = re.match(r'^([А-ЯЁа-яёA-Za-z\-]+(?:\s+[А-ЯЁа-яёA-Za-z]\.){1,2})', teacher_raw.strip())
+        teacher_match = re.match(
+            r"^([А-ЯЁа-яёA-Za-z\-]+(?:\s+[А-ЯЁа-яёA-Za-z]\.){1,2})", teacher_raw.strip()
+        )
         teacher = format_teacher_name(teacher_match.group(1)) if teacher_match else ""
 
         specialty_raw = str(row[8]) if not pd.isna(row[8]) else ""
         specialty = specialty_raw.split()[0] if specialty_raw else ""
-        
+
         note = row[29] if not pd.isna(row[29]) else ""
 
         sroki = str(row[13]) if not pd.isna(row[13]) else ""
@@ -546,7 +559,19 @@ def extract_data(df):
         # Сроки пока оставим пустыми (нужен анализ), заполним позже
         edu_lvl = str(row[10]).strip().lower()
 
-        result_row = [num, group, practice_full, sroki, "Кафедра", "", teacher, "", specialty, "нет", note]
+        result_row = [
+            num,
+            group,
+            practice_full,
+            sroki,
+            "Кафедра",
+            "",
+            teacher,
+            "",
+            specialty,
+            "нет",
+            note,
+        ]
         if "маг" in edu_lvl:
             master_list.append(result_row)
         else:
@@ -557,7 +582,7 @@ def extract_data(df):
     results = bachelor_list + master_list
 
     for i in range(len(results)):
-        results[i][0] = i+1
+        results[i][0] = i + 1
     return results
 
 
@@ -570,30 +595,33 @@ def set_cell_border(cell, **kwargs):
     """
     tc = cell._tc
     tcPr = tc.get_or_add_tcPr()
-    tcBorders = OxmlElement('w:tcBorders')
-    for edge in ('top', 'left', 'bottom', 'right'):
+    tcBorders = OxmlElement("w:tcBorders")
+    for edge in ("top", "left", "bottom", "right"):
         edge_data = kwargs.get(edge)
         if edge_data:
-            tag = f'w:{edge}'
+            tag = f"w:{edge}"
             element = OxmlElement(tag)
-            element.set(qn('w:val'), edge_data)         # тип линии
-            element.set(qn('w:sz'), '4')                # толщина (1/8 pt)
-            element.set(qn('w:space'), '0')             # отступ
-            element.set(qn('w:color'), '000000')        # цвет (чёрный)
+            element.set(qn("w:val"), edge_data)  # тип линии
+            element.set(qn("w:sz"), "4")  # толщина (1/8 pt)
+            element.set(qn("w:space"), "0")  # отступ
+            element.set(qn("w:color"), "000000")  # цвет (чёрный)
             tcBorders.append(element)
     tcPr.append(tcBorders)
 
     # Установка шрифта Times New Roman, размер 10 pt
+
+
 def set_cell_font(cell, font_name="Times New Roman", font_size=10):
     paragraph = cell.paragraphs[0]
     run = paragraph.runs[0] if paragraph.runs else paragraph.add_run()
     font = run.font
     font.name = font_name
-    run._element.rPr.rFonts.set(qn('w:eastAsia'), font_name)
+    run._element.rPr.rFonts.set(qn("w:eastAsia"), font_name)
     font.size = Pt(font_size)
 
-
     # Заполнение строки word
+
+
 def fill_the_table_rows(table, data, start_row):
     for i, row_data in enumerate(data):
         # Если строки не хватает — добавляем
@@ -607,13 +635,14 @@ def fill_the_table_rows(table, data, start_row):
             set_cell_font(cell, font_name="Times New Roman", font_size=10)
             set_cell_border(cell, top="single", bottom="single", left="single", right="single")
 
+
 # Заполнение столбца word
 def fill_the_table_col(table, column_index, data):
     for i, group in enumerate(data):
-            row_index = i + 2  # начинаем с 3-й строки
-            if row_index >= len(table.rows):
-                table.add_row()
-            cell = table.rows[row_index].cells[column_index]
-            cell.text = group
-            set_cell_font(cell, font_name="Times New Roman", font_size=10)
-            set_cell_border(cell, top="single", bottom="single", left="single", right="single")
+        row_index = i + 2  # начинаем с 3-й строки
+        if row_index >= len(table.rows):
+            table.add_row()
+        cell = table.rows[row_index].cells[column_index]
+        cell.text = group
+        set_cell_font(cell, font_name="Times New Roman", font_size=10)
+        set_cell_border(cell, top="single", bottom="single", left="single", right="single")
