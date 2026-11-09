@@ -4,7 +4,7 @@ import sqlite3
 from PySide6.QtWidgets import QDialog, QMessageBox
 from View.appearance import Ui_Dialog
 
-import Models.dbhandler_new as dbh
+import Models.dbhandler as dbh
 
 AUTH_FAILED = "Неверный логин или пароль"
 REGISTRATION_CODE_ENV = "REGISTRATION_CODE"

@@ -73,6 +73,24 @@ def test_sixth_table_leaves_missing_teacher_empty():
     assert with_teacher[0][1] == "Иванов И.И."
 
 
+def test_unreadable_date_leaves_semester_empty():
+    parsed = parse_practice_table([practice_row("4411", "без даты", "Учебная практика")])
+    assert parsed[0][3] == ""
+    assert parse_practice_table([["4411", "короткая строка"]]) == []
+
+
+def test_short_and_broken_report_rows_do_not_raise():
+    parsed, skipped = parse_fiveth_table(
+        [["короткая"], ["", "", "нет кода"], ["", "", "гр. 4411", "12"]]
+    )
+    assert skipped == 2
+    assert parsed == [["4411", "12", "", "", "", "", "", "в КНИТУ-КАИ"]]
+    sixth = parse_sixth_table([[1, "4411", "09.03.02", 7, "Учебная"]], [["шапка"]])
+    assert sixth[0][1] == ""
+    assert sixth[0][3] == "4411"
+    assert sixth[0][4] == "Учебная"
+
+
 def test_plan_without_group_code_does_not_raise():
     document = Document()
     table = document.add_table(rows=3, cols=9)
@@ -110,6 +128,8 @@ def main():
     test_directed_students_ignore_year_in_title()
     test_fiveth_table_skips_rows_without_group_code()
     test_sixth_table_leaves_missing_teacher_empty()
+    test_unreadable_date_leaves_semester_empty()
+    test_short_and_broken_report_rows_do_not_raise()
     test_plan_without_group_code_does_not_raise()
     print("parse-checks-ok")
 

@@ -1,0 +1,87 @@
+import datetime
+import os
+import sqlite3
+
+from PySide6.QtWidgets import QMessageBox
+
+import Models.dbhandler as dbh
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+help_path = os.path.join(base_dir, "", "help.html")
+shablon_plan_path = os.path.join(base_dir, "Shablons", "shablon_plan.docx")
+shablon_otch_path = os.path.join(base_dir, "Shablons", "shablon_otchet.docx")
+# Строки шаблона отчёта, с которых пишутся данные: у первой таблицы одна строка
+# шапки, у пятой — четыре. Остальные таблицы начинаются после двух строк шапки.
+OTCHET_TABLE_START_ROWS = (1, 2, 2, 2, 4, 2)
+RETENTION_YEARS = 5
+
+
+def years_before(day, years):
+    try:
+        return day.replace(year=day.year - years)
+    except ValueError:
+        return day.replace(year=day.year - years, day=28)
+
+
+def parse_created_date(value):
+    text = str(value or "").strip()
+    for fmt in ("%Y.%m.%d", "%Y-%m.%d", "%d.%m.%Y"):
+        try:
+            return datetime.datetime.strptime(text, fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def split_expired_documents(rows, today=None):
+    """Делит документы старше срока хранения на незащищённые и защищённые."""
+    today = today or datetime.date.today()
+    limit = years_before(today, RETENTION_YEARS)
+    expired = []
+    protected = []
+    for row in rows:
+        created = parse_created_date(row[3] if len(row) > 3 else None)
+        if created is None or created > limit:
+            continue
+        if len(row) > 5 and row[5] == 1:
+            protected.append(row)
+        else:
+            expired.append(row)
+    return expired, protected
+
+
+def saves_filename(year, doc_type, moment=None):
+    """Год, тип и дата-время, чтобы два сохранения за день не затирали один файл."""
+    moment = moment or datetime.datetime.now()
+    marker = "p" if doc_type == "План" else "o"
+    stamp = moment.strftime("%Y%m%d_%H%M%S_%f")
+    return f"{year}_{marker}_{stamp}.docx"
+
+
+def normalize_group(value):
+    """Номер группы к строке: Excel часто отдаёт 4111.0 или строку с пробелами."""
+    text = str(value).strip()
+    if text.endswith(".0") and text[:-2].isdigit():
+        return text[:-2]
+    return text
+
+
+def save_registered_copy(window, doc, doc_type):
+    year = datetime.datetime.now().year
+    saves_dir = os.path.join(base_dir, "Saves")
+    os.makedirs(saves_dir, exist_ok=True)
+    save_path = os.path.join(saves_dir, saves_filename(year, doc_type))
+    try:
+        doc.save(save_path)
+    except OSError as exc:
+        QMessageBox.warning(window, "Ошибка", f"Не удалось сохранить файл: {exc}")
+        return
+    created = datetime.datetime.now().strftime("%Y.%m.%d")
+    try:
+        dbh.insert_document(year, doc_type, created, window.user, save_path, 0)
+    except sqlite3.Error as exc:
+        QMessageBox.warning(
+            window,
+            "Ошибка",
+            f"Файл сохранён, но записать его в базу не удалось: {exc}",
+        )

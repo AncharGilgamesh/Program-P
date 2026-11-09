@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import Models.dbhandler_new as dbh
+import Models.dbhandler as dbh
 from View.appearance_logic import AUTH_FAILED, registration_failure
 
 SOURCE_DB = Path(__file__).resolve().parents[1] / "DB" / "maindatabase.db"
@@ -20,6 +20,13 @@ def use_copy(directory):
     shutil.copy(SOURCE_DB, copy_path)
     dbh.DB_PATH = str(copy_path)
     return copy_path
+
+
+def test_hash_password_round_trip():
+    stored = dbh.hash_password("secret")
+    assert dbh.is_password_hash(stored)
+    assert dbh.password_matches("secret", stored) is True
+    assert dbh.password_matches("other", stored) is False
 
 
 def test_plaintext_login_is_replaced_by_hash():
@@ -46,15 +53,22 @@ def test_login_failure_message_is_shared():
 
 
 def test_registration_without_code_is_refused():
-    os.environ.pop("REGISTRATION_CODE", None)
-    message = registration_failure("anything")
-    assert message == "Регистрация недоступна: не задан код регистрации"
-    os.environ["REGISTRATION_CODE"] = "test-code"
+    from unittest.mock import patch
+
+    previous = os.environ.get("REGISTRATION_CODE")
     try:
-        assert registration_failure("wrong") == "Неправильный код регистрации"
-        assert registration_failure("test-code") is None
+        with patch("View.appearance_logic.load_local_env"):
+            os.environ.pop("REGISTRATION_CODE", None)
+            message = registration_failure("anything")
+            assert message == "Регистрация недоступна: не задан код регистрации"
+            os.environ["REGISTRATION_CODE"] = "test-code"
+            assert registration_failure("wrong") == "Неправильный код регистрации"
+            assert registration_failure("test-code") is None
     finally:
-        os.environ.pop("REGISTRATION_CODE", None)
+        if previous is None:
+            os.environ.pop("REGISTRATION_CODE", None)
+        else:
+            os.environ["REGISTRATION_CODE"] = previous
 
 
 def test_referenced_teacher_is_kept():
@@ -108,6 +122,7 @@ def test_remember_flag_stays_on_one_user():
 
 
 def main():
+    test_hash_password_round_trip()
     test_plaintext_login_is_replaced_by_hash()
     test_login_failure_message_is_shared()
     test_registration_without_code_is_refused()
