@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 import Models.datahandler as dh
 from Models.docx_writer import fill_the_table_rows
 from Models.model import PlanTableModel, ResultTableModel
-from View.planaddingdialogs import GroupEditDialog
+from View.meetingdatedialog import MeetingDateDialog
 from window_support import OTCHET_TABLE_START_ROWS, save_registered_copy, shablon_otch_path
 
 
@@ -92,10 +92,10 @@ class ReportPage:
     def add_meting_date(self):
         data_for_meeting = self._oth_frst_stg_model.get_data()
         data_fin = dh.get_group_practice_keys_frst_stg(data_for_meeting)
-        dialog = GroupEditDialog(data_fin, self)
+        dialog = MeetingDateDialog(data_fin, parent=self)
 
         if dialog.exec():
-            selected_keys, date_str = dialog.get_result()
+            selected_keys, date_str = dialog.get_results()
             rows_to_update = dh.get_target_row_indices(data_for_meeting, selected_keys)
             # можно выделить это в отдельную функцию для добавления по индексам!!!!!!!!!
             for row in rows_to_update:
@@ -113,7 +113,7 @@ class ReportPage:
         table3 = dh.parse_third_table(data[1:])
         table4 = dh.parse_fourth_table(table2)
         table5, skipped_groups = dh.parse_fiveth_table(table2)
-        table6 = dh.parse_sixth_table(table1, data)
+        table6 = dh.parse_sixth_table(data[1:])
         loaded = (
             (self._oth_frst_stg_model, table1),
             (self._oth_scnd_std_model, table2),

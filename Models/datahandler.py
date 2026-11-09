@@ -10,24 +10,26 @@ from collections import defaultdict
 
 # Для превращения относительного пути в абсолютный
 def resource_path(relative_path):
-    """Получение абсолютного пути к ресурсу для PyInstaller"""
+    """Путь от каталога проекта, а не от текущего каталога. В сборке — от _MEIPASS."""
     if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(project_root, relative_path)
 
 
 # Шестой этап
-def parse_sixth_table(data, prepods):
-    # data — разобранный план практик, prepods — строки исходного плана вместе с шапкой.
-    # Руководитель лежит в столбце 5 следующей строки. Если её нет, ячейка остаётся пустой.
+def parse_sixth_table(data_rows):
+    # Те же строки, что у первого этапа: короче 9 ячеек пропускаются.
+    # Руководитель лежит в столбце 5 этой же строки. Пустая ячейка остаётся пустой.
     result = []
-    for i, row in enumerate(data):
+    for i, row in enumerate(data_rows):
+        if len(row) < 9:
+            continue
         teacher = ""
-        prepod_index = i + 1
-        if prepod_index < len(prepods) and len(prepods[prepod_index]) > 5:
-            teacher = str(prepods[prepod_index][5] or "").strip()
-        group = row[1] if len(row) > 1 else ""
-        practice = row[4] if len(row) > 4 else ""
+        if len(row) > 5 and row[5] not in (None, ""):
+            teacher = str(row[5]).strip()
+        group = row[0].strip() if row[0] is not None else ""
+        practice = extract_practice_type(str(row[1] or ""))
         result.append([str(i + 1), teacher, "", group, practice, "", "", ""])
     return result
 
@@ -437,7 +439,7 @@ def transform_practice_data(data, start_id=0):
                     row[4],  # Сроки прохождения
                     "Кафедра",  # Кафедра (везде одинаково)
                     "",  # Пустая строка
-                    row[2].strip(),  # ФИО преподавателя (убираем лишние пробелы)
+                    "" if pd.isna(row[2]) else str(row[2]).strip(),  # ФИО преподавателя
                     "",  # Пустая строка
                     row[3],  # Направление
                     "нет",  # "нет" (везде одинаково)
@@ -518,6 +520,62 @@ def normalize_practice_type(practice: str) -> str:
     return practice  # если не найдено соответствие — оставить как есть
 
 
+_STUDENT_BLOCK_AT_END = re.compile(r"(?:\n)?Г/б - \d+\nПл\. - \d+\nЦелевики - \d+\s*$")
+
+
+def apply_student_block(current, block):
+    """Ставит блок «Г/б / Пл. / Целевики» в конец. Повторный вызов заменяет числа."""
+    text = "" if current is None else str(current).rstrip()
+    addition = str(block).strip()
+    without = _STUDENT_BLOCK_AT_END.sub("", text).rstrip()
+    if not without:
+        return addition
+    return f"{without}\n{addition}"
+
+
+def _cell(row, index):
+    try:
+        if index >= len(row):
+            raise IndexError
+        return row[index]
+    except (KeyError, IndexError):
+        raise IndexError(f"В строке нагрузки нет столбца {index + 1}") from None
+
+
+def _count_cell(row, index):
+    value = _cell(row, index)
+    if pd.isna(value):
+        return 0
+    if isinstance(value, bool):
+        raise ValueError(f"Столбец {index + 1} должен быть числом")
+    if isinstance(value, str):
+        text = value.strip().replace(",", ".")
+        if not text:
+            return 0
+        try:
+            number = float(text)
+        except ValueError:
+            raise ValueError(f"Столбец {index + 1} должен быть числом, получено: {value}") from None
+    else:
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            raise ValueError(f"Столбец {index + 1} должен быть числом, получено: {value}") from None
+    if not number.is_integer():
+        raise ValueError(f"Столбец {index + 1} должен быть целым числом, получено: {value}")
+    return int(number)
+
+
+def _student_counts(row):
+    budget = _count_cell(row, 5)
+    paid = _count_cell(row, 6)
+    total = _count_cell(row, 7)
+    if pd.isna(_cell(row, 7)):
+        total = budget + paid
+    targeted = total - budget - paid if total > budget + paid else 0
+    return budget, paid, targeted
+
+
 def extract_additional_info_form_nagruzka(df):
     result_dict = {}
     for idx, row in df.iterrows():
@@ -527,10 +585,7 @@ def extract_additional_info_form_nagruzka(df):
 
         if pd.isna(group):
             continue
-        budget = int(row[5]) if not pd.isna(row[5]) else 0
-        paid = int(row[6]) if not pd.isna(row[6]) else 0
-        total = int(row[7]) if not pd.isna(row[7]) else budget + paid
-        targeted = total - budget - paid if total > budget + paid else 0
+        budget, paid, targeted = _student_counts(row)
         student_info = f"\nГ/б - {budget}\nПл. - {paid}\nЦелевики - {targeted}"
         if group not in result_dict:
             result_dict[group] = student_info
@@ -554,10 +609,7 @@ def extract_data(df):
         practice_raw = str(row[12]) if not pd.isna(row[12]) else ""
         practice_type = normalize_practice_type(practice_raw)
 
-        budget = int(row[5]) if not pd.isna(row[5]) else 0
-        paid = int(row[6]) if not pd.isna(row[6]) else 0
-        total = int(row[7]) if not pd.isna(row[7]) else budget + paid
-        targeted = total - budget - paid if total > budget + paid else 0
+        budget, paid, targeted = _student_counts(row)
         student_info = f"Г/б - {budget}\nПл. - {paid}\nЦелевики - {targeted}"
         practice_full = f"{practice_type}\n{student_info}"
 
@@ -570,7 +622,8 @@ def extract_data(df):
         specialty_raw = str(row[8]) if not pd.isna(row[8]) else ""
         specialty = specialty_raw.split()[0] if specialty_raw else ""
 
-        note = row[29] if not pd.isna(row[29]) else ""
+        note_cell = _cell(row, 29)
+        note = "" if pd.isna(note_cell) else note_cell
 
         sroki = str(row[13]) if not pd.isna(row[13]) else ""
 

@@ -3,7 +3,7 @@
 import pytest
 from PySide6.QtCore import Qt
 
-from Models.model import ResultTableModel
+from Models.model import PlanTableModel, ResultTableModel
 
 pytestmark = pytest.mark.usefixtures("qapp")
 
@@ -21,6 +21,14 @@ HEADERS = [
 
 def grade_row():
     return ["4411", "10", "4", "3", "2", "0", "", "в КНИТУ-КАИ"]
+
+
+def test_locked_directory_model_rejects_edits():
+    model = PlanTableModel([("1", "Иванов")], ["id", "Фамилия"], editable=False)
+    index = model.index(0, 1)
+    assert not (model.flags(index) & Qt.ItemIsEditable)
+    assert model.setData(index, "Петров", Qt.EditRole) is False
+    assert model.data(index, Qt.DisplayRole) == "Иванов"
 
 
 def test_undefended_is_total_minus_scores():

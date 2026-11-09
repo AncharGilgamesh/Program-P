@@ -45,14 +45,3 @@ def fill_the_table_rows(table, data, start_row):
             cell.text = str(value)
             set_cell_font(cell, font_name="Times New Roman", font_size=10)
             set_cell_border(cell, top="single", bottom="single", left="single", right="single")
-
-
-def fill_the_table_col(table, column_index, data):
-    for i, group in enumerate(data):
-        row_index = i + 2  # начинаем с 3-й строки
-        if row_index >= len(table.rows):
-            table.add_row()
-        cell = table.rows[row_index].cells[column_index]
-        cell.text = group
-        set_cell_font(cell, font_name="Times New Roman", font_size=10)
-        set_cell_border(cell, top="single", bottom="single", left="single", right="single")

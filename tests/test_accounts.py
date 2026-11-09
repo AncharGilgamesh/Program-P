@@ -10,7 +10,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import Models.dbhandler as dbh
-from View.appearance_logic import AUTH_FAILED, registration_failure
+from View.appearance_logic import (
+    AUTH_FAILED,
+    EMPTY_NEW_PASSWORD,
+    WRONG_CURRENT_PASSWORD,
+    cabinet_password_failure,
+    new_password_failure,
+    registration_failure,
+)
 
 SOURCE_DB = Path(__file__).resolve().parents[1] / "DB" / "maindatabase.db"
 
@@ -46,6 +53,41 @@ def test_plaintext_login_is_replaced_by_hash():
         assert dbh.authenticate(username, original) is True
         assert dbh.authenticate(username, original + "x") is False
         assert dbh.authenticate(username + "-missing", original) is False
+
+
+def test_empty_new_password_is_refused():
+    assert new_password_failure("", "") == EMPTY_NEW_PASSWORD
+    assert cabinet_password_failure("secret", "secret", "", "") == EMPTY_NEW_PASSWORD
+
+
+def test_wrong_current_password_is_refused():
+    assert (
+        cabinet_password_failure("secret", "nope", "new-pass", "new-pass")
+        == WRONG_CURRENT_PASSWORD
+    )
+
+
+def test_password_change_accepts_current_and_new():
+    assert cabinet_password_failure("secret", "secret", "new-pass", "new-pass") is None
+
+
+def test_update_user_password_stores_hash():
+    with tempfile.TemporaryDirectory() as directory:
+        use_copy(directory)
+        username = dbh.execute_query("SELECT username FROM users LIMIT 1", fetch=True)[0][0]
+        dbh.execute_query(
+            "UPDATE users SET password = ? WHERE username = ?",
+            ("secret", username),
+        )
+        dbh.update_user_password(username, "new-pass")
+        stored = dbh.execute_query(
+            "SELECT password FROM users WHERE username = ?",
+            (username,),
+            fetch=True,
+        )[0][0]
+        assert dbh.is_password_hash(stored)
+        assert dbh.password_matches("new-pass", stored) is True
+        assert dbh.password_matches("secret", stored) is False
 
 
 def test_login_failure_message_is_shared():
@@ -97,6 +139,36 @@ def test_referenced_teacher_is_kept():
         assert before == after == 1
 
 
+def test_protected_document_stays_and_open_one_is_removed():
+    with tempfile.TemporaryDirectory() as directory:
+        use_copy(directory)
+        dbh.insert_document(2026, "План", "2026.11.09", "user", "Saves/stage-protected.docx", 1)
+        dbh.insert_document(2026, "План", "2026.11.09", "user", "Saves/stage-open.docx", 0)
+        protected_id = dbh.execute_query(
+            "SELECT id FROM documents WHERE file_path = ?",
+            ("Saves/stage-protected.docx",),
+            fetch=True,
+        )[0][0]
+        open_id = dbh.execute_query(
+            "SELECT id FROM documents WHERE file_path = ?",
+            ("Saves/stage-open.docx",),
+            fetch=True,
+        )[0][0]
+        before = dbh.execute_query("SELECT COUNT(*) FROM documents", fetch=True)[0][0]
+        try:
+            dbh.remove_document(protected_id)
+            raise AssertionError("защищённый документ не должен удаляться")
+        except sqlite3.IntegrityError:
+            pass
+        kept = dbh.select_document_by_id(protected_id)
+        assert kept and kept[0][5] == 1
+        dbh.remove_document(open_id)
+        assert dbh.select_document_by_id(open_id) == []
+        dbh.remove_document("1 OR 1=1")
+        after = dbh.execute_query("SELECT COUNT(*) FROM documents", fetch=True)[0][0]
+        assert after == before - 1
+
+
 def test_document_id_is_a_parameter():
     with tempfile.TemporaryDirectory() as directory:
         use_copy(directory)
@@ -107,28 +179,38 @@ def test_document_id_is_a_parameter():
         assert before > 0
 
 
-def test_remember_flag_stays_on_one_user():
+def test_remembered_username_is_stored_outside_the_database():
+    from window_support import (
+        clear_remembered_username,
+        read_remembered_username,
+        save_remembered_username,
+    )
+
     with tempfile.TemporaryDirectory() as directory:
-        use_copy(directory)
-        teacher_id = dbh.execute_query(
-            "SELECT id FROM teachers LIMIT 1", fetch=True
-        )[0][0]
-        dbh.insert_user(teacher_id, "second-user", "second-pass", "А", "Б", "В")
-        dbh.update_remember_status("second-user", 1)
-        remembered = dbh.execute_query(
-            "SELECT username FROM users WHERE is_remembered = 1", fetch=True
-        )
-        assert [row[0] for row in remembered] == ["second-user"]
+        assert read_remembered_username(directory) is None
+        save_remembered_username("second-user", directory)
+        stored = (Path(directory) / "remembered_username").read_text(encoding="utf-8")
+        assert stored == "second-user"
+        assert "pass" not in stored
+        assert read_remembered_username(directory) == "second-user"
+        clear_remembered_username(directory)
+        assert not (Path(directory) / "remembered_username").exists()
+        assert read_remembered_username(directory) is None
 
 
 def main():
     test_hash_password_round_trip()
     test_plaintext_login_is_replaced_by_hash()
+    test_empty_new_password_is_refused()
+    test_wrong_current_password_is_refused()
+    test_password_change_accepts_current_and_new()
+    test_update_user_password_stores_hash()
     test_login_failure_message_is_shared()
     test_registration_without_code_is_refused()
     test_referenced_teacher_is_kept()
+    test_protected_document_stays_and_open_one_is_removed()
     test_document_id_is_a_parameter()
-    test_remember_flag_stays_on_one_user()
+    test_remembered_username_is_stored_outside_the_database()
     print("account-checks-ok")
 
 

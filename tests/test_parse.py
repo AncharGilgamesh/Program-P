@@ -9,6 +9,7 @@ from docx import Document
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from Models.datahandler import (  # noqa: E402
+    apply_student_block,
     count_directed_students,
     parse_fiveth_table,
     parse_practice_table,
@@ -16,6 +17,7 @@ from Models.datahandler import (  # noqa: E402
     parse_sixth_table,
     read_plan_from_docx,
 )
+from window_support import normalize_group  # noqa: E402
 
 
 def practice_row(group, dates, practice):
@@ -64,13 +66,21 @@ def test_fiveth_table_skips_rows_without_group_code():
 
 
 def test_sixth_table_leaves_missing_teacher_empty():
-    practices = [[1, "4411", "09.03.02", 7, "Учебная практика", ""]]
-    without_teacher = parse_sixth_table(practices, [["шапка"]])
-    assert without_teacher[0][1] == ""
-    with_teacher = parse_sixth_table(
-        practices, [["шапка"], ["", "", "", "", "", "Иванов И.И."]]
-    )
-    assert with_teacher[0][1] == "Иванов И.И."
+    empty = practice_row("4411", "01.09.2025-30.09.2025", "Учебная практика")
+    filled = practice_row("4411", "01.09.2025-30.09.2025", "Учебная практика")
+    filled[5] = "Иванов И.И."
+    assert parse_sixth_table([empty])[0][1] == ""
+    assert parse_sixth_table([filled])[0][1] == "Иванов И.И."
+
+
+def test_short_row_does_not_shift_following_teacher():
+    first = practice_row("4411", "01.09.2025-30.09.2025", "Учебная практика")
+    first[5] = "Иванов И.И."
+    second = practice_row("4412", "01.02.2025-28.02.2025", "Производственная практика")
+    second[5] = "Петров П.П."
+    parsed = parse_sixth_table([first, ["короткая"], second])
+    assert [row[3] for row in parsed] == ["4411", "4412"]
+    assert [row[1] for row in parsed] == ["Иванов И.И.", "Петров П.П."]
 
 
 def test_unreadable_date_leaves_semester_empty():
@@ -85,10 +95,22 @@ def test_short_and_broken_report_rows_do_not_raise():
     )
     assert skipped == 2
     assert parsed == [["4411", "12", "", "", "", "", "", "в КНИТУ-КАИ"]]
-    sixth = parse_sixth_table([[1, "4411", "09.03.02", 7, "Учебная"]], [["шапка"]])
-    assert sixth[0][1] == ""
-    assert sixth[0][3] == "4411"
-    assert sixth[0][4] == "Учебная"
+    assert parse_sixth_table([["короткая"]]) == []
+
+
+def test_apply_student_block_replaces_numbers_and_keeps_year():
+    title = "Учебная практика 2024"
+    first = apply_student_block(title, "\nГ/б - 10\nПл. - 2\nЦелевики - 1")
+    assert first == "Учебная практика 2024\nГ/б - 10\nПл. - 2\nЦелевики - 1"
+    second = apply_student_block(first, "Г/б - 3\nПл. - 1\nЦелевики - 0")
+    assert "2024" in second
+    assert second.count("Г/б") == 1
+    assert "Г/б - 10" not in second
+    assert second.endswith("Г/б - 3\nПл. - 1\nЦелевики - 0")
+
+
+def test_group_keys_match_after_normalization():
+    assert normalize_group(4111) == normalize_group("4111.0")
 
 
 def test_plan_without_group_code_does_not_raise():
@@ -106,7 +128,7 @@ def test_plan_without_group_code_does_not_raise():
     practices = parse_practice_table(loaded[1:])
     places = parse_second_table(loaded[1:])
     grades, skipped = parse_fiveth_table(places)
-    teachers = parse_sixth_table(practices, loaded)
+    teachers = parse_sixth_table(loaded[1:])
     assert practices[0][3] == 5
     assert places[0][3] == 5
     assert skipped == 1
@@ -128,8 +150,11 @@ def main():
     test_directed_students_ignore_year_in_title()
     test_fiveth_table_skips_rows_without_group_code()
     test_sixth_table_leaves_missing_teacher_empty()
+    test_short_row_does_not_shift_following_teacher()
     test_unreadable_date_leaves_semester_empty()
     test_short_and_broken_report_rows_do_not_raise()
+    test_apply_student_block_replaces_numbers_and_keeps_year()
+    test_group_keys_match_after_normalization()
     test_plan_without_group_code_does_not_raise()
     print("parse-checks-ok")
 

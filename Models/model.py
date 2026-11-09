@@ -4,13 +4,14 @@ from PySide6.QtCore import QAbstractTableModel, Qt, QModelIndex
 
 
 class PlanTableModel(QAbstractTableModel):
-    def __init__(self, data=[], header=None):
+    def __init__(self, data=[], header=None, editable=True):
         super(PlanTableModel, self).__init__()
         self._data = data if data else []
         self._header = header if header else []
+        self._editable = editable
 
     def setData(self, index, value, role=Qt.EditRole):
-        if not index.isValid() or role != Qt.EditRole:
+        if not self._editable or not index.isValid() or role != Qt.EditRole:
             return False
 
         row, col = index.row(), index.column()
@@ -24,9 +25,10 @@ class PlanTableModel(QAbstractTableModel):
         return True
 
     def flags(self, index):
-        return (
-            Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable  # Разрешаем редактирование
-        )
+        flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        if self._editable:
+            flags |= Qt.ItemIsEditable
+        return flags
 
     def rowCount(self, index=None):
         """func."""

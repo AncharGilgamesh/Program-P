@@ -5,9 +5,28 @@ from PySide6.QtWidgets import QDialog, QMessageBox
 from View.appearance import Ui_Dialog
 
 import Models.dbhandler as dbh
+from window_support import save_remembered_username
 
 AUTH_FAILED = "Неверный логин или пароль"
+EMPTY_NEW_PASSWORD = "Введите новый пароль"
+WRONG_CURRENT_PASSWORD = "Неверный текущий пароль"
 REGISTRATION_CODE_ENV = "REGISTRATION_CODE"
+
+
+def new_password_failure(new_password, repeat_password):
+    """None, если новый пароль можно записать. Пустой пароль не проходит."""
+    if new_password is None or len(new_password) < 1:
+        return EMPTY_NEW_PASSWORD
+    if new_password != repeat_password:
+        return "Пароли не совпадают"
+    return None
+
+
+def cabinet_password_failure(stored, current_password, new_password, repeat_password):
+    """Смена в кабинете: сначала текущий пароль, затем новый. Без диалога и без записи."""
+    if not dbh.password_matches(current_password or "", stored):
+        return WRONG_CURRENT_PASSWORD
+    return new_password_failure(new_password, repeat_password)
 
 
 def load_local_env():
@@ -77,7 +96,10 @@ class AppearanceDialog(QDialog):
             QMessageBox.warning(self, "Ошибка", AUTH_FAILED)
             return
         if self.ui.checkBox.isChecked():
-            dbh.update_remember_status(username, 1)
+            try:
+                save_remembered_username(username)
+            except OSError as exc:
+                QMessageBox.warning(self, "Ошибка", f"Не удалось запомнить вход: {exc}")
         self.success = True
         self.user = username
         self.accept()
@@ -138,8 +160,9 @@ class AppearanceDialog(QDialog):
         if not users:
             QMessageBox.warning(self, "Ошибка", AUTH_FAILED)
             return
-        if not password == repeat_password:
-            QMessageBox.warning(self, "Ошибка", "Пароли не совпадают")
+        failure = new_password_failure(password, repeat_password)
+        if failure:
+            QMessageBox.warning(self, "Ошибка", failure)
             return
         try:
             dbh.update_user_password(username, password)

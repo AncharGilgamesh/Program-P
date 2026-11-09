@@ -159,7 +159,19 @@ def remove_teacher(id):
     execute_query("DELETE FROM teachers WHERE id = ?", (id,))
 
 
+def select_document_by_id(id):
+    query = """
+        SELECT id, year, type, created, creator, protected, file_path
+        FROM documents
+        WHERE id = ?
+    """
+    return execute_query(query, (id,), fetch=True)
+
+
 def remove_document(id):
+    rows = select_document_by_id(id)
+    if rows and rows[0][5] == 1:
+        raise sqlite3.IntegrityError("Документ защищён и не может быть удалён")
     execute_query("DELETE FROM documents WHERE id = ?", (id,))
 
 

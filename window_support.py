@@ -85,3 +85,31 @@ def save_registered_copy(window, doc, doc_type):
             "Ошибка",
             f"Файл сохранён, но записать его в базу не удалось: {exc}",
         )
+
+
+def remembered_username_path(directory=None):
+    """Логин «запомнить меня» лежит у пользователя, не в общей базе."""
+    folder = directory or os.path.join(os.path.expanduser("~"), ".magistr_project")
+    return os.path.join(folder, "remembered_username")
+
+
+def save_remembered_username(username, directory=None):
+    path = remembered_username_path(directory)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(str(username).strip())
+
+
+def read_remembered_username(directory=None):
+    path = remembered_username_path(directory)
+    if not os.path.isfile(path):
+        return None
+    with open(path, encoding="utf-8") as handle:
+        text = handle.read().strip()
+    return text or None
+
+
+def clear_remembered_username(directory=None):
+    path = remembered_username_path(directory)
+    if os.path.isfile(path):
+        os.remove(path)

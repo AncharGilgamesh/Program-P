@@ -1,18 +1,27 @@
 import sqlite3
 import sys
 
-from PySide6.QtWidgets import QApplication, QHeaderView, QMainWindow, QMessageBox
+from PySide6.QtWidgets import (
+    QApplication,
+    QHeaderView,
+    QInputDialog,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+)
 
 import Models.dbhandler as dbh
 from Models.model import PlanTableModel
-from View.appearance_logic import AppearanceDialog
+from View.appearance_logic import AppearanceDialog, cabinet_password_failure
 from View.database_page import DatabasePage
 from View.plan_page import PlanPage
 from View.report_page import ReportPage
 from View.workspace import Ui_MainWindow
 from window_support import (
     OTCHET_TABLE_START_ROWS,
+    clear_remembered_username,
     help_path,
+    read_remembered_username,
     saves_filename,
     split_expired_documents,
 )
@@ -21,15 +30,18 @@ __all__ = ["OTCHET_TABLE_START_ROWS", "saves_filename", "split_expired_documents
 
 
 def remembered_username():
-    """Логин с включённым «запомнить меня». Пустой список — не ошибка."""
+    """Логин из домашнего файла, если такая учётка есть в базе."""
+    username = read_remembered_username()
+    if not username:
+        return None
     try:
-        rows = dbh.select_remembered_user()
+        rows = dbh.select_user_by_username(username)
     except sqlite3.Error as exc:
         QMessageBox.warning(None, "Ошибка", f"Не удалось прочитать базу: {exc}")
         return None
-    if not rows or not rows[0] or not rows[0][3]:
+    if not rows:
         return None
-    return rows[0][2]
+    return username
 
 
 class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
@@ -46,6 +58,7 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         self.user = user
         self._table_loaded = False
         self._nagruzka_loaded = False
+        self._retention_reviewed = False
 
         self._db_model = None
 
@@ -164,10 +177,26 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
     def lk_change_password(self):
         password = self.ui.lkNewPassLine.text()
         repeat_password = self.ui.lkRepeatPassLine.text()
-        if not password == repeat_password:
-            QMessageBox.warning(self, "Ошибка", "Пароли не совпадают")
+        current_password, accepted = QInputDialog.getText(
+            self,
+            "Смена пароля",
+            "Текущий пароль:",
+            QLineEdit.EchoMode.Password,
+        )
+        if not accepted:
             return
-
+        try:
+            users = dbh.select_user_by_username(self.user)
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось проверить учётную запись: {exc}")
+            return
+        if not users:
+            QMessageBox.warning(self, "Ошибка", "Пользователь не найден")
+            return
+        failure = cabinet_password_failure(users[0][3], current_password, password, repeat_password)
+        if failure:
+            QMessageBox.warning(self, "Ошибка", failure)
+            return
         try:
             dbh.update_user_password(self.user, password)
         except sqlite3.Error as exc:
@@ -176,10 +205,25 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         QMessageBox.information(self, "Успешно", "Успешная смена пароля")
 
     def go_to_lk(self):
+        try:
+            users = dbh.select_user_by_username(self.user)
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось открыть кабинет: {exc}")
+            return
+        if not users:
+            QMessageBox.warning(self, "Ошибка", "Пользователь не найден")
+            return
+        user = users[0]
+        try:
+            teachers = dbh.select_teacher_by_id(user[1])
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось открыть кабинет: {exc}")
+            return
+        if not teachers:
+            QMessageBox.warning(self, "Ошибка", "Преподаватель не найден в справочнике")
+            return
+        user_data = teachers[0]
         self.switch_page(4)
-        user = dbh.select_user_by_username(self.user)[0]
-        # передаем teacher_id, чтобы получить инфу по преподавателю
-        user_data = dbh.select_teacher_by_id(user[1])[0]
         self.ui.lkUsernameLine.setText(self.user)
         self.ui.lkLastNameLine.setText(user[4])
         self.ui.lkNameLine.setText(user[5])
@@ -193,23 +237,12 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         """Переключает страницу в QStackedWidget и обновляет состояние кнопок"""
         self.ui.mainStackedWidget.setCurrentIndex(index)
         if index == 0:
-            self.upload_db_docs(review_retention=True)
+            self.upload_db_docs(review_retention=not self._retention_reviewed)
 
     def exit_function(self):
-        dbh.update_remember_status(self.user, 0)
+        clear_remembered_username()
         self.restart_auth = True
         self.close()  # просто закрываем окно, не sys.exit()
-
-
-def check_for_appearance():
-    username = remembered_username()
-    if username:
-        return username
-    appearance = AppearanceDialog()
-    appearance.exec()
-    if not appearance.get_success_status():
-        sys.exit()
-    return appearance.get_username()
 
 
 def run_application():
@@ -240,9 +273,3 @@ def run_application():
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     run_application()
-    """
-    username = check_for_appearance()
-    window = MainWindow(user=username)
-    window.show()
-
-    sys.exit(app.exec())"""

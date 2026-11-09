@@ -20,11 +20,21 @@ class DatabasePage:
             return None
         return self._db_model.get_row(indexes[0].row())
 
-    def open_document(self):
+    def _document_from_db(self):
         data = self.selected_db_row()
         if data is None:
+            return None
+        rows = dbh.select_document_by_id(data[0])
+        if not rows:
+            QMessageBox.warning(self, "Ошибка", "Документ не найден")
+            return None
+        return rows[0]
+
+    def open_document(self):
+        row = self._document_from_db()
+        if row is None:
             return
-        file_path = data[-1]
+        file_path = row[-1]
         system = platform.system()
         try:
             if system == "Windows":
@@ -37,31 +47,36 @@ class DatabasePage:
             QMessageBox.warning(self, "Ошибка", f"Не удалось открыть файл: {exc}")
 
     def defend_doucment(self):
-        data = self.selected_db_row()
-        if data is None:
+        row = self._document_from_db()
+        if row is None:
             return
-        new_status = 1 if data[-2] == 0 else 0
+        new_status = 1 if row[5] == 0 else 0
         try:
-            dbh.defend_document(data[0], new_status)
+            dbh.defend_document(row[0], new_status)
         except sqlite3.Error as exc:
             QMessageBox.warning(self, "Ошибка", f"Не удалось изменить защиту: {exc}")
             return
         self.upload_db_docs()
 
     def remove_document(self):
-        data = self.selected_db_row()
-        if data is None:
+        row = self._document_from_db()
+        if row is None:
             return
-        if len(data) > 5 and data[5] == 1:
+        if row[5] == 1:
             QMessageBox.warning(self, "Защита", "Документ защищён и не может быть удалён")
             return
+        file_path = row[-1]
         try:
-            dbh.remove_document(data[0])
+            dbh.remove_document(row[0])
+        except sqlite3.IntegrityError:
+            QMessageBox.warning(self, "Защита", "Документ защищён и не может быть удалён")
+            return
         except sqlite3.Error as exc:
             QMessageBox.warning(self, "Ошибка", f"Не удалось удалить запись: {exc}")
             return
         try:
-            os.remove(data[-1])
+            if file_path:
+                os.remove(file_path)
         except OSError as exc:
             QMessageBox.warning(self, "Ошибка", f"Запись удалена, но файл не удалён: {exc}")
         self.upload_db_docs()
@@ -70,7 +85,7 @@ class DatabasePage:
         self.ui.dbPageStackedWidget.setCurrentIndex(1)
         data = dbh.load_starostas()
         headers = ["id", "id_Куратора", "Фамилия", "Имя", "Отчество", "Группа", "Почта", "Номер"]
-        self._db_model = PlanTableModel(data, headers)
+        self._db_model = PlanTableModel(data, headers, editable=False)
         self.ui.dataBaseTableView.setModel(self._db_model)
 
     def add_db_starosta(self):
@@ -115,7 +130,7 @@ class DatabasePage:
         self.ui.dbPageStackedWidget.setCurrentIndex(0)
         data = dbh.load_teachers()
         headers = ["id", "Фамилия", "Имя", "Отчество", "Степень", "Должность", "Почта", "Номер"]
-        self._db_model = PlanTableModel(data, headers)
+        self._db_model = PlanTableModel(data, headers, editable=False)
         self.ui.dataBaseTableView.setModel(self._db_model)
 
     def add_db_prepod(self):
@@ -157,9 +172,8 @@ class DatabasePage:
     def upload_db_docs(self, review_retention=False):
         self.ui.dbPageStackedWidget.setCurrentIndex(2)
         data = dbh.load_docs()
-        print(data)
         headers = ["id", "Год", "Тип", "Дата создания", "Создатель", "Защищено", "Путь"]
-        self._db_model = PlanTableModel(data, headers)
+        self._db_model = PlanTableModel(data, headers, editable=False)
         self.ui.dataBaseTableView.setModel(self._db_model)
         if review_retention:
             self.review_document_retention(data)
@@ -168,6 +182,7 @@ class DatabasePage:
         expired, protected = split_expired_documents(rows)
         if not expired and not protected:
             return
+        self._retention_reviewed = True
         lines = []
         if expired:
             lines.append("Незащищённые документы старше 5 лет:")

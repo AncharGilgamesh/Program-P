@@ -833,9 +833,6 @@ QHeaderView::section {
         <height>31</height>
        </rect>
       </property>
-      <property name="toolTip">
-       <string>Твоя мама</string>
-      </property>
       <property name="styleSheet">
        <string notr="true">QPushButton{
     color: white;

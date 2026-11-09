@@ -1058,9 +1058,6 @@ QTableView QLineEdit {
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QPushButton" name="notePlanPushButton">
-            <property name="toolTip">
-             <string>Твоя мама</string>
-            </property>
             <property name="styleSheet">
              <string notr="true">QPushButton{
     color: white;
