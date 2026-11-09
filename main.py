@@ -95,6 +95,7 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         self.ui.otch_pln_btn.clicked.connect(self.load_plan)
         self.ui.otchSaveAsPushButton.clicked.connect(self.save_otchet_as)
         self.ui.otchSavePushButton.clicked.connect(self.save_otchet)
+        self.ui.pushButton.clicked.connect(self.load_saved_otchet)
         # first stage
         self.ui.meeting_date_otch_btn.clicked.connect(self.add_meting_date)
         # second stage
@@ -111,6 +112,7 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         # Тут страница плана
         self.ui.loadTableButton.clicked.connect(self.load_table_new)
         self.ui.loadNagruzkaButton.clicked.connect(self.load_nagruzka)
+        self.ui.loadPlanPushButton.clicked.connect(self.load_saved_plan)
         # проверяю insert rows для модели
         self.ui.notePlanPushButton.clicked.connect(self.open_group_dialog)
         # проверяю добавление значений

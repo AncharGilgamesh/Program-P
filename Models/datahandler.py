@@ -426,6 +426,38 @@ def read_plan_from_docx(docx_path):
     return data
 
 
+def rows_from_saved_report(doc, start_rows, widths):
+    """Шесть таблиц сохранённого отчёта. Пустые строки пропускаются, дата не пересчитывается."""
+    if len(doc.tables) < 6:
+        raise ValueError("В файле отчёта нужны шесть таблиц")
+    loaded = []
+    for table, start, width in zip(doc.tables, start_rows, widths):
+        rows = []
+        for row in table.rows[start:]:
+            cells = [cell.text.strip() for cell in row.cells]
+            cells = cells[:width]
+            if len(cells) < width:
+                cells.extend([""] * (width - len(cells)))
+            if any(cells):
+                rows.append(cells)
+        loaded.append(rows)
+    return loaded
+
+
+def rows_from_saved_plan(data):
+    """Строки сохранённого плана: без шапки, ширина 10, id с 1."""
+    rows = []
+    for raw in data[1:]:
+        cells = ["" if cell is None else str(cell).strip() for cell in raw]
+        if not any(cells):
+            continue
+        cells = cells[:10]
+        if len(cells) < 10:
+            cells.extend([""] * (10 - len(cells)))
+        rows.append(cells)
+    return [[index, *cells] for index, cells in enumerate(rows, start=1)]
+
+
 def find_column_index_by_keyword(model, keyword: str) -> int:
     """Ищет столбец, в заголовке которого содержится keyword (без учёта регистра)."""
     keyword = keyword.lower()

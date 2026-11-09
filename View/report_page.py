@@ -172,6 +172,35 @@ class ReportPage:
         self.ui.otch_lbl_stage.setText(f"{index + 1} этап")
         self.ui.stackedWidget.setCurrentIndex(index)
 
+    def load_saved_otchet(self):
+        fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Word файлы (*.docx)")
+        if not fname:
+            return
+        try:
+            tables = dh.rows_from_saved_report(
+                Document(fname), OTCHET_TABLE_START_ROWS, (6, 7, 3, 8, 8, 8)
+            )
+        except Exception as exc:
+            log_exception()
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            return
+        models = self._otchet_models()
+        if any(model.rowCount() > 0 for model in models):
+            answer = QMessageBox.question(
+                self,
+                "Заменить текущий отчёт?",
+                "Заменить текущий отчёт?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
+            if answer != QMessageBox.Yes:
+                return
+        for model, rows in zip(models, tables):
+            model.clear()
+            if rows:
+                model.insertRows(0, len(rows), rows)
+        self.set_otchet_resizing()
+
     def set_otchet_tables_models(self):
         headers_for_first_stage = [
             "№",

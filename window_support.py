@@ -2,6 +2,7 @@ import datetime
 import os
 import sqlite3
 import traceback
+from pathlib import Path
 
 from PySide6.QtWidgets import QMessageBox
 
@@ -15,6 +16,27 @@ shablon_otch_path = os.path.join(base_dir, "Shablons", "shablon_otchet.docx")
 # шапки, у пятой — четыре. Остальные таблицы начинаются после двух строк шапки.
 OTCHET_TABLE_START_ROWS = (1, 2, 2, 2, 4, 2)
 RETENTION_YEARS = 5
+
+
+def path_inside_saves(file_path, root=None):
+    """Истина, если путь после resolve лежит внутри каталога Saves."""
+    text = "" if file_path is None else str(file_path).strip()
+    if not text:
+        return False
+    base = Path(root or base_dir).resolve()
+    saves = (base / "Saves").resolve()
+    candidate = Path(text)
+    if not candidate.is_absolute():
+        candidate = base / candidate
+    try:
+        resolved = candidate.resolve()
+    except OSError:
+        return False
+    try:
+        resolved.relative_to(saves)
+    except ValueError:
+        return False
+    return True
 
 
 def years_before(day, years):

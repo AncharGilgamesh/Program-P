@@ -30,6 +30,7 @@ from Models.datahandler import (  # noqa: E402
     parse_second_table,
     parse_sixth_table,
     read_plan_from_docx,
+    rows_from_saved_plan,
 )
 from View.plan_page import plan_replace_needs_confirm  # noqa: E402
 
@@ -337,6 +338,21 @@ def test_plan_without_group_code_does_not_raise():
     assert teachers[0][1] == ""
 
 
+def test_saved_plan_row_keeps_group_and_id():
+    document = Document()
+    table = document.add_table(rows=3, cols=10)
+    table.rows[2].cells[0].text = "4411"
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "plan.docx"
+        document.save(path)
+        loaded = read_plan_from_docx(str(path))
+    rows = rows_from_saved_plan(loaded)
+    assert len(rows) == 1
+    assert rows[0][0] == 1
+    assert rows[0][1] == "4411"
+    assert len(rows[0]) == 11
+
+
 def test_plan_replace_needs_confirm_only_for_a_filled_table():
     assert plan_replace_needs_confirm(0, True) is False
     assert plan_replace_needs_confirm(3, True) is True
@@ -368,6 +384,7 @@ def main():
     test_workload_teacher_keeps_initials_and_full_name()
     test_empty_total_keeps_zero_targeted()
     test_total_below_budget_and_paid_names_the_group()
+    test_saved_plan_row_keeps_group_and_id()
     test_plan_replace_needs_confirm_only_for_a_filled_table()
     test_group_keys_match_after_normalization()
     test_repeated_group_counts_are_summed()

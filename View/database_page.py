@@ -9,7 +9,7 @@ import Models.dbhandler as dbh
 from Models.model import PlanTableModel
 from View.prepod_dialog import PrepodDialog
 from View.startosta_dialog import StarostaDialog
-from window_support import split_expired_documents
+from window_support import path_inside_saves, split_expired_documents
 
 
 class DatabasePage:
@@ -35,6 +35,9 @@ class DatabasePage:
         if row is None:
             return
         file_path = row[-1]
+        if not path_inside_saves(file_path):
+            QMessageBox.warning(self, "Ошибка", "Файл лежит вне папки сохранений")
+            return
         system = platform.system()
         try:
             if system == "Windows":
@@ -66,6 +69,9 @@ class DatabasePage:
             QMessageBox.warning(self, "Защита", "Документ защищён и не может быть удалён")
             return
         file_path = row[-1]
+        if not path_inside_saves(file_path):
+            QMessageBox.warning(self, "Ошибка", "Файл лежит вне папки сохранений")
+            return
         try:
             dbh.remove_document(row[0])
         except sqlite3.IntegrityError:
@@ -203,6 +209,9 @@ class DatabasePage:
         if answer != QMessageBox.Yes:
             return
         for row in expired:
+            if not path_inside_saves(row[-1]):
+                QMessageBox.warning(self, "Ошибка", "Файл лежит вне папки сохранений")
+                continue
             try:
                 dbh.remove_document(row[0])
             except sqlite3.Error as exc:

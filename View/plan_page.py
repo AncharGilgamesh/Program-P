@@ -183,3 +183,22 @@ class PlanPage:
             print("Данные:")
             block_df = pd.DataFrame(block['data'])
             print(block_df.to_string(index=False, header=False))"""
+
+    def load_saved_plan(self):
+        fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Word файлы (*.docx)")
+        if not fname:
+            return
+        try:
+            rows = dh.rows_from_saved_plan(dh.read_plan_from_docx(fname))
+        except Exception as exc:
+            log_exception()
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            return
+        if plan_replace_needs_confirm(self._plan_model.rowCount(), True):
+            if not self._ask_replace_plan():
+                return
+        self._plan_model.clear()
+        if rows:
+            self._plan_model.insertRows(0, len(rows), rows)
+        self._table_loaded = True
+        self.ui.tableView.resizeRowsToContents()
