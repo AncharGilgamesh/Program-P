@@ -32,7 +32,7 @@ from Models.datahandler import (  # noqa: E402
     read_plan_from_docx,
     rows_from_saved_plan,
 )
-from View.plan_page import plan_replace_needs_confirm  # noqa: E402
+from View.plan_page import plan_replace_needs_confirm, table_loaded_after_replace  # noqa: E402
 
 
 def practice_row(group, dates, practice):
@@ -124,6 +124,32 @@ def test_excel_date_becomes_first_of_september():
     assert loaded[0][3] == "01.09.2025"
 
 
+def test_iso_dates_inside_a_sentence_become_day_first():
+    text = "с 2025-09-01 по 2025-09-30"
+    assert extract_start_end_dates(text) == ("01.09.2025", "30.09.2025")
+    assert extract_first_month(text) == 9
+    assert extract_meeting_date(text) == "01.09.2025"
+    parsed = parse_practice_table([practice_row("4411", text, "Учебная практика")])
+    assert parsed[0][3] == 7
+    assert parsed[0][5] == "01.09.2025"
+    with_time = "с 2025-09-01 00:00:00 по 2025-09-30"
+    assert normalize_practice_period(with_time) == "с 01.09.2025 по 30.09.2025"
+    third = "с 2025-09-01 по 2025-09-30 и 2025-10-05"
+    assert normalize_practice_period(third) == "с 01.09.2025 по 30.09.2025 и 2025-10-05"
+
+
+def test_invalid_iso_date_does_not_use_a_replacement_slot():
+    broken = "2025-13-01 и 2025-09-01 и 2025-09-30"
+    assert normalize_practice_period(broken) == "2025-13-01 и 01.09.2025 и 30.09.2025"
+    third = "с 2025-09-01 по 2025-09-30 и 2025-10-05"
+    assert normalize_practice_period(third) == "с 01.09.2025 по 30.09.2025 и 2025-10-05"
+    assert normalize_practice_period("01.09.2025-30.09.2025") == "01.09.2025-30.09.2025"
+    assert normalize_practice_period(pd.Timestamp("2025-09-01")) == "01.09.2025"
+    text = "с 2025-09-01 по 2025-09-30"
+    assert extract_first_month(text) == 9
+    assert extract_meeting_date(text) == "01.09.2025"
+
+
 def test_unknown_practice_title_survives_in_the_report():
     diploma = "Преддипломная практика\nГ/б - 4\nПл. - 0\nЦелевики - 0"
     row = practice_row("4411", "01.09.2025-30.09.2025", diploma)
@@ -194,6 +220,52 @@ def test_workload_group_drops_decimal_tail():
         ]
     )
     assert transformed[0][1] == "4311"
+
+
+def test_table_period_timestamp_is_day_month_year():
+    transformed = transform_practice_data(
+        [
+            {
+                "title": "Учебная практика",
+                "data": [
+                    ["шапка", "группа", "фио", "направление", "сроки"],
+                    ["", 4311.0, "Иванов", "09.03.02", pd.Timestamp("2025-09-01")],
+                    ["", "4312", "Петров", "09.03.02", None],
+                    ["", "4313", "Сидоров", "09.03.02", "01.09.2025-30.09.2025"],
+                ],
+            }
+        ]
+    )
+    assert transformed[0][1] == "4311"
+    assert transformed[0][3] == "01.09.2025"
+    assert transformed[1][3] == ""
+    assert "NaT" not in transformed[1]
+    assert "nan" not in [str(cell) for cell in transformed[1]]
+    assert transformed[2][3] == "01.09.2025-30.09.2025"
+
+
+def test_empty_direction_stays_blank():
+    transformed = transform_practice_data(
+        [
+            {
+                "title": "Учебная практика",
+                "data": [
+                    ["шапка", "группа", "фио", "направление", "сроки"],
+                    ["", 4311.0, "Иванов", None, pd.Timestamp("2025-09-01")],
+                    ["", 4312, "Петров", float("nan"), "01.09.2025"],
+                    ["", 4313, "Сидоров", " 09.03.02 ", "01.09.2025"],
+                ],
+            }
+        ]
+    )
+    assert transformed[0][8] == ""
+    assert transformed[1][8] == ""
+    assert "nan" not in [str(cell) for cell in transformed[0]]
+    assert "NaT" not in [str(cell) for cell in transformed[0]]
+    assert "nan" not in [str(cell) for cell in transformed[1]]
+    assert transformed[2][8] == "09.03.02"
+    assert transformed[0][1] == "4311"
+    assert transformed[0][3] == "01.09.2025"
 
 
 def test_workload_teacher_keeps_initials_and_full_name():
@@ -353,6 +425,11 @@ def test_saved_plan_row_keeps_group_and_id():
     assert len(rows[0]) == 11
 
 
+def test_empty_replace_clears_the_loaded_flag():
+    assert table_loaded_after_replace(0) is False
+    assert table_loaded_after_replace(4) is True
+
+
 def test_plan_replace_needs_confirm_only_for_a_filled_table():
     assert plan_replace_needs_confirm(0, True) is False
     assert plan_replace_needs_confirm(3, True) is True
@@ -375,16 +452,21 @@ def main():
     test_sixth_table_leaves_missing_teacher_empty()
     test_short_row_does_not_shift_following_teacher()
     test_excel_date_becomes_first_of_september()
+    test_iso_dates_inside_a_sentence_become_day_first()
+    test_invalid_iso_date_does_not_use_a_replacement_slot()
     test_unknown_practice_title_survives_in_the_report()
     test_third_table_lists_groups_in_sorted_order()
     test_unreadable_date_leaves_semester_empty()
     test_short_and_broken_report_rows_do_not_raise()
     test_apply_student_block_replaces_numbers_and_keeps_year()
     test_workload_group_drops_decimal_tail()
+    test_table_period_timestamp_is_day_month_year()
+    test_empty_direction_stays_blank()
     test_workload_teacher_keeps_initials_and_full_name()
     test_empty_total_keeps_zero_targeted()
     test_total_below_budget_and_paid_names_the_group()
     test_saved_plan_row_keeps_group_and_id()
+    test_empty_replace_clears_the_loaded_flag()
     test_plan_replace_needs_confirm_only_for_a_filled_table()
     test_group_keys_match_after_normalization()
     test_repeated_group_counts_are_summed()

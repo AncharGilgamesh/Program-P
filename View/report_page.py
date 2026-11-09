@@ -13,6 +13,11 @@ from window_support import (
 )
 
 
+def report_replace_needs_confirm(row_counts):
+    """Истина, когда загрузка сотрёт хотя бы одну заполненную таблицу отчёта."""
+    return any(count > 0 for count in row_counts)
+
+
 def show_fio_dialog(parent=None):
     text, ok = QInputDialog.getText(parent, "Введите ФИО", "Фамилия и инициалы:")
     if ok and text.strip():
@@ -115,6 +120,16 @@ class ReportPage:
                 # столбец 5 — это "Дата проведения собрания"
                 self._oth_frst_stg_model.setData(self._oth_frst_stg_model.index(row, 5), date_str)
 
+    def _ask_replace_report(self):
+        answer = QMessageBox.question(
+            self,
+            "Заменить текущий отчёт?",
+            "Заменить текущий отчёт?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        return answer == QMessageBox.Yes
+
     def load_plan(self):
         fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Word файлы (*.docx)")
         if not fname:
@@ -138,6 +153,9 @@ class ReportPage:
         except Exception as exc:
             log_exception()
             QMessageBox.warning(self, "Ошибка", str(exc))
+            return
+        counts = [model.rowCount() for model, _rows in loaded]
+        if report_replace_needs_confirm(counts) and not self._ask_replace_report():
             return
         for model, rows in loaded:
             model.clear()
@@ -185,16 +203,9 @@ class ReportPage:
             QMessageBox.warning(self, "Ошибка", str(exc))
             return
         models = self._otchet_models()
-        if any(model.rowCount() > 0 for model in models):
-            answer = QMessageBox.question(
-                self,
-                "Заменить текущий отчёт?",
-                "Заменить текущий отчёт?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
-            )
-            if answer != QMessageBox.Yes:
-                return
+        counts = [model.rowCount() for model in models]
+        if report_replace_needs_confirm(counts) and not self._ask_replace_report():
+            return
         for model, rows in zip(models, tables):
             model.clear()
             if rows:

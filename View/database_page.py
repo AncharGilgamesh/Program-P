@@ -9,7 +9,7 @@ import Models.dbhandler as dbh
 from Models.model import PlanTableModel
 from View.prepod_dialog import PrepodDialog
 from View.startosta_dialog import StarostaDialog
-from window_support import path_inside_saves, split_expired_documents
+from window_support import locate_saved_file, split_expired_documents
 
 
 class DatabasePage:
@@ -34,18 +34,19 @@ class DatabasePage:
         row = self._document_from_db()
         if row is None:
             return
-        file_path = row[-1]
-        if not path_inside_saves(file_path):
+        file_path = locate_saved_file(row[-1])
+        if file_path is None:
             QMessageBox.warning(self, "Ошибка", "Файл лежит вне папки сохранений")
             return
         system = platform.system()
+        target = os.fspath(file_path)
         try:
             if system == "Windows":
-                os.startfile(file_path)
+                os.startfile(target)
             elif system == "Darwin":
-                subprocess.run(["open", file_path], check=True)
+                subprocess.run(["open", target], check=True)
             else:
-                subprocess.run(["xdg-open", file_path], check=True)
+                subprocess.run(["xdg-open", target], check=True)
         except (OSError, subprocess.CalledProcessError) as exc:
             QMessageBox.warning(self, "Ошибка", f"Не удалось открыть файл: {exc}")
 
@@ -68,10 +69,17 @@ class DatabasePage:
         if row[5] == 1:
             QMessageBox.warning(self, "Защита", "Документ защищён и не может быть удалён")
             return
-        file_path = row[-1]
-        if not path_inside_saves(file_path):
-            QMessageBox.warning(self, "Ошибка", "Файл лежит вне папки сохранений")
-            return
+        file_path = locate_saved_file(row[-1])
+        if file_path is None:
+            answer = QMessageBox.question(
+                self,
+                "Удалить только запись из базы?",
+                "Удалить только запись из базы?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
+            if answer != QMessageBox.Yes:
+                return
         try:
             dbh.remove_document(row[0])
         except sqlite3.IntegrityError:
@@ -80,22 +88,30 @@ class DatabasePage:
         except sqlite3.Error as exc:
             QMessageBox.warning(self, "Ошибка", f"Не удалось удалить запись: {exc}")
             return
-        try:
-            if file_path:
-                os.remove(file_path)
-        except OSError as exc:
-            QMessageBox.warning(self, "Ошибка", f"Запись удалена, но файл не удалён: {exc}")
+        if file_path is not None:
+            try:
+                os.remove(os.fspath(file_path))
+            except OSError as exc:
+                QMessageBox.warning(self, "Ошибка", f"Запись удалена, но файл не удалён: {exc}")
         self.upload_db_docs()
 
     def upload_db_starosta(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(1)
-        data = dbh.load_starostas()
+        try:
+            data = dbh.load_starostas()
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            return
         headers = ["id", "id_Куратора", "Фамилия", "Имя", "Отчество", "Группа", "Почта", "Номер"]
         self._db_model = PlanTableModel(data, headers, editable=False)
         self.ui.dataBaseTableView.setModel(self._db_model)
 
     def add_db_starosta(self):
-        teachers = dbh.load_teachers()
+        try:
+            teachers = dbh.load_teachers()
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось открыть список преподавателей: {exc}")
+            return
         dialog = StarostaDialog(teachers=teachers, parent=self)
         if not dialog.exec():
             return
@@ -107,7 +123,11 @@ class DatabasePage:
         self.upload_db_starosta()
 
     def edit_db_starosta(self):
-        teachers = dbh.load_teachers()
+        try:
+            teachers = dbh.load_teachers()
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось открыть список преподавателей: {exc}")
+            return
         row = self.selected_db_row()
         if row is None:
             return
@@ -134,7 +154,11 @@ class DatabasePage:
 
     def upload_db_teachers(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(0)
-        data = dbh.load_teachers()
+        try:
+            data = dbh.load_teachers()
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            return
         headers = ["id", "Фамилия", "Имя", "Отчество", "Степень", "Должность", "Почта", "Номер"]
         self._db_model = PlanTableModel(data, headers, editable=False)
         self.ui.dataBaseTableView.setModel(self._db_model)
@@ -177,7 +201,11 @@ class DatabasePage:
 
     def upload_db_docs(self, review_retention=False):
         self.ui.dbPageStackedWidget.setCurrentIndex(2)
-        data = dbh.load_docs()
+        try:
+            data = dbh.load_docs()
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            return
         headers = ["id", "Год", "Тип", "Дата создания", "Создатель", "Защищено", "Путь"]
         self._db_model = PlanTableModel(data, headers, editable=False)
         self.ui.dataBaseTableView.setModel(self._db_model)
@@ -191,10 +219,10 @@ class DatabasePage:
         self._retention_reviewed = True
         lines = []
         if expired:
-            lines.append("Незащищённые документы старше 5 лет:")
+            lines.append("Незащищённые документы сроком 5 лет и больше:")
             lines.extend(self._document_line(row) for row in expired)
         if protected:
-            lines.append("Защищённые документы старше 5 лет не удаляются:")
+            lines.append("Защищённые документы сроком 5 лет и больше не удаляются:")
             lines.extend(self._document_line(row) for row in protected)
         if not expired:
             QMessageBox.information(self, "Срок хранения", "\n".join(lines))
@@ -209,7 +237,8 @@ class DatabasePage:
         if answer != QMessageBox.Yes:
             return
         for row in expired:
-            if not path_inside_saves(row[-1]):
+            file_path = locate_saved_file(row[-1])
+            if file_path is None:
                 QMessageBox.warning(self, "Ошибка", "Файл лежит вне папки сохранений")
                 continue
             try:
@@ -218,8 +247,7 @@ class DatabasePage:
                 QMessageBox.warning(self, "Ошибка", f"Не удалось удалить запись: {exc}")
                 continue
             try:
-                if row[-1]:
-                    os.remove(row[-1])
+                os.remove(os.fspath(file_path))
             except OSError as exc:
                 QMessageBox.warning(self, "Ошибка", f"Запись удалена, но файл не удалён: {exc}")
         self.upload_db_docs()

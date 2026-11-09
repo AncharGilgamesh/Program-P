@@ -13,6 +13,11 @@ def plan_replace_needs_confirm(row_count, replaces_rows):
     return row_count > 0 and bool(replaces_rows)
 
 
+def table_loaded_after_replace(row_count):
+    """Истина, когда после замены в таблице остались строки."""
+    return row_count > 0
+
+
 class PlanPage:
     def save_plan_as(self):
         options = QFileDialog.Options()
@@ -174,7 +179,7 @@ class PlanPage:
         self._plan_model.clear()
         if combined_blocks:
             self._plan_model.insertRows(0, len(combined_blocks), combined_blocks)
-        self._table_loaded = True
+        self._table_loaded = table_loaded_after_replace(self._plan_model.rowCount())
         self.ui.tableView.resizeRowsToContents()
         """
         for i, block in enumerate(blocks_maga, 1):
@@ -200,5 +205,5 @@ class PlanPage:
         self._plan_model.clear()
         if rows:
             self._plan_model.insertRows(0, len(rows), rows)
-        self._table_loaded = True
+        self._table_loaded = table_loaded_after_replace(self._plan_model.rowCount())
         self.ui.tableView.resizeRowsToContents()

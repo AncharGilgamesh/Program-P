@@ -122,6 +122,13 @@ def create_users_table():
     execute_query(query)
 
 
+def _stored_email(email):
+    """Пустая почта — NULL, чтобы несколько преподавателей без адреса могли сохраниться."""
+    if email is None or str(email).strip() == "":
+        return None
+    return email
+
+
 def update_teacher(id, data):
     query = """
         UPDATE teachers
@@ -134,7 +141,10 @@ def update_teacher(id, data):
             phone = ?
         WHERE id = ?
     """
-    execute_query(query, tuple(data) + (id,))
+    values = list(data)
+    if len(values) > 5:
+        values[5] = _stored_email(values[5])
+    execute_query(query, tuple(values) + (id,))
 
 
 def teacher_has_references(teacher_id):
@@ -194,7 +204,7 @@ def insert_teacher(l_name, f_name, m_name, a_degree, a_title, email, phone):
         INSERT INTO teachers (last_name, first_name, middle_name, academic_degree, academic_title, email, phone)
         VALUES (?, ?, ?, ?, ?, ?, ?);
     """
-    params = (l_name, f_name, m_name, a_degree, a_title, email, phone)
+    params = (l_name, f_name, m_name, a_degree, a_title, _stored_email(email), phone)
     execute_query(query, params)
 
 

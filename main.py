@@ -53,7 +53,13 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         self.load_help_html()
 
         # Создаем базы данных
-        dbh.create_tables()
+        try:
+            dbh.create_tables()
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            self._startup_failed = True
+            self.close()
+            return
 
         self.user = user
         self._table_loaded = False
@@ -260,6 +266,8 @@ def run_application():
 
         # 3. Запускаем основное окно
         main_window = MainWindow(user=username)
+        if getattr(main_window, "_startup_failed", False):
+            break
         main_window.show()
 
         # 4. Запускаем event loop и ждём выхода

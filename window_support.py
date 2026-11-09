@@ -18,6 +18,37 @@ OTCHET_TABLE_START_ROWS = (1, 2, 2, 2, 4, 2)
 RETENTION_YEARS = 5
 
 
+def locate_saved_file(stored, root=None):
+    """Путь внутри текущего Saves или None.
+
+    Относительный путь считается от корня проекта. Абсолютный путь из другой
+    копии папки находится по имени файла, если оно уже лежит в текущем Saves.
+    """
+    text = "" if stored is None else str(stored).strip()
+    if not text:
+        return None
+    base = Path(root or base_dir).resolve()
+    saves = (base / "Saves").resolve()
+    candidate = Path(text)
+    absolute = candidate.is_absolute()
+    if not absolute:
+        candidate = base / candidate
+    try:
+        resolved = candidate.resolve()
+    except OSError:
+        return None
+    try:
+        resolved.relative_to(saves)
+    except ValueError:
+        if not absolute:
+            return None
+        moved = saves / Path(text).name
+        if moved.is_file():
+            return moved.resolve()
+        return None
+    return resolved
+
+
 def path_inside_saves(file_path, root=None):
     """Истина, если путь после resolve лежит внутри каталога Saves."""
     text = "" if file_path is None else str(file_path).strip()
@@ -96,9 +127,10 @@ def log_exception():
 
 def save_registered_copy(window, doc, doc_type):
     year = datetime.datetime.now().year
+    filename = saves_filename(year, doc_type)
     saves_dir = os.path.join(base_dir, "Saves")
     os.makedirs(saves_dir, exist_ok=True)
-    save_path = os.path.join(saves_dir, saves_filename(year, doc_type))
+    save_path = os.path.join(saves_dir, filename)
     try:
         doc.save(save_path)
     except OSError as exc:
@@ -107,7 +139,7 @@ def save_registered_copy(window, doc, doc_type):
         return
     created = datetime.datetime.now().strftime("%Y.%m.%d")
     try:
-        dbh.insert_document(year, doc_type, created, window.user, save_path, 0)
+        dbh.insert_document(year, doc_type, created, window.user, f"Saves/{filename}", 0)
     except sqlite3.Error as exc:
         log_exception()
         QMessageBox.warning(

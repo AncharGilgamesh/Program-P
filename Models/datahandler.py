@@ -153,7 +153,12 @@ _ISO_DATE = re.compile(r"(\d{4})-(\d{2})-(\d{2})(?:[ T]\d{2}:\d{2}:\d{2})?")
 
 
 def normalize_practice_period(value):
-    """Дата Excel и ГГГГ-ММ-ДД становятся дд.мм.гггг. Уже записанный диапазон не трогает."""
+    """Дата Excel и до двух дат ГГГГ-ММ-ДД становятся дд.мм.гггг.
+
+    Диапазон, который уже начинается с дд.мм, не трогает. Слова перед первой
+    датой не мешают замене. Неразборная дата остаётся как есть и не занимает
+    слот. Третья успешная дата ГГГГ-ММ-ДД в той же ячейке остаётся.
+    """
     if isinstance(value, datetime):
         return "" if pd.isna(value) else value.strftime("%d.%m.%Y")
     if isinstance(value, date):
@@ -163,19 +168,17 @@ def normalize_practice_period(value):
     text = str(value).strip()
     if not text or _LEADING_DAY_MONTH.match(text):
         return text
-    if not re.match(r"^\d{4}-\d{2}-\d{2}", text):
-        return text
     replaced = 0
 
     def _as_day_first(match):
         nonlocal replaced
         if replaced >= 2:
             return match.group(0)
-        replaced += 1
         try:
             parsed = datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)))
         except ValueError:
             return match.group(0)
+        replaced += 1
         return parsed.strftime("%d.%m.%Y")
 
     return _ISO_DATE.sub(_as_day_first, text)
@@ -514,16 +517,21 @@ def transform_practice_data(data, start_id=0):
                 group_cell = row[1]
                 if group_cell is None or pd.isna(group_cell) or str(group_cell).strip() == "":
                     continue
+                direction = row[3]
+                if direction is None or pd.isna(direction):
+                    direction = ""
+                else:
+                    direction = str(direction).strip()
                 transformed_row = [
                     current_id,  # Уникальный ID
                     normalize_group(group_cell),  # № группы
                     clean_practice_name(title),  # Название практики из title
-                    row[4],  # Сроки прохождения
+                    normalize_practice_period(row[4]),  # Сроки прохождения
                     "Кафедра",  # Кафедра (везде одинаково)
                     "",  # Пустая строка
                     "" if pd.isna(row[2]) else str(row[2]).strip(),  # ФИО преподавателя
                     "",  # Пустая строка
-                    row[3],  # Направление
+                    direction,  # Направление
                     "нет",  # "нет" (везде одинаково)
                     "",  # Пустая строка
                 ]

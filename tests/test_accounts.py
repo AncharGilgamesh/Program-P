@@ -17,6 +17,8 @@ from View.appearance_logic import (
     cabinet_password_failure,
     new_password_failure,
     registration_failure,
+    registration_teacher_failure,
+    resolve_registration_teacher,
 )
 
 
@@ -148,6 +150,75 @@ def test_registration_without_code_is_refused():
             os.environ["REGISTRATION_CODE"] = previous
 
 
+def test_registration_needs_exactly_one_teacher():
+    assert registration_teacher_failure([]) == "Преподаватель не найден в справочнике"
+    assert registration_teacher_failure([("1",)]) is None
+    message = registration_teacher_failure([("1",), ("2",)])
+    assert message == "В справочнике несколько преподавателей с таким ФИО"
+
+
+def test_reserved_name_from_env_skips_code():
+    from unittest.mock import patch
+
+    from View.appearance_logic import canonical_username
+
+    previous_code = os.environ.get("REGISTRATION_CODE")
+    previous_name = os.environ.get("RESERVED_ADMIN")
+    refused = "Регистрация недоступна: не задан код регистрации"
+    try:
+        with patch("View.appearance_logic.load_local_env"):
+            os.environ.pop("REGISTRATION_CODE", None)
+            os.environ["RESERVED_ADMIN"] = "keeper"
+            assert registration_failure("", "keeper") is None
+            assert registration_failure("чужой-код", "Keeper") is None
+            assert canonical_username("Keeper") == "keeper"
+            assert registration_failure("", "admin") == refused
+            os.environ["RESERVED_ADMIN"] = ""
+            assert registration_failure("", "keeper") == refused
+    finally:
+        if previous_code is None:
+            os.environ.pop("REGISTRATION_CODE", None)
+        else:
+            os.environ["REGISTRATION_CODE"] = previous_code
+        if previous_name is None:
+            os.environ.pop("RESERVED_ADMIN", None)
+        else:
+            os.environ["RESERVED_ADMIN"] = previous_name
+
+
+def test_reserved_registration_creates_teacher_and_user():
+    from unittest.mock import patch
+
+    previous_name = os.environ.get("RESERVED_ADMIN")
+    try:
+        with patch("View.appearance_logic.load_local_env"):
+            os.environ["RESERVED_ADMIN"] = "keeper"
+            with account_db():
+                before = dbh.execute_query("SELECT COUNT(*) FROM teachers", fetch=True)[0][0]
+                teacher_id, failure = resolve_registration_teacher(
+                    "Keeper", "Админов", "Админ", "Админович"
+                )
+                assert failure is None
+                after = dbh.execute_query("SELECT COUNT(*) FROM teachers", fetch=True)[0][0]
+                assert after == before + 1
+                dbh.insert_user(
+                    teacher_id, "keeper", "secret-admin", "Админов", "Админ", "Админович"
+                )
+                assert dbh.authenticate("keeper", "secret-admin") is True
+                again, again_failure = resolve_registration_teacher(
+                    "keeper", "Админов", "Админ", "Админович"
+                )
+                assert again_failure is None
+                assert again == teacher_id
+                unchanged = dbh.execute_query("SELECT COUNT(*) FROM teachers", fetch=True)[0][0]
+                assert unchanged == after
+    finally:
+        if previous_name is None:
+            os.environ.pop("RESERVED_ADMIN", None)
+        else:
+            os.environ["RESERVED_ADMIN"] = previous_name
+
+
 def test_referenced_teacher_is_kept():
     with account_db():
         teacher_id = dbh.execute_query(
@@ -211,6 +282,37 @@ def test_document_id_is_a_parameter():
         assert before > 0
 
 
+def test_blank_teacher_email_is_stored_as_null():
+    with account_db():
+        dbh.insert_teacher("Один", "Иван", "Иванович", "", "", "", "3")
+        dbh.insert_teacher("Два", "Пётр", "Петрович", "", "", "   ", "4")
+        rows = dbh.execute_query(
+            "SELECT email FROM teachers WHERE last_name IN (?, ?)",
+            ("Один", "Два"),
+            fetch=True,
+        )
+        assert [row[0] for row in rows] == [None, None]
+        teacher_id = dbh.execute_query(
+            "SELECT id FROM teachers WHERE last_name = ?",
+            ("Один",),
+            fetch=True,
+        )[0][0]
+        dbh.update_teacher(
+            teacher_id, ["Один", "Иван", "Иванович", "", "", "Kept@Example.com", "3"]
+        )
+        stored = dbh.execute_query(
+            "SELECT email FROM teachers WHERE id = ?", (teacher_id,), fetch=True
+        )[0][0]
+        assert stored == "Kept@Example.com"
+        try:
+            dbh.insert_teacher(
+                "Три", "Иван", "Иванович", "", "", "ivanov@example.com", "5"
+            )
+            raise AssertionError("занятый адрес должен отказать")
+        except sqlite3.IntegrityError:
+            pass
+
+
 def test_remembered_username_is_stored_outside_the_database():
     from window_support import (
         clear_remembered_username,
@@ -239,9 +341,11 @@ def main():
     test_update_user_password_stores_hash()
     test_login_failure_message_is_shared()
     test_registration_without_code_is_refused()
+    test_registration_needs_exactly_one_teacher()
     test_referenced_teacher_is_kept()
     test_protected_document_stays_and_open_one_is_removed()
     test_document_id_is_a_parameter()
+    test_blank_teacher_email_is_stored_as_null()
     test_remembered_username_is_stored_outside_the_database()
     print("account-checks-ok")
 

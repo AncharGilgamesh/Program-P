@@ -11,6 +11,29 @@ AUTH_FAILED = "Неверный логин или пароль"
 EMPTY_NEW_PASSWORD = "Введите новый пароль"
 WRONG_CURRENT_PASSWORD = "Неверный текущий пароль"
 REGISTRATION_CODE_ENV = "REGISTRATION_CODE"
+RESERVED_ADMIN_ENV = "RESERVED_ADMIN"
+
+
+def reserved_admin_username():
+    """Имя из RESERVED_ADMIN. Пустая строка значит, что исключения нет."""
+    load_local_env()
+    return os.environ.get(RESERVED_ADMIN_ENV, "").strip()
+
+
+def is_reserved_admin(username):
+    """Истина, если имя совпадает с RESERVED_ADMIN без учёта регистра."""
+    expected = reserved_admin_username()
+    if not expected:
+        return False
+    return str(username or "").strip().lower() == expected.lower()
+
+
+def canonical_username(username):
+    """Для имени из RESERVED_ADMIN возвращает написание из .env."""
+    text = str(username or "").strip()
+    if is_reserved_admin(text):
+        return reserved_admin_username()
+    return text
 
 
 def new_password_failure(new_password, repeat_password):
@@ -43,8 +66,13 @@ def load_local_env():
             os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
-def registration_failure(code):
-    """None, если код принят. Иначе текст отказа, без сравнения с литералом в коде."""
+def registration_failure(code, username=""):
+    """None, если код принят. Иначе текст отказа, без сравнения с литералом в коде.
+
+    Имя из RESERVED_ADMIN код не проверяет: эту учётную запись можно завести всегда.
+    """
+    if is_reserved_admin(username):
+        return None
     load_local_env()
     expected = os.environ.get(REGISTRATION_CODE_ENV, "").strip()
     if not expected:
@@ -52,6 +80,35 @@ def registration_failure(code):
     if code != expected:
         return "Неправильный код регистрации"
     return None
+
+
+def registration_teacher_failure(teachers):
+    """None, если в справочнике ровно один преподаватель с таким ФИО."""
+    if not teachers:
+        return "Преподаватель не найден в справочнике"
+    if len(teachers) > 1:
+        return "В справочнике несколько преподавателей с таким ФИО"
+    return None
+
+
+def resolve_registration_teacher(username, last_name, first_name, middle_name):
+    """Идентификатор преподавателя для новой учётки и текст отказа.
+
+    Обычное имя требует ровно одну карточку с тем же ФИО. Имя из RESERVED_ADMIN
+    при отсутствии карточки создаёт её, а при нескольких совпадениях берёт первую.
+    """
+    teachers = dbh.select_teacher_by_name(last_name, first_name, middle_name)
+    if is_reserved_admin(username):
+        if not teachers:
+            dbh.insert_teacher(last_name, first_name, middle_name, "", "", None, "")
+            teachers = dbh.select_teacher_by_name(last_name, first_name, middle_name)
+        if not teachers:
+            return None, f"Не удалось добавить преподавателя для {reserved_admin_username()}"
+        return teachers[0][0], None
+    failure = registration_teacher_failure(teachers)
+    if failure:
+        return None, failure
+    return teachers[0][0], None
 
 
 class AppearanceDialog(QDialog):
@@ -105,35 +162,53 @@ class AppearanceDialog(QDialog):
         self.accept()
 
     def register_user(self):
-        username = self.ui.regUsernamLine.text()
+        username = canonical_username(self.ui.regUsernamLine.text())
         password = self.ui.regPassLine.text()
         password_rep = self.ui.regRepeatPassLine.text()
-        name = self.ui.nameLine.text()
-        sec_name = self.ui.familiaLine.text()
-        middle_name = self.ui.otchestvoLine.text()
-        reg_code = self.ui.regCodeLine.text()
-        failure = registration_failure(reg_code)
+        name = self.ui.nameLine.text().strip()
+        sec_name = self.ui.familiaLine.text().strip()
+        middle_name = self.ui.otchestvoLine.text().strip()
+        reg_code = self.ui.regCodeLine.text().strip()
+        failure = registration_failure(reg_code, username)
         if failure:
             QMessageBox.warning(self, "Ошибка", failure)
             return
         if not password == password_rep:
             QMessageBox.warning(self, "Ошибка", "Пароли не совпадают")
             return
-        if not all([username, password, name, sec_name, middle_name, reg_code]):
+        required = [username, password, name, sec_name, middle_name]
+        if not is_reserved_admin(username):
+            required.append(reg_code)
+        if not all(required):
             QMessageBox.warning(self, "Ошибка", "Пожалуйста, заполните обязательные поля.")
             return
         try:
-            teachers = dbh.select_teacher_by_name(sec_name, name, middle_name)
+            teacher_id, failure = resolve_registration_teacher(
+                username, sec_name, name, middle_name
+            )
         except sqlite3.Error as exc:
             QMessageBox.warning(self, "Ошибка", f"Не удалось проверить преподавателя: {exc}")
             return
-        if not teachers:
-            QMessageBox.warning(self, "Ошибка", "Преподаватель не найден в справочнике")
+        if failure:
+            QMessageBox.warning(self, "Ошибка", failure)
             return
         try:
-            dbh.insert_user(
-                teachers[0][0], username, password, sec_name, name, middle_name
+            dbh.insert_user(teacher_id, username, password, sec_name, name, middle_name)
+        except sqlite3.IntegrityError:
+            if is_reserved_admin(username):
+                QMessageBox.warning(
+                    self,
+                    "Ошибка",
+                    f"Пользователь {reserved_admin_username()} уже зарегистрирован. "
+                    "Войдите под этим именем.",
+                )
+                return
+            QMessageBox.warning(
+                self,
+                "Ошибка",
+                "Не удалось зарегистрировать пользователя. Попробуйте другое имя.",
             )
+            return
         except sqlite3.Error as exc:
             QMessageBox.warning(
                 self,
