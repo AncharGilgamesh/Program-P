@@ -1,5 +1,3 @@
-"""Проверки разбора плана. Запуск: uv run python tests/test_parse.py"""
-
 import sys
 import tempfile
 from pathlib import Path

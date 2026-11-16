@@ -3,7 +3,7 @@ import sqlite3
 
 import bcrypt as bcrypt_lib
 
-# bcrypt 4.x убрал __about__, а passlib 1.7.4 всё ещё читает его при первом вызове.
+# passlib 1.7.4 при первом вызове лезет в bcrypt.__about__, в bcrypt 4 его нет
 if not hasattr(bcrypt_lib, "__about__"):
 
     class _BcryptAbout:
@@ -123,7 +123,7 @@ def create_users_table():
 
 
 def _stored_email(email):
-    """Пустая почта — NULL, чтобы несколько преподавателей без адреса могли сохраниться."""
+    # пустую почту пишу как NULL, иначе UNIQUE не пускает вторую пустую
     if email is None or str(email).strip() == "":
         return None
     return email
@@ -288,7 +288,7 @@ def update_user_password(username, new_password):
 
 
 def authenticate(username, password):
-    """True, если пара верна. Открытый старый пароль после успеха заменяется хешем."""
+    # старый пароль открытым текстом после входа заменяю на хеш
     users = select_user_by_username(username)
     if not users:
         return False

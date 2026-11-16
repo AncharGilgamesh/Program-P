@@ -1,5 +1,3 @@
-"""Дата собрания без показа окна. Фикстура qapp уже поднимает QApplication."""
-
 import re
 
 import pytest

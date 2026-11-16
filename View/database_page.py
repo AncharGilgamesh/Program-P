@@ -9,7 +9,7 @@ import Models.dbhandler as dbh
 from Models.model import PlanTableModel
 from View.prepod_dialog import PrepodDialog
 from View.startosta_dialog import StarostaDialog
-from window_support import locate_saved_file, split_expired_documents
+from window_support import locate_saved_file, release_saved_copy, split_expired_documents
 
 
 class DatabasePage:
@@ -62,6 +62,39 @@ class DatabasePage:
             return
         self.upload_db_docs()
 
+    def _confirm_drop_row_only(self):
+        answer = QMessageBox.question(
+            self,
+            "Удалить только запись из базы?",
+            "Удалить только запись из базы?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        return answer == QMessageBox.Yes
+
+    def _remove_document_record(self, row):
+        # сначала файл в Saves, строку снимаю только если файл ушёл или его уже не было
+        status, detail = release_saved_copy(row[-1])
+        if status == "outside":
+            if not self._confirm_drop_row_only():
+                return False
+        elif status == "kept":
+            QMessageBox.warning(
+                self,
+                "Ошибка",
+                f"Файл не удалён, запись в базе сохранена: {detail}",
+            )
+            return False
+        try:
+            dbh.remove_document(row[0])
+        except sqlite3.IntegrityError:
+            QMessageBox.warning(self, "Защита", "Документ защищён и не может быть удалён")
+            return False
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", f"Не удалось удалить запись: {exc}")
+            return False
+        return True
+
     def remove_document(self):
         row = self._document_from_db()
         if row is None:
@@ -69,31 +102,8 @@ class DatabasePage:
         if row[5] == 1:
             QMessageBox.warning(self, "Защита", "Документ защищён и не может быть удалён")
             return
-        file_path = locate_saved_file(row[-1])
-        if file_path is None:
-            answer = QMessageBox.question(
-                self,
-                "Удалить только запись из базы?",
-                "Удалить только запись из базы?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
-            )
-            if answer != QMessageBox.Yes:
-                return
-        try:
-            dbh.remove_document(row[0])
-        except sqlite3.IntegrityError:
-            QMessageBox.warning(self, "Защита", "Документ защищён и не может быть удалён")
-            return
-        except sqlite3.Error as exc:
-            QMessageBox.warning(self, "Ошибка", f"Не удалось удалить запись: {exc}")
-            return
-        if file_path is not None:
-            try:
-                os.remove(os.fspath(file_path))
-            except OSError as exc:
-                QMessageBox.warning(self, "Ошибка", f"Запись удалена, но файл не удалён: {exc}")
-        self.upload_db_docs()
+        if self._remove_document_record(row):
+            self.upload_db_docs()
 
     def upload_db_starosta(self):
         self.ui.dbPageStackedWidget.setCurrentIndex(1)
@@ -237,19 +247,7 @@ class DatabasePage:
         if answer != QMessageBox.Yes:
             return
         for row in expired:
-            file_path = locate_saved_file(row[-1])
-            if file_path is None:
-                QMessageBox.warning(self, "Ошибка", "Файл лежит вне папки сохранений")
-                continue
-            try:
-                dbh.remove_document(row[0])
-            except sqlite3.Error as exc:
-                QMessageBox.warning(self, "Ошибка", f"Не удалось удалить запись: {exc}")
-                continue
-            try:
-                os.remove(os.fspath(file_path))
-            except OSError as exc:
-                QMessageBox.warning(self, "Ошибка", f"Запись удалена, но файл не удалён: {exc}")
+            self._remove_document_record(row)
         self.upload_db_docs()
 
     def _document_line(self, row):

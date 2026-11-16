@@ -15,13 +15,11 @@ RESERVED_ADMIN_ENV = "RESERVED_ADMIN"
 
 
 def reserved_admin_username():
-    """Имя из RESERVED_ADMIN. Пустая строка значит, что исключения нет."""
     load_local_env()
     return os.environ.get(RESERVED_ADMIN_ENV, "").strip()
 
 
 def is_reserved_admin(username):
-    """Истина, если имя совпадает с RESERVED_ADMIN без учёта регистра."""
     expected = reserved_admin_username()
     if not expected:
         return False
@@ -29,7 +27,6 @@ def is_reserved_admin(username):
 
 
 def canonical_username(username):
-    """Для имени из RESERVED_ADMIN возвращает написание из .env."""
     text = str(username or "").strip()
     if is_reserved_admin(text):
         return reserved_admin_username()
@@ -37,7 +34,6 @@ def canonical_username(username):
 
 
 def new_password_failure(new_password, repeat_password):
-    """None, если новый пароль можно записать. Пустой пароль не проходит."""
     if new_password is None or len(new_password) < 1:
         return EMPTY_NEW_PASSWORD
     if new_password != repeat_password:
@@ -46,14 +42,13 @@ def new_password_failure(new_password, repeat_password):
 
 
 def cabinet_password_failure(stored, current_password, new_password, repeat_password):
-    """Смена в кабинете: сначала текущий пароль, затем новый. Без диалога и без записи."""
     if not dbh.password_matches(current_password or "", stored):
         return WRONG_CURRENT_PASSWORD
     return new_password_failure(new_password, repeat_password)
 
 
 def load_local_env():
-    """Подхватывает .env из корня проекта, не затирая уже заданные переменные."""
+    # .env из корня, уже заданные переменные не затираю
     env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
     if not os.path.isfile(env_path):
         return
@@ -67,10 +62,7 @@ def load_local_env():
 
 
 def registration_failure(code, username=""):
-    """None, если код принят. Иначе текст отказа, без сравнения с литералом в коде.
-
-    Имя из RESERVED_ADMIN код не проверяет: эту учётную запись можно завести всегда.
-    """
+    # RESERVED_ADMIN код не проверяет
     if is_reserved_admin(username):
         return None
     load_local_env()
@@ -83,7 +75,6 @@ def registration_failure(code, username=""):
 
 
 def registration_teacher_failure(teachers):
-    """None, если в справочнике ровно один преподаватель с таким ФИО."""
     if not teachers:
         return "Преподаватель не найден в справочнике"
     if len(teachers) > 1:
@@ -92,11 +83,7 @@ def registration_teacher_failure(teachers):
 
 
 def resolve_registration_teacher(username, last_name, first_name, middle_name):
-    """Идентификатор преподавателя для новой учётки и текст отказа.
-
-    Обычное имя требует ровно одну карточку с тем же ФИО. Имя из RESERVED_ADMIN
-    при отсутствии карточки создаёт её, а при нескольких совпадениях берёт первую.
-    """
+    # обычно нужно ровно одно ФИО; для RESERVED_ADMIN карточку создаю, если её нет
     teachers = dbh.select_teacher_by_name(last_name, first_name, middle_name)
     if is_reserved_admin(username):
         if not teachers:

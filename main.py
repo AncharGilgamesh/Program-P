@@ -30,7 +30,6 @@ __all__ = ["OTCHET_TABLE_START_ROWS", "saves_filename", "split_expired_documents
 
 
 def remembered_username():
-    """Логин из домашнего файла, если такая учётка есть в базе."""
     username = read_remembered_username()
     if not username:
         return None
@@ -242,7 +241,6 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         self.ui.lkPhoneLine.setText(user_data[-1])
 
     def switch_page(self, index):
-        """Переключает страницу в QStackedWidget и обновляет состояние кнопок"""
         self.ui.mainStackedWidget.setCurrentIndex(index)
         if index == 0:
             self.upload_db_docs(review_retention=not self._retention_reviewed)

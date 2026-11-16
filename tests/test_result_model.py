@@ -1,5 +1,3 @@
-"""Сумма оценок и столбец «Не защитило». Нужен QApplication, без pytest-qt."""
-
 import pytest
 from PySide6.QtCore import Qt
 

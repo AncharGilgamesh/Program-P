@@ -98,9 +98,6 @@ class MeetingDateDialog(QDialog):
         self.right_model.setStringList(items)
 
     def get_results(self):
-        """
-        Возвращает список выбранных (группа–практика) и дату собрания в формате dd.mm.yyyy
-        """
         selected = self.right_model.stringList()
         date_str = self.date_edit.date().toString("dd.MM.yyyy")
         return selected, date_str

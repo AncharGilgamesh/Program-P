@@ -1,6 +1,5 @@
-"""Срок хранения и имена файлов. Запуск: uv run python tests/test_documents.py"""
-
 import datetime
+import sqlite3
 import sys
 import tempfile
 from pathlib import Path
@@ -13,7 +12,7 @@ import window_support
 from Models.datahandler import rows_from_saved_report
 from View.report_page import report_replace_needs_confirm
 from main import saves_filename, split_expired_documents
-from window_support import locate_saved_file, path_inside_saves, save_registered_copy
+from window_support import locate_saved_file, path_inside_saves, release_saved_copy, save_registered_copy
 
 
 def row(created, protected, doc_type="План"):
@@ -146,6 +145,62 @@ def test_save_writes_a_relative_saves_path():
         assert (root / stored).is_file()
 
 
+def test_failed_insert_removes_the_new_file():
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        original_base = window_support.base_dir
+        original_insert = window_support.dbh.insert_document
+        original_warning = window_support.QMessageBox.warning
+
+        def insert_document(*args):
+            raise sqlite3.Error("insert failed")
+
+        window_support.base_dir = str(root)
+        window_support.dbh.insert_document = insert_document
+        window_support.QMessageBox.warning = lambda *args, **kwargs: None
+
+        class Doc:
+            def save(self, path):
+                Path(path).write_bytes(b"doc")
+
+        class Window:
+            user = "user"
+
+        try:
+            save_registered_copy(Window(), Doc(), "План")
+        finally:
+            window_support.base_dir = original_base
+            window_support.dbh.insert_document = original_insert
+            window_support.QMessageBox.warning = original_warning
+        assert list((root / "Saves").glob("*")) == []
+
+
+def test_failed_file_delete_keeps_the_row():
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        saves = root / "Saves"
+        saves.mkdir()
+        target = saves / "plan.docx"
+        target.write_bytes(b"doc")
+        original_remove = window_support.os.remove
+
+        def refuse_remove(path):
+            raise OSError("busy")
+
+        window_support.os.remove = refuse_remove
+        removed = []
+        try:
+            status, detail = release_saved_copy("Saves/plan.docx", root)
+            if status == "ready":
+                removed.append(1)
+        finally:
+            window_support.os.remove = original_remove
+        assert status == "kept"
+        assert detail == "busy"
+        assert removed == []
+        assert target.is_file()
+
+
 def test_report_replace_needs_confirm_when_any_table_has_rows():
     assert report_replace_needs_confirm((0, 0, 0, 0, 0, 0)) is False
     assert report_replace_needs_confirm((0, 0, 1, 0, 0, 0)) is True
@@ -171,6 +226,8 @@ def main():
     test_path_must_stay_inside_saves()
     test_locate_saved_file_follows_the_folder()
     test_save_writes_a_relative_saves_path()
+    test_failed_insert_removes_the_new_file()
+    test_failed_file_delete_keeps_the_row()
     test_report_replace_needs_confirm_when_any_table_has_rows()
     test_saves_names_differ_within_one_day()
     print("document-checks-ok")

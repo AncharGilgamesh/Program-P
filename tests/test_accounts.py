@@ -1,5 +1,3 @@
-"""Проверки пароля и SQL на временной схеме. Запуск: uv run python tests/test_accounts.py"""
-
 import os
 import sqlite3
 import sys
@@ -56,7 +54,6 @@ def _seed_account_db():
 
 @contextmanager
 def account_db():
-    """Временная база со схемой приложения. Пароль пользователя — открытый текст secret."""
     previous = dbh.DB_PATH
     with tempfile.TemporaryDirectory() as directory:
         dbh.DB_PATH = str(Path(directory) / "accounts.db")

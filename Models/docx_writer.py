@@ -4,10 +4,6 @@ from docx.shared import Pt
 
 
 def set_cell_border(cell, **kwargs):
-    """
-    Устанавливает границы ячейки.
-    Параметры можно передавать как: top="single", bottom="single", left="single", right="single"
-    """
     tc = cell._tc
     tcPr = tc.get_or_add_tcPr()
     tcBorders = OxmlElement("w:tcBorders")

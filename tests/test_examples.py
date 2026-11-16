@@ -1,5 +1,3 @@
-"""Учебные файлы Example открываются теми же функциями, что кнопки программы."""
-
 import sys
 from pathlib import Path
 

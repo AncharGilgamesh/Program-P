@@ -14,7 +14,6 @@ from window_support import (
 
 
 def report_replace_needs_confirm(row_counts):
-    """Истина, когда загрузка сотрёт хотя бы одну заполненную таблицу отчёта."""
     return any(count > 0 for count in row_counts)
 
 

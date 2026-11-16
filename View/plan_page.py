@@ -9,12 +9,10 @@ from window_support import log_exception, save_registered_copy, shablon_plan_pat
 
 
 def plan_replace_needs_confirm(row_count, replaces_rows):
-    """Истина, когда загрузка сотрёт уже заполненную таблицу."""
     return row_count > 0 and bool(replaces_rows)
 
 
 def table_loaded_after_replace(row_count):
-    """Истина, когда после замены в таблице остались строки."""
     return row_count > 0
 
 

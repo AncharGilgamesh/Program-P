@@ -1,5 +1,3 @@
-"""Учебные Excel и Word в этой папке. Запуск: uv run python Example/build_examples.py"""
-
 import sys
 from pathlib import Path
 
@@ -35,7 +33,6 @@ WORKLOAD_WIDTH = 30
 
 
 def practice_sheet_rows(blocks):
-    """Лист кафедральной таблицы: заголовок блока, шапка, строки групп."""
     rows = []
     for title, groups in blocks:
         rows.append([title, None, None, None, None])
@@ -140,7 +137,6 @@ def workload_rows():
 
 
 def plan_rows_from_files(table_path, workload_path):
-    """Те же шаги, что «Загрузить таблицу», затем «Загрузить нагрузку»."""
     with pd.ExcelFile(table_path) as book:
         bachelor = pd.read_excel(book, 0, header=None)
         master = pd.read_excel(book, 1, header=None)
@@ -165,7 +161,6 @@ def write_plan(rows, path):
 
 
 def write_report(plan_path, path):
-    """Те же шесть таблиц, что «Загрузить план» на странице отчёта."""
     body = read_plan_from_docx(plan_path)[1:]
     tables = [
         parse_practice_table(body),

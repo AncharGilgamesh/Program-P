@@ -61,7 +61,6 @@ class PlanTableModel(QAbstractTableModel):
         return True
 
     def clear(self):
-        """Сбрасывает строки через reset, не подменяя _data снаружи модели."""
         self.beginResetModel()
         self._data = []
         self.endResetModel()

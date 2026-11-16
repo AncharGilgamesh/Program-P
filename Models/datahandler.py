@@ -10,7 +10,6 @@ from collections import defaultdict
 
 # Для превращения относительного пути в абсолютный
 def resource_path(relative_path):
-    """Путь от каталога проекта, а не от текущего каталога. В сборке — от _MEIPASS."""
     if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative_path)
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,8 +18,7 @@ def resource_path(relative_path):
 
 # Шестой этап
 def parse_sixth_table(data_rows):
-    # Те же строки, что у первого этапа: короче 9 ячеек пропускаются.
-    # Руководитель лежит в столбце 5 этой же строки. Пустая ячейка остаётся пустой.
+    # те же строки, что у первого этапа, преподаватель в 5 столбце
     result = []
     number = 0
     for row in data_rows:
@@ -38,8 +36,7 @@ def parse_sixth_table(data_rows):
 
 # Пятый этап отчета
 def parse_fiveth_table(data):
-    # Сюда передаётся table2. Номер группы берётся только из текста вида 4xxx.
-    # Строка без такого номера пропускается, чтобы загрузка не падала.
+    # сюда передаю table2, номер группы ищу в тексте места (4xxx)
     result = []
     skipped = 0
     for row in data:
@@ -119,8 +116,7 @@ def parse_second_table(data_rows):
         else:
             location = f"Учебная каф. ПМИ, гр. {group}"
 
-        # 4. Сколько человек направлено — только строки «Г/б», «Пл.», «Целевики».
-        # Год и номер в названии практики в сумму не входят.
+        # 4. Сколько человек направлено (Г/б, Пл., Целевики; год в названии не считаю)
         people_count = count_directed_students(practice_text)
 
         # 5. Пустая строка
@@ -135,7 +131,6 @@ def parse_second_table(data_rows):
 
 
 def count_directed_students(practice_text):
-    """Сумма студентов из строк, которые формирует extract_data."""
     total = 0
     for line in str(practice_text).splitlines():
         match = re.search(
@@ -153,12 +148,7 @@ _ISO_DATE = re.compile(r"(\d{4})-(\d{2})-(\d{2})(?:[ T]\d{2}:\d{2}:\d{2})?")
 
 
 def normalize_practice_period(value):
-    """Дата Excel и до двух дат ГГГГ-ММ-ДД становятся дд.мм.гггг.
-
-    Диапазон, который уже начинается с дд.мм, не трогает. Слова перед первой
-    датой не мешают замене. Неразборная дата остаётся как есть и не занимает
-    слот. Третья успешная дата ГГГГ-ММ-ДД в той же ячейке остаётся.
-    """
+    # excel и ГГГГ-ММ-ДД -> дд.мм.гггг; то, что уже начинается с дд.мм, не трогаю
     if isinstance(value, datetime):
         return "" if pd.isna(value) else value.strftime("%d.%m.%Y")
     if isinstance(value, date):
@@ -263,10 +253,6 @@ def get_group_practice_keys_frst_stg(data):
 
 
 def get_target_row_indices(data, selected_keys):
-    """
-    Возвращает список индексов строк, соответствующих выбранным ключам.
-    Ключ: "Группа – Вид практики (с сокращением)"
-    """
     target_indices = []
 
     for i, row in enumerate(data):
@@ -404,12 +390,6 @@ def extract_meeting_date(text):
 
 # Функция для чтения плана
 def read_plan_from_docx(docx_path):
-    """
-    Читает первую таблицу из Word-документа и возвращает список списков.
-    - Первая строка используется как заголовки.
-    - Вторая строка (обычно объединённая и пустая) пропускается.
-    - Остальные строки — данные (начиная с третьей строки).
-    """
     doc = Document(docx_path)
     table = doc.tables[0]
 
@@ -430,7 +410,6 @@ def read_plan_from_docx(docx_path):
 
 
 def rows_from_saved_report(doc, start_rows, widths):
-    """Шесть таблиц сохранённого отчёта. Пустые строки пропускаются, дата не пересчитывается."""
     if len(doc.tables) < 6:
         raise ValueError("В файле отчёта нужны шесть таблиц")
     loaded = []
@@ -448,7 +427,6 @@ def rows_from_saved_report(doc, start_rows, widths):
 
 
 def rows_from_saved_plan(data):
-    """Строки сохранённого плана: без шапки, ширина 10, id с 1."""
     rows = []
     for raw in data[1:]:
         cells = ["" if cell is None else str(cell).strip() for cell in raw]
@@ -462,7 +440,6 @@ def rows_from_saved_plan(data):
 
 
 def find_column_index_by_keyword(model, keyword: str) -> int:
-    """Ищет столбец, в заголовке которого содержится keyword (без учёта регистра)."""
     keyword = keyword.lower()
     for col in range(model.columnCount()):
         header = model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
@@ -472,16 +449,7 @@ def find_column_index_by_keyword(model, keyword: str) -> int:
 
 
 def clean_practice_name(text):
-    """
-    Удаляет из строки слова "курс", "семестр" и все цифры.
-
-    Args:
-        text (str): Исходная строка.
-
-    Returns:
-        str: Очищенная строка.
-    """
-    # Удаляем слова "курс" и "семестр" (регистронезависимо)
+    # убираю "курс", "семестр" и цифры
     text = re.sub(r"\b(курс|семестр)\b", "", text, flags=re.IGNORECASE)
 
     # Удаляем все цифры
@@ -495,17 +463,6 @@ def clean_practice_name(text):
 
 # функция для обработки данных, загруженных из Excel таблицы
 def transform_practice_data(data, start_id=0):
-    """
-    Преобразует иерархические данные о практиках в плоский список списков.
-
-    Args:
-        data: Исходные данные (список словарей с ключами 'title' и 'data')
-        start_id: Начальное значение ID (по умолчанию 0)
-
-    Returns:
-        Список списков с заданной структурой:
-        [id, № группы, сроки, "Кафедра", "", ФИО, "", направление, "нет", "", название практики]
-    """
     result = []
     current_id = start_id
 
@@ -588,13 +545,11 @@ def extract_practice_blocks_with_empty_stop(df):
 
 # Тут порпобую грузить нагрузку
 def format_teacher_name(name: str) -> str:
-    """Форматирует ФИО преподавателя — делает заглавными только первые буквы."""
     parts = name.strip().split()
     return " ".join(p.capitalize() for p in parts)
 
 
 def parse_workload_teacher(value):
-    """ФИО из ячейки нагрузки: оба инициала или полное имя. Чужой текст — пустая строка."""
     if value is None or pd.isna(value):
         return ""
     text = str(value).strip()
@@ -629,7 +584,7 @@ def parse_workload_teacher(value):
 
 
 def normalize_group(value):
-    """Номер группы к строке: Excel часто отдаёт 4111.0 или строку с пробелами."""
+    # excel иногда отдаёт 4111.0
     text = str(value).strip()
     if text.endswith(".0") and text[:-2].isdigit():
         return text[:-2]
@@ -637,7 +592,6 @@ def normalize_group(value):
 
 
 def normalize_practice_type(practice: str) -> str:
-    """Преобразует названия практик согласно правилам."""
     practice = practice.strip().lower()
 
     if "ознакомительная" in practice:
@@ -657,7 +611,6 @@ _STUDENT_BLOCK_AT_END = re.compile(r"(?:\n)?Г/б - \d+\nПл\. - \d+\nЦеле�
 
 
 def apply_student_block(current, block):
-    """Ставит блок «Г/б / Пл. / Целевики» в конец. Повторный вызов заменяет числа."""
     text = "" if current is None else str(current).rstrip()
     addition = str(block).strip()
     without = _STUDENT_BLOCK_AT_END.sub("", text).rstrip()
@@ -709,14 +662,12 @@ def _workload_practice_type(row):
 
 
 def practice_type_from_plan_cell(value):
-    """Вид практики из ячейки плана: без хвостового блока студентов."""
     text = "" if value is None else str(value)
     without = _STUDENT_BLOCK_AT_END.sub("", text).strip()
     return normalize_practice_type(without)
 
 
 def choose_student_block(blocks, group, practice_cell):
-    """Блок студентов для ячейки плана. Пусто, если у группы несколько несовпавших видов."""
     group_key = normalize_group(group)
     exact = blocks.get((group_key, practice_type_from_plan_cell(practice_cell)))
     if exact is not None:
