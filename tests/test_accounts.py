@@ -65,14 +65,14 @@ def account_db():
             dbh.DB_PATH = previous
 
 
-def test_hash_password_round_trip():
+def test_hash_password():
     stored = dbh.hash_password("secret")
     assert dbh.is_password_hash(stored)
     assert dbh.password_matches("secret", stored) is True
     assert dbh.password_matches("other", stored) is False
 
 
-def test_plaintext_login_is_replaced_by_hash():
+def test_plain_password_becomes_hash():
     with account_db():
         row = dbh.execute_query(
             "SELECT username, password FROM users LIMIT 1", fetch=True
@@ -90,23 +90,23 @@ def test_plaintext_login_is_replaced_by_hash():
         assert dbh.authenticate(username + "-missing", original) is False
 
 
-def test_empty_new_password_is_refused():
+def test_empty_password():
     assert new_password_failure("", "") == EMPTY_NEW_PASSWORD
     assert cabinet_password_failure("secret", "secret", "", "") == EMPTY_NEW_PASSWORD
 
 
-def test_wrong_current_password_is_refused():
+def test_wrong_password():
     assert (
         cabinet_password_failure("secret", "nope", "new-pass", "new-pass")
         == WRONG_CURRENT_PASSWORD
     )
 
 
-def test_password_change_accepts_current_and_new():
+def test_change_password():
     assert cabinet_password_failure("secret", "secret", "new-pass", "new-pass") is None
 
 
-def test_update_user_password_stores_hash():
+def test_update_password():
     with account_db():
         username = dbh.execute_query("SELECT username FROM users LIMIT 1", fetch=True)[0][0]
         dbh.execute_query(
@@ -124,11 +124,11 @@ def test_update_user_password_stores_hash():
         assert dbh.password_matches("secret", stored) is False
 
 
-def test_login_failure_message_is_shared():
+def test_auth_failed_text():
     assert "логин" in AUTH_FAILED and "пароль" in AUTH_FAILED
 
 
-def test_registration_without_code_is_refused():
+def test_registration_code():
     from unittest.mock import patch
 
     previous = os.environ.get("REGISTRATION_CODE")
@@ -147,14 +147,14 @@ def test_registration_without_code_is_refused():
             os.environ["REGISTRATION_CODE"] = previous
 
 
-def test_registration_needs_exactly_one_teacher():
+def test_one_teacher():
     assert registration_teacher_failure([]) == "Преподаватель не найден в справочнике"
     assert registration_teacher_failure([("1",)]) is None
     message = registration_teacher_failure([("1",), ("2",)])
     assert message == "В справочнике несколько преподавателей с таким ФИО"
 
 
-def test_reserved_name_from_env_skips_code():
+def test_reserved_admin():
     from unittest.mock import patch
 
     from View.appearance_logic import canonical_username
@@ -183,7 +183,7 @@ def test_reserved_name_from_env_skips_code():
             os.environ["RESERVED_ADMIN"] = previous_name
 
 
-def test_reserved_registration_creates_teacher_and_user():
+def test_reserved_admin_teacher():
     from unittest.mock import patch
 
     previous_name = os.environ.get("RESERVED_ADMIN")
@@ -216,7 +216,7 @@ def test_reserved_registration_creates_teacher_and_user():
             os.environ["RESERVED_ADMIN"] = previous_name
 
 
-def test_referenced_teacher_is_kept():
+def test_teacher_with_links():
     with account_db():
         teacher_id = dbh.execute_query(
             """
@@ -241,7 +241,7 @@ def test_referenced_teacher_is_kept():
         assert before == after == 1
 
 
-def test_protected_document_stays_and_open_one_is_removed():
+def test_protected_document():
     with account_db():
         dbh.insert_document(2026, "План", "2026.11.09", "user", "Saves/stage-protected.docx", 1)
         dbh.insert_document(2026, "План", "2026.11.09", "user", "Saves/stage-open.docx", 0)
@@ -270,7 +270,7 @@ def test_protected_document_stays_and_open_one_is_removed():
         assert after == before - 1
 
 
-def test_document_id_is_a_parameter():
+def test_document_id():
     with account_db():
         before = dbh.execute_query("SELECT COUNT(*) FROM documents", fetch=True)[0][0]
         dbh.remove_document("1 OR 1=1")
@@ -279,7 +279,7 @@ def test_document_id_is_a_parameter():
         assert before > 0
 
 
-def test_blank_teacher_email_is_stored_as_null():
+def test_empty_email():
     with account_db():
         dbh.insert_teacher("Один", "Иван", "Иванович", "", "", "", "3")
         dbh.insert_teacher("Два", "Пётр", "Петрович", "", "", "   ", "4")
@@ -310,7 +310,7 @@ def test_blank_teacher_email_is_stored_as_null():
             pass
 
 
-def test_remembered_username_is_stored_outside_the_database():
+def test_remembered_username():
     from window_support import (
         clear_remembered_username,
         read_remembered_username,
@@ -330,20 +330,20 @@ def test_remembered_username_is_stored_outside_the_database():
 
 
 def main():
-    test_hash_password_round_trip()
-    test_plaintext_login_is_replaced_by_hash()
-    test_empty_new_password_is_refused()
-    test_wrong_current_password_is_refused()
-    test_password_change_accepts_current_and_new()
-    test_update_user_password_stores_hash()
-    test_login_failure_message_is_shared()
-    test_registration_without_code_is_refused()
-    test_registration_needs_exactly_one_teacher()
-    test_referenced_teacher_is_kept()
-    test_protected_document_stays_and_open_one_is_removed()
-    test_document_id_is_a_parameter()
-    test_blank_teacher_email_is_stored_as_null()
-    test_remembered_username_is_stored_outside_the_database()
+    test_hash_password()
+    test_plain_password_becomes_hash()
+    test_empty_password()
+    test_wrong_password()
+    test_change_password()
+    test_update_password()
+    test_auth_failed_text()
+    test_registration_code()
+    test_one_teacher()
+    test_teacher_with_links()
+    test_protected_document()
+    test_document_id()
+    test_empty_email()
+    test_remembered_username()
     print("account-checks-ok")
 
 

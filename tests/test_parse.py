@@ -42,7 +42,7 @@ def practice_row(group, dates, practice):
     return row
 
 
-def test_fourth_course_semester():
+def test_semester():
     autumn = parse_practice_table(
         [practice_row("4411", "01.09.2025-30.09.2025", "Учебная практика")]
     )
@@ -53,7 +53,7 @@ def test_fourth_course_semester():
     assert spring[0][3] == 8
 
 
-def test_directed_students_ignore_year_in_title():
+def test_students_in_title():
     text = "Учебная практика 2024\nГ/б - 10\nПл. - 2\nЦелевики - 1"
     assert count_directed_students(text) == 13
     row = [""] * 8
@@ -65,7 +65,7 @@ def test_directed_students_ignore_year_in_title():
     assert parsed[0][3] == 13
 
 
-def test_fiveth_table_skips_rows_without_group_code():
+def test_fiveth_skip():
     rows = parse_second_table(
         [
             _second_row("2301", "цех без кода"),
@@ -78,7 +78,7 @@ def test_fiveth_table_skips_rows_without_group_code():
     assert parsed[0][0] == "4411"
 
 
-def test_sixth_table_leaves_missing_teacher_empty():
+def test_sixth_empty_teacher():
     empty = practice_row("4411", "01.09.2025-30.09.2025", "Учебная практика")
     filled = practice_row("4411", "01.09.2025-30.09.2025", "Учебная практика")
     filled[5] = "Иванов И.И."
@@ -86,7 +86,7 @@ def test_sixth_table_leaves_missing_teacher_empty():
     assert parse_sixth_table([filled])[0][1] == "Иванов И.И."
 
 
-def test_short_row_does_not_shift_following_teacher():
+def test_short_row():
     first = practice_row("4411", "01.09.2025-30.09.2025", "Учебная практика")
     first[5] = "Иванов И.И."
     second = practice_row("4412", "01.02.2025-28.02.2025", "Производственная практика")
@@ -97,7 +97,7 @@ def test_short_row_does_not_shift_following_teacher():
     assert [row[1] for row in parsed] == ["Иванов И.И.", "Петров П.П."]
 
 
-def test_excel_date_becomes_first_of_september():
+def test_excel_date():
     assert normalize_practice_period(pd.Timestamp("2025-09-01")) == "01.09.2025"
     assert normalize_practice_period("2025-09-01 00:00:00") == "01.09.2025"
     assert extract_first_month("2025-09-01 00:00:00") == 9
@@ -122,7 +122,7 @@ def test_excel_date_becomes_first_of_september():
     assert loaded[0][3] == "01.09.2025"
 
 
-def test_iso_dates_inside_a_sentence_become_day_first():
+def test_iso_date():
     text = "с 2025-09-01 по 2025-09-30"
     assert extract_start_end_dates(text) == ("01.09.2025", "30.09.2025")
     assert extract_first_month(text) == 9
@@ -136,7 +136,7 @@ def test_iso_dates_inside_a_sentence_become_day_first():
     assert normalize_practice_period(third) == "с 01.09.2025 по 30.09.2025 и 2025-10-05"
 
 
-def test_invalid_iso_date_does_not_use_a_replacement_slot():
+def test_bad_iso_date():
     broken = "2025-13-01 и 2025-09-01 и 2025-09-30"
     assert normalize_practice_period(broken) == "2025-13-01 и 01.09.2025 и 30.09.2025"
     third = "с 2025-09-01 по 2025-09-30 и 2025-10-05"
@@ -148,7 +148,7 @@ def test_invalid_iso_date_does_not_use_a_replacement_slot():
     assert extract_meeting_date(text) == "01.09.2025"
 
 
-def test_unknown_practice_title_survives_in_the_report():
+def test_unknown_practice():
     diploma = "Преддипломная практика\nГ/б - 4\nПл. - 0\nЦелевики - 0"
     row = practice_row("4411", "01.09.2025-30.09.2025", diploma)
     assert parse_practice_table([row])[0][4] == "Преддипломная практика"
@@ -159,7 +159,7 @@ def test_unknown_practice_title_survives_in_the_report():
     assert parse_sixth_table([known_row])[0][4].startswith("Учебная практика")
 
 
-def test_third_table_lists_groups_in_sorted_order():
+def test_third_groups_order():
     rows = [
         ["4412", "", "", "цех", "", "Иванов И.И."],
         ["4411", "", "", "цех", "", "Иванов И.И."],
@@ -170,13 +170,13 @@ def test_third_table_lists_groups_in_sorted_order():
     assert place.index("4411") < place.index("4412")
 
 
-def test_unreadable_date_leaves_semester_empty():
+def test_bad_date_semester():
     parsed = parse_practice_table([practice_row("4411", "без даты", "Учебная практика")])
     assert parsed[0][3] == ""
     assert parse_practice_table([["4411", "короткая строка"]]) == []
 
 
-def test_short_and_broken_report_rows_do_not_raise():
+def test_broken_rows():
     parsed, skipped = parse_fiveth_table(
         [["короткая"], ["", "", "нет кода"], ["", "", "гр. 4411", "12"]]
     )
@@ -185,7 +185,7 @@ def test_short_and_broken_report_rows_do_not_raise():
     assert parse_sixth_table([["короткая"]]) == []
 
 
-def test_apply_student_block_replaces_numbers_and_keeps_year():
+def test_student_block():
     title = "Учебная практика 2024"
     first = apply_student_block(title, "\nГ/б - 10\nПл. - 2\nЦелевики - 1")
     assert first == "Учебная практика 2024\nГ/б - 10\nПл. - 2\nЦелевики - 1"
@@ -203,7 +203,7 @@ def _workload_row(group):
     return row
 
 
-def test_workload_group_drops_decimal_tail():
+def test_group_decimal():
     loaded = extract_data(pd.DataFrame([[None] * 30, _workload_row(4411.0), _workload_row("4411.0")]))
     assert [row[1] for row in loaded] == ["4411", "4411"]
     transformed = transform_practice_data(
@@ -220,7 +220,7 @@ def test_workload_group_drops_decimal_tail():
     assert transformed[0][1] == "4311"
 
 
-def test_table_period_timestamp_is_day_month_year():
+def test_period_format():
     transformed = transform_practice_data(
         [
             {
@@ -242,7 +242,7 @@ def test_table_period_timestamp_is_day_month_year():
     assert transformed[2][3] == "01.09.2025-30.09.2025"
 
 
-def test_empty_direction_stays_blank():
+def test_empty_direction():
     transformed = transform_practice_data(
         [
             {
@@ -266,7 +266,7 @@ def test_empty_direction_stays_blank():
     assert transformed[0][3] == "01.09.2025"
 
 
-def test_workload_teacher_keeps_initials_and_full_name():
+def test_teacher_name():
     assert parse_workload_teacher("иванов и.и.") == "Иванов И.И."
     assert parse_workload_teacher("Иванов И.И.") == "Иванов И.И."
     assert parse_workload_teacher("Иванов И. И.") == "Иванов И.И."
@@ -276,7 +276,7 @@ def test_workload_teacher_keeps_initials_and_full_name():
     assert parse_workload_teacher("-") == ""
 
 
-def test_empty_total_keeps_zero_targeted():
+def test_empty_total():
     row = [None] * 8
     row[4] = "4411"
     row[5] = 10
@@ -287,7 +287,7 @@ def test_empty_total_keeps_zero_targeted():
     assert "Целевики - 0" in block
 
 
-def test_total_below_budget_and_paid_names_the_group():
+def test_bad_total():
     row = [None] * 8
     row[4] = 4411
     row[5] = 8
@@ -297,7 +297,7 @@ def test_total_below_budget_and_paid_names_the_group():
         extract_additional_info_form_nagruzka(pd.DataFrame([[None] * 8, row]))
 
 
-def test_group_keys_match_after_normalization():
+def test_group_keys():
     assert normalize_group(4111) == normalize_group("4111") == normalize_group("4111.0") == "4111"
 
 
@@ -317,7 +317,7 @@ def _nagruzka_frame(rows):
     return pd.DataFrame([header, *body])
 
 
-def test_repeated_group_counts_are_summed():
+def test_sum_groups():
     same = extract_additional_info_form_nagruzka(_nagruzka_frame([(4411, 10), (4411, 3)]))
     assert list(same) == [("4411", "")]
     assert same[("4411", "")].count("Г/б") == 1
@@ -329,7 +329,7 @@ def test_repeated_group_counts_are_summed():
     assert "Г/б - 10" not in merged[("4111", "")]
 
 
-def test_same_group_keeps_separate_practice_counts():
+def test_two_practices():
     result = extract_additional_info_form_nagruzka(
         _nagruzka_frame(
             [
@@ -347,7 +347,7 @@ def test_same_group_keeps_separate_practice_counts():
     assert "Г/б - 4" in result[field]
 
 
-def test_unrecognized_practice_gets_the_only_group_block():
+def test_one_block():
     only = extract_additional_info_form_nagruzka(
         _nagruzka_frame([(4411, 10, "ознакомительная")])
     )
@@ -358,7 +358,7 @@ def test_unrecognized_practice_gets_the_only_group_block():
     assert "Г/б - 7" in choose_student_block(empty_kind, "4411", "Учебная практика")
 
 
-def test_unrecognized_practice_stays_empty_when_group_has_two_kinds():
+def test_two_blocks_empty():
     both = extract_additional_info_form_nagruzka(
         _nagruzka_frame(
             [
@@ -370,7 +370,7 @@ def test_unrecognized_practice_stays_empty_when_group_has_two_kinds():
     assert choose_student_block(both, "4411", "Учебная практика") is None
 
 
-def test_known_practice_word_selects_only_its_block():
+def test_practice_word():
     both = extract_additional_info_form_nagruzka(
         _nagruzka_frame(
             [
@@ -385,7 +385,7 @@ def test_known_practice_word_selects_only_its_block():
     assert "Г/б - 4" not in block
 
 
-def test_plan_without_group_code_does_not_raise():
+def test_plan_no_group():
     document = Document()
     table = document.add_table(rows=3, cols=9)
     data_row = table.rows[2]
@@ -408,7 +408,7 @@ def test_plan_without_group_code_does_not_raise():
     assert teachers[0][1] == ""
 
 
-def test_saved_plan_row_keeps_group_and_id():
+def test_saved_plan_row():
     document = Document()
     table = document.add_table(rows=3, cols=10)
     table.rows[2].cells[0].text = "4411"
@@ -423,12 +423,12 @@ def test_saved_plan_row_keeps_group_and_id():
     assert len(rows[0]) == 11
 
 
-def test_empty_replace_clears_the_loaded_flag():
+def test_empty_replace():
     assert table_loaded_after_replace(0) is False
     assert table_loaded_after_replace(4) is True
 
 
-def test_plan_replace_needs_confirm_only_for_a_filled_table():
+def test_replace_plan():
     assert plan_replace_needs_confirm(0, True) is False
     assert plan_replace_needs_confirm(3, True) is True
     assert plan_replace_needs_confirm(3, False) is False
@@ -444,35 +444,35 @@ def _second_row(group, place):
 
 
 def main():
-    test_fourth_course_semester()
-    test_directed_students_ignore_year_in_title()
-    test_fiveth_table_skips_rows_without_group_code()
-    test_sixth_table_leaves_missing_teacher_empty()
-    test_short_row_does_not_shift_following_teacher()
-    test_excel_date_becomes_first_of_september()
-    test_iso_dates_inside_a_sentence_become_day_first()
-    test_invalid_iso_date_does_not_use_a_replacement_slot()
-    test_unknown_practice_title_survives_in_the_report()
-    test_third_table_lists_groups_in_sorted_order()
-    test_unreadable_date_leaves_semester_empty()
-    test_short_and_broken_report_rows_do_not_raise()
-    test_apply_student_block_replaces_numbers_and_keeps_year()
-    test_workload_group_drops_decimal_tail()
-    test_table_period_timestamp_is_day_month_year()
-    test_empty_direction_stays_blank()
-    test_workload_teacher_keeps_initials_and_full_name()
-    test_empty_total_keeps_zero_targeted()
-    test_total_below_budget_and_paid_names_the_group()
-    test_saved_plan_row_keeps_group_and_id()
-    test_empty_replace_clears_the_loaded_flag()
-    test_plan_replace_needs_confirm_only_for_a_filled_table()
-    test_group_keys_match_after_normalization()
-    test_repeated_group_counts_are_summed()
-    test_same_group_keeps_separate_practice_counts()
-    test_unrecognized_practice_gets_the_only_group_block()
-    test_unrecognized_practice_stays_empty_when_group_has_two_kinds()
-    test_known_practice_word_selects_only_its_block()
-    test_plan_without_group_code_does_not_raise()
+    test_semester()
+    test_students_in_title()
+    test_fiveth_skip()
+    test_sixth_empty_teacher()
+    test_short_row()
+    test_excel_date()
+    test_iso_date()
+    test_bad_iso_date()
+    test_unknown_practice()
+    test_third_groups_order()
+    test_bad_date_semester()
+    test_broken_rows()
+    test_student_block()
+    test_group_decimal()
+    test_period_format()
+    test_empty_direction()
+    test_teacher_name()
+    test_empty_total()
+    test_bad_total()
+    test_saved_plan_row()
+    test_empty_replace()
+    test_replace_plan()
+    test_group_keys()
+    test_sum_groups()
+    test_two_practices()
+    test_one_block()
+    test_two_blocks_empty()
+    test_practice_word()
+    test_plan_no_group()
     print("parse-checks-ok")
 
 

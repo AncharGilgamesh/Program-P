@@ -19,7 +19,7 @@ def row(created, protected, doc_type="План"):
     return [1, 2020, doc_type, created, "user", protected, "Saves/file.docx"]
 
 
-def test_five_year_split():
+def test_old_documents():
     today = datetime.date(2026, 11, 9)
     rows = [
         row("2021.11.09", 0),
@@ -33,13 +33,13 @@ def test_five_year_split():
     assert [item[3] for item in protected] == ["2020.01.01"]
 
 
-def test_report_tables_share_one_start_row_scheme():
+def test_otchet_start_rows():
     from main import OTCHET_TABLE_START_ROWS
 
     assert OTCHET_TABLE_START_ROWS == (1, 2, 2, 2, 4, 2)
 
 
-def test_saved_report_reads_six_tables_without_the_template():
+def test_load_otchet_tables():
     document = Document()
     for index in range(6):
         table = document.add_table(rows=2 if index == 0 else 1, cols=2)
@@ -56,7 +56,7 @@ def test_saved_report_reads_six_tables_without_the_template():
     assert tables[1:] == [[], [], [], [], []]
 
 
-def test_saved_report_drops_header_rows_before_the_start_index():
+def test_otchet_skip_header():
     starts = (1, 2, 2, 2, 4, 2)
     widths = (6, 7, 3, 8, 8, 8)
     document = Document()
@@ -78,7 +78,7 @@ def test_saved_report_drops_header_rows_before_the_start_index():
         assert "шапка" not in joined
 
 
-def test_path_must_stay_inside_saves():
+def test_path_in_saves():
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         saves = root / "Saves"
@@ -93,7 +93,7 @@ def test_path_must_stay_inside_saves():
         assert path_inside_saves("", root) is False
 
 
-def test_locate_saved_file_follows_the_folder():
+def test_find_saved_file():
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         saves = root / "Saves"
@@ -115,7 +115,7 @@ def test_locate_saved_file_follows_the_folder():
         assert locate_saved_file(str(outside), root) is None
 
 
-def test_save_writes_a_relative_saves_path():
+def test_save_relative_path():
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         captured = {}
@@ -145,7 +145,7 @@ def test_save_writes_a_relative_saves_path():
         assert (root / stored).is_file()
 
 
-def test_failed_insert_removes_the_new_file():
+def test_save_drops_file():
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         original_base = window_support.base_dir
@@ -175,7 +175,7 @@ def test_failed_insert_removes_the_new_file():
         assert list((root / "Saves").glob("*")) == []
 
 
-def test_failed_file_delete_keeps_the_row():
+def test_delete_keeps_row():
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         saves = root / "Saves"
@@ -201,12 +201,12 @@ def test_failed_file_delete_keeps_the_row():
         assert target.is_file()
 
 
-def test_report_replace_needs_confirm_when_any_table_has_rows():
+def test_replace_otchet():
     assert report_replace_needs_confirm((0, 0, 0, 0, 0, 0)) is False
     assert report_replace_needs_confirm((0, 0, 1, 0, 0, 0)) is True
 
 
-def test_saves_names_differ_within_one_day():
+def test_save_filename():
     morning = datetime.datetime(2026, 11, 9, 10, 0, 0)
     evening = datetime.datetime(2026, 11, 9, 18, 30, 1)
     plan_a = saves_filename(2026, "План", morning)
@@ -219,17 +219,17 @@ def test_saves_names_differ_within_one_day():
 
 
 def main():
-    test_five_year_split()
-    test_report_tables_share_one_start_row_scheme()
-    test_saved_report_reads_six_tables_without_the_template()
-    test_saved_report_drops_header_rows_before_the_start_index()
-    test_path_must_stay_inside_saves()
-    test_locate_saved_file_follows_the_folder()
-    test_save_writes_a_relative_saves_path()
-    test_failed_insert_removes_the_new_file()
-    test_failed_file_delete_keeps_the_row()
-    test_report_replace_needs_confirm_when_any_table_has_rows()
-    test_saves_names_differ_within_one_day()
+    test_old_documents()
+    test_otchet_start_rows()
+    test_load_otchet_tables()
+    test_otchet_skip_header()
+    test_path_in_saves()
+    test_find_saved_file()
+    test_save_relative_path()
+    test_save_drops_file()
+    test_delete_keeps_row()
+    test_replace_otchet()
+    test_save_filename()
     print("document-checks-ok")
 
 

@@ -32,14 +32,14 @@ def _plan_rows():
     return bachelor_rows + master_rows
 
 
-def test_example_table_has_three_groups():
+def test_example_groups():
     rows = _plan_rows()
     assert [row[1] for row in rows] == ["4111", "4211", "4411"]
     assert rows[0][8] == "09.03.02"
     assert rows[0][4] == "Кафедра"
 
 
-def test_example_workload_adds_students_and_can_build_a_plan():
+def test_example_nagruzka():
     workload = pd.read_excel(EXAMPLE / "нагрузка.xlsx", header=None)
     blocks = extract_additional_info_form_nagruzka(workload)
     assert "Г/б - 10" in blocks[("4111", "Учебная практика – ознакомительная")]
@@ -49,7 +49,7 @@ def test_example_workload_adds_students_and_can_build_a_plan():
     assert built[2][1] == "4411"
 
 
-def test_example_word_files_reload():
+def test_example_docx():
     plan = rows_from_saved_plan(read_plan_from_docx(EXAMPLE / "план.docx"))
     assert [row[1] for row in plan] == ["4111", "4211", "4411"]
     assert "Г/б - 10" in plan[0][2]
