@@ -65,7 +65,7 @@ View/meetingdatedialog.py    дата собрания
 View/prepod_dialog.py        карточка преподавателя
 View/startosta_dialog.py     карточка старосты
 tests/                       проверки разбора, учёток, документов и дат
-Example/                     учебные Excel и Word
+Example/                     учебные Excel и Word кафедры ПМИ
 DB/                          база
 Shablons/                    шаблоны Word
 ```
@@ -82,7 +82,7 @@ Shablons/                    шаблоны Word
 | `Saves/` | Планы и отчёты кнопки «Сохранить». Повторное сохранение старый файл не затирает |
 | `Shablons/shablon_plan.docx` | Шаблон плана. Данные пишутся в первую таблицу со строки 2 |
 | `Shablons/shablon_otchet.docx` | Шаблон отчёта. Шесть таблиц заполняются со строк 1, 2, 2, 2, 4 и 2 |
-| `Example/` | Учебные Excel и Word на группы `4111`, `4211` и `4411`. Как прогнать, написано в [Example/README.md](Example/README.md) |
+| `Example/` | Учебные Excel и Word кафедры ПМИ за 2025/2026 год. Как прогнать, написано в [Example/README.md](Example/README.md) |
 | `logs/app.log` | Ошибки. Пароли туда не пишутся |
 
 `DB/maindatabase.db` и `Saves/otchet_test.docx` лежат в репозитории как учебный пример. Пароли в базе только хешем, почта и телефоны в справочнике пустые. В `.gitignore` эти пути не добавлены.
@@ -97,12 +97,6 @@ uv run pytest
 ```
 
 Ruff проверяет каталог целиком, кроме трёх сгенерированных файлов интерфейса. Пример базы и `Saves` в репозитории остаются.
-
-Собрать учебные Word заново:
-
-```text
-uv run python Example/build_examples.py
-```
 
 ## Ограничения
 
