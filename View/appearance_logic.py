@@ -106,6 +106,21 @@ class AppearanceDialog(QDialog):
 
         self.success = False
         self.user = None
+        self._place_auth_fields()
+        for button in (
+            self.ui.authPagePushButton,
+            self.ui.regPagePushButton,
+            self.ui.recoverPagePushButton,
+        ):
+            button.setCheckable(True)
+            button.setAutoExclusive(True)
+        self.setStyleSheet(
+            self.styleSheet()
+            + "QPushButton:checked {"
+            " background-color: rgba(255, 255, 255, 45);"
+            " border: 1px solid white;"
+            "}"
+        )
         self.go_to_auth()
 
         self.ui.authPagePushButton.clicked.connect(self.go_to_auth)
@@ -116,17 +131,48 @@ class AppearanceDialog(QDialog):
         self.ui.registerButton.clicked.connect(self.register_user)
         self.ui.recoverPushButton.clicked.connect(self.check_recover)
 
+    def _place_auth_fields(self):
+        self.ui.label.setGeometry(10, 30, 121, 21)
+        self.ui.authUsernameLine.setGeometry(140, 26, 211, 31)
+        self.ui.label_3.setGeometry(10, 80, 121, 21)
+        self.ui.authPassLine.setGeometry(140, 76, 211, 31)
+        self.ui.authPushButton.setGeometry(110, 140, 181, 31)
+        self.ui.checkBox.setGeometry(140, 184, 161, 20)
+        self.ui.label_7.setText("Фамилия")
+        self.ui.label_7.setGeometry(10, 140, 121, 21)
+        self.ui.familiaLine.setGeometry(150, 136, 211, 31)
+        self.ui.label_6.setText("Имя")
+        self.ui.label_6.setGeometry(10, 180, 121, 21)
+        self.ui.nameLine.setGeometry(150, 176, 211, 31)
+        self.ui.label_11.setGeometry(10, 20, 121, 21)
+        self.ui.recoverUsernameLine.setGeometry(150, 16, 211, 31)
+        self.ui.label_12.setGeometry(10, 60, 131, 21)
+        self.ui.revocerRegisterCodeLine.setGeometry(150, 56, 211, 31)
+        self.ui.label_13.setText("Новый пароль")
+        self.ui.label_13.setGeometry(10, 100, 121, 21)
+        self.ui.recoverPassLine.setGeometry(150, 96, 211, 31)
+        self.ui.label_14.setText("Повторите пароль")
+        self.ui.label_14.setGeometry(10, 140, 131, 21)
+        self.ui.recoverRepeatPassLine.setGeometry(150, 136, 211, 31)
+        self.ui.recoverPushButton.setGeometry(110, 190, 181, 31)
+
     def go_to_auth(self):
         self.ui.stackedWidget.setCurrentWidget(self.ui.page)
         self.ui.mainInfoLabel.setText("Авторизация")
+        self.setWindowTitle("Авторизация")
+        self.ui.authPagePushButton.setChecked(True)
 
     def go_to_register(self):
         self.ui.stackedWidget.setCurrentWidget(self.ui.page_2)
         self.ui.mainInfoLabel.setText("Регистрация")
+        self.setWindowTitle("Регистрация")
+        self.ui.regPagePushButton.setChecked(True)
 
     def go_to_recover(self):
         self.ui.stackedWidget.setCurrentWidget(self.ui.page_3)
         self.ui.mainInfoLabel.setText("Восстановление")
+        self.setWindowTitle("Восстановление")
+        self.ui.recoverPagePushButton.setChecked(True)
 
     def check_login(self):
         username = self.ui.authUsernameLine.text()
@@ -206,10 +252,13 @@ class AppearanceDialog(QDialog):
         QMessageBox.information(self, "Успешно", "Пользователь зарегистрирован")
 
     def check_recover(self):
-        username = self.ui.recoverUsernameLine.text()
-        recoverCode = self.ui.revocerRegisterCodeLine.text()
+        username = self.ui.recoverUsernameLine.text().strip()
+        recoverCode = self.ui.revocerRegisterCodeLine.text().strip()
         password = self.ui.recoverPassLine.text()
         repeat_password = self.ui.recoverRepeatPassLine.text()
+        if not all([username, recoverCode, password, repeat_password]):
+            QMessageBox.warning(self, "Ошибка", "Заполните все поля.")
+            return
         failure = registration_failure(recoverCode)
         if failure:
             QMessageBox.warning(self, "Ошибка", failure)

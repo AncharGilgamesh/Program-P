@@ -10,10 +10,23 @@ from PySide6.QtWidgets import (
 from Models.datahandler import resource_path
 
 
+DEGREE_ITEMS = ["", "к.т.н.", "к.ф.-м.н.", "д.ф.-м.н.", "д.т.н.", "-"]
+DEGREE_ALIASES = {
+    "к.т.н": "к.т.н.",
+    "к.ф.м.н": "к.ф.-м.н.",
+    "к.ф.-м.н": "к.ф.-м.н.",
+    "д.ф.м.н": "д.ф.-м.н.",
+    "д.ф.-м.н": "д.ф.-м.н.",
+    "д.т.н": "д.т.н.",
+    "д.т.н.": "д.т.н.",
+}
+
+
 class PrepodDialog(QDialog):
     def __init__(self, parent=None, data=None):
         super().__init__(parent)
-        self.setWindowTitle("Добавить/Редактировать преподавателя")
+        self.setWindowTitle("Изменить преподавателя" if data else "Добавить преподавателя")
+        self.setMinimumWidth(440)
         with open(resource_path("View/dialogstyle.qss"), "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
 
@@ -22,7 +35,7 @@ class PrepodDialog(QDialog):
         self.first_name_edit = QLineEdit()
         self.middle_name_edit = QLineEdit()
         self.degree_combo = QComboBox()
-        self.degree_combo.addItems(["", "к.т.н", "к.ф.м.н", "д.ф.м.н", "д.т.н.", "-"])
+        self.degree_combo.addItems(DEGREE_ITEMS)
         self.position_combo = QComboBox()
         self.position_combo.addItems(
             ["", "доцент", "профессор", "ассистент", "Зав. кафедрой", "ст. преподаватель"]
@@ -35,7 +48,11 @@ class PrepodDialog(QDialog):
             self.last_name_edit.setText(data[0] if len(data) > 0 else "")
             self.first_name_edit.setText(data[1] if len(data) > 1 else "")
             self.middle_name_edit.setText(data[2] if len(data) > 2 else "")
-            self.degree_combo.setCurrentText(data[3] if len(data) > 3 else "")
+            degree = data[3] if len(data) > 3 else ""
+            degree = DEGREE_ALIASES.get(degree, degree)
+            if degree and self.degree_combo.findText(degree) < 0:
+                self.degree_combo.addItem(degree)
+            self.degree_combo.setCurrentText(degree)
             self.position_combo.setCurrentText(data[4] if len(data) > 4 else "")
             self.email_edit.setText(data[5] if len(data) > 5 else "")
             self.phone_edit.setText(data[6] if len(data) > 6 else "")
@@ -48,7 +65,7 @@ class PrepodDialog(QDialog):
         form_layout.addRow("Степень:", self.degree_combo)
         form_layout.addRow("Должность:", self.position_combo)
         form_layout.addRow("Почта:", self.email_edit)
-        form_layout.addRow("Номер:", self.phone_edit)
+        form_layout.addRow("Телефон:", self.phone_edit)
 
         # Кнопки
         self.ok_button = QPushButton("Сохранить")

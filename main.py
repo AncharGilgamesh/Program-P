@@ -1,26 +1,25 @@
 import sqlite3
 import sys
 
-from PySide6.QtWidgets import (
-    QApplication,
-    QHeaderView,
-    QInputDialog,
-    QLineEdit,
-    QMainWindow,
-    QMessageBox,
-)
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 import Models.dbhandler as dbh
 from Models.model import PlanTableModel
-from View.appearance_logic import AppearanceDialog, cabinet_password_failure
+from View.appearance_logic import (
+    AppearanceDialog,
+    cabinet_password_failure,
+    new_password_failure,
+)
 from View.database_page import DatabasePage
 from View.plan_page import PlanPage
 from View.report_page import ReportPage
 from View.workspace import Ui_MainWindow
 from window_support import (
     OTCHET_TABLE_START_ROWS,
+    ask_text,
     clear_remembered_username,
     help_path,
+    prepare_table,
     read_remembered_username,
     saves_filename,
     split_expired_documents,
@@ -48,6 +47,12 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowTitle("Ведение документации по практикам")
+        self.ui.otch_lbl_page_info.setText("Генерация отчёта")
+        self.setStyleSheet(self.styleSheet() + "\nQPushButton { text-align: center; }\n")
+        self._setup_navigation()
+        self._setup_readable_buttons()
+        self._setup_cabinet_fields()
 
         self.load_help_html()
 
@@ -77,21 +82,20 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         self._plan_data = None
         self._plan_headers = [
             "id",
-            "№\nгр.",
-            "Вид практики\n(кол-во студентов)",
-            "Сроки\nпроведения\n(кол-во часов)",
-            "Место\nпроведения\n(предприятие, кафедра)",
-            "№ договора\nс предприя-\nтием\n(числа)",
-            "Руководитель от\nуниверситета(ф.и.о.,\nдолжность, звание,\n контактный тел.)",
-            "Руководитель от\nпредпр-я(ф.и.о.,\nдолж.,контакт.\nТел.)",
-            "Наименование\nспециальности и ее\nшифр",
-            "Необходимо\nсть закупки\n(есть, нет)",
-            "Примечан\nие",
+            "№\nгруппы",
+            "Вид практики\n(число студентов)",
+            "Сроки\nпроведения\n(часы)",
+            "Место\nпроведения\n(предприятие,\nкафедра)",
+            "№\nдоговора",
+            "Руководитель\nот университета\n(ФИО, должность,\nзвание, телефон)",
+            "Руководитель\nот предприятия\n(ФИО, должность,\nтелефон)",
+            "Специальность\nи шифр",
+            "Необходимость\nзакупки\n(есть, нет)",
+            "Примечание",
         ]
         self._plan_model = PlanTableModel(self._plan_data, self._plan_headers)
         self.ui.tableView.setModel(self._plan_model)
-        self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.ui.tableView.hideColumn(0)
+        prepare_table(self.ui.tableView, hide=(0,))
         # Определяем заголовки для таблиц
         self.set_otchet_tables_models()
         # Тут страница отчета
@@ -158,6 +162,106 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
         # страница личного кабинта
         self.ui.lkChangePassPushButton.clicked.connect(self.lk_change_password)
         self.ui.lkDelAccPushButton.clicked.connect(self.lk_del_account)
+        self._nav_by_index[1].setChecked(True)
+        self._update_stage_buttons()
+
+    def _setup_navigation(self):
+        style = (
+            "QToolButton {"
+            " color: white; font-size: 11pt; background-color: transparent;"
+            " border: none; border-radius: 8px; font-family: Consolas; padding: 4px;"
+            "}"
+            "QToolButton:hover { background-color: rgba(255, 255, 255, 28); }"
+            "QToolButton:checked {"
+            " background-color: rgba(255, 255, 255, 48);"
+            " border: 1px solid rgba(255, 255, 255, 90);"
+            "}"
+        )
+        labels = (
+            (self.ui.cabinetToolButton, "Личный кабинет"),
+            (self.ui.dataToolButton, "База данных"),
+            (self.ui.genOtchToolButton, "Генерация отчёта"),
+            (self.ui.genPlanToolButton, "План"),
+            (self.ui.faqToolButton, "Руководство"),
+            (self.ui.exitToolButton, "Выйти"),
+        )
+        for button, text in labels:
+            button.setStyleSheet(style)
+            button.setText(text)
+            button.setMinimumSize(188, 84)
+        self._nav_by_index = {
+            0: self.ui.dataToolButton,
+            1: self.ui.genOtchToolButton,
+            2: self.ui.genPlanToolButton,
+            3: self.ui.faqToolButton,
+            4: self.ui.cabinetToolButton,
+        }
+        for button in self._nav_by_index.values():
+            button.setCheckable(True)
+            button.setAutoExclusive(True)
+
+    def _setup_readable_buttons(self):
+        labels = {
+            self.ui.dbAddPrepodPushButton: "Добавить преподавателя",
+            self.ui.dbEditPrepodPushButton: "Изменить преподавателя",
+            self.ui.dbDelPrepodPushButton: "Удалить преподавателя",
+            self.ui.dbAddStarostaPushButton: "Добавить старосту",
+            self.ui.dbEditStarostaPushButton: "Изменить старосту",
+            self.ui.dbDelStarostaPushButton: "Удалить старосту",
+            self.ui.otchAllAnotherButton: "Другое: как прибыло",
+        }
+        for button, text in labels.items():
+            button.setText(text)
+            button.setMinimumHeight(36)
+            button.setMaximumWidth(16777215)
+        centered = (
+            self.ui.dbAddPrepodPushButton,
+            self.ui.dbEditPrepodPushButton,
+            self.ui.dbDelPrepodPushButton,
+            self.ui.dbAddStarostaPushButton,
+            self.ui.dbEditStarostaPushButton,
+            self.ui.dbDelStarostaPushButton,
+            self.ui.otchAllAnotherButton,
+            self.ui.meeting_date_otch_btn,
+            self.ui.otchSecondStagePushButton,
+            self.ui.otchOneRukVsemButton,
+            self.ui.otchAllUdlButton,
+            self.ui.otchAllXorButton,
+            self.ui.otchAllOtlButton,
+        )
+        for button in centered:
+            button.setStyleSheet(
+                "QPushButton { color: white; text-align: center; }"
+                "QPushButton:disabled {"
+                " color: rgba(255, 255, 255, 0.4);"
+                " background-color: rgba(155, 79, 165, 70);"
+                "}"
+            )
+
+    def _setup_cabinet_fields(self):
+        style = (
+            "QLineEdit {"
+            " background-color: transparent;"
+            " border: none;"
+            " border-bottom: 1px solid rgba(255, 255, 255, 50);"
+            " color: white;"
+            " padding: 4px 8px;"
+            "}"
+        )
+        fields = (
+            self.ui.lkUsernameLine,
+            self.ui.lkLastNameLine,
+            self.ui.lkNameLine,
+            self.ui.lkMiddleNameLine,
+            self.ui.lkTitleLine,
+            self.ui.lkDegreeLine,
+            self.ui.lkEmailLine,
+            self.ui.lkPhoneLine,
+        )
+        for field in fields:
+            field.setStyleSheet(style)
+            field.setPlaceholderText("не указано")
+        self.ui.lkDelAccPushButton.setGeometry(490, 220, 191, 31)
 
     def load_help_html(self):
         with open(help_path, "r", encoding="utf-8") as f:
@@ -184,13 +288,12 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
     def lk_change_password(self):
         password = self.ui.lkNewPassLine.text()
         repeat_password = self.ui.lkRepeatPassLine.text()
-        current_password, accepted = QInputDialog.getText(
-            self,
-            "Смена пароля",
-            "Текущий пароль:",
-            QLineEdit.EchoMode.Password,
-        )
-        if not accepted:
+        failure = new_password_failure(password, repeat_password)
+        if failure:
+            QMessageBox.warning(self, "Ошибка", failure)
+            return
+        current_password = ask_text(self, "Смена пароля", "Текущий пароль:", password=True)
+        if current_password is None:
             return
         try:
             users = dbh.select_user_by_username(self.user)
@@ -242,6 +345,9 @@ class MainWindow(DatabasePage, PlanPage, ReportPage, QMainWindow):
 
     def switch_page(self, index):
         self.ui.mainStackedWidget.setCurrentIndex(index)
+        button = self._nav_by_index.get(index)
+        if button is not None:
+            button.setChecked(True)
         if index == 0:
             self.upload_db_docs(review_retention=not self._retention_reviewed)
 

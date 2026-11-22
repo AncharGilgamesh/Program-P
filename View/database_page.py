@@ -9,10 +9,44 @@ import Models.dbhandler as dbh
 from Models.model import PlanTableModel
 from View.prepod_dialog import PrepodDialog
 from View.startosta_dialog import StarostaDialog
-from window_support import locate_saved_file, release_saved_copy, split_expired_documents
+from window_support import (
+    locate_saved_file,
+    prepare_table,
+    release_saved_copy,
+    split_expired_documents,
+)
+
+
+def _yes_no(value, _row):
+    return "Да" if value else "Нет"
+
+
+def _file_name(value, _row):
+    text = "" if value is None else str(value)
+    name = os.path.basename(text)
+    return name or text
+
+
+def _full_path(value, _row):
+    return "" if value is None else str(value)
 
 
 class DatabasePage:
+    def _mark_db_tab(self, active):
+        idle = "QPushButton { color: white; text-align: center; }"
+        marked = (
+            "QPushButton { color: white; text-align: center;"
+            " background-color: rgba(255, 255, 255, 48);"
+            " border: 1px solid rgba(255, 255, 255, 90); }"
+        )
+        buttons = {
+            "docs": self.ui.dbPlansPushButton,
+            "teachers": self.ui.dbPrepodsPushButton,
+            "starostas": self.ui.dbStarostaPushButton,
+        }
+        for name, button in buttons.items():
+            button.setStyleSheet(marked if name == active else idle)
+
     def selected_db_row(self):
         indexes = self.ui.dataBaseTableView.selectedIndexes()
         if self._db_model is None or not indexes:
@@ -112,9 +146,25 @@ class DatabasePage:
         except sqlite3.Error as exc:
             QMessageBox.warning(self, "Ошибка", str(exc))
             return
-        headers = ["id", "id_Куратора", "Фамилия", "Имя", "Отчество", "Группа", "Почта", "Номер"]
-        self._db_model = PlanTableModel(data, headers, editable=False)
+        try:
+            teachers = dbh.load_teachers()
+        except sqlite3.Error as exc:
+            QMessageBox.warning(self, "Ошибка", str(exc))
+            return
+        names = {
+            row[0]: " ".join(part for part in (row[1], row[2], row[3]) if part) for row in teachers
+        }
+
+        def curator(value, _row):
+            if value in names:
+                return names[value]
+            return "" if value is None else str(value)
+
+        headers = ["id", "Куратор", "Фамилия", "Имя", "Отчество", "Группа", "Почта", "Телефон"]
+        self._db_model = PlanTableModel(data, headers, editable=False, display={1: curator})
         self.ui.dataBaseTableView.setModel(self._db_model)
+        prepare_table(self.ui.dataBaseTableView, hide=(0,), contents=(1,))
+        self._mark_db_tab("starostas")
 
     def add_db_starosta(self):
         try:
@@ -169,9 +219,11 @@ class DatabasePage:
         except sqlite3.Error as exc:
             QMessageBox.warning(self, "Ошибка", str(exc))
             return
-        headers = ["id", "Фамилия", "Имя", "Отчество", "Степень", "Должность", "Почта", "Номер"]
+        headers = ["id", "Фамилия", "Имя", "Отчество", "Степень", "Должность", "Почта", "Телефон"]
         self._db_model = PlanTableModel(data, headers, editable=False)
         self.ui.dataBaseTableView.setModel(self._db_model)
+        prepare_table(self.ui.dataBaseTableView, hide=(0,))
+        self._mark_db_tab("teachers")
 
     def add_db_prepod(self):
         dialog = PrepodDialog(parent=self)
@@ -216,9 +268,17 @@ class DatabasePage:
         except sqlite3.Error as exc:
             QMessageBox.warning(self, "Ошибка", str(exc))
             return
-        headers = ["id", "Год", "Тип", "Дата создания", "Создатель", "Защищено", "Путь"]
-        self._db_model = PlanTableModel(data, headers, editable=False)
+        headers = ["id", "Год", "Тип", "Дата создания", "Создатель", "Защищено", "Файл"]
+        self._db_model = PlanTableModel(
+            data,
+            headers,
+            editable=False,
+            display={5: _yes_no, 6: _file_name},
+            tooltips={6: _full_path},
+        )
         self.ui.dataBaseTableView.setModel(self._db_model)
+        prepare_table(self.ui.dataBaseTableView, hide=(0,), contents=(6,))
+        self._mark_db_tab("docs")
         if review_retention:
             self.review_document_retention(data)
 

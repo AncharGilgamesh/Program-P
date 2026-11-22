@@ -4,11 +4,13 @@ from PySide6.QtCore import QAbstractTableModel, Qt, QModelIndex
 
 
 class PlanTableModel(QAbstractTableModel):
-    def __init__(self, data=[], header=None, editable=True):
+    def __init__(self, data=[], header=None, editable=True, display=None, tooltips=None):
         super(PlanTableModel, self).__init__()
         self._data = data if data else []
         self._header = header if header else []
         self._editable = editable
+        self._display = display or {}
+        self._tooltips = tooltips or {}
 
     def setData(self, index, value, role=Qt.EditRole):
         if not self._editable or not index.isValid() or role != Qt.EditRole:
@@ -66,12 +68,21 @@ class PlanTableModel(QAbstractTableModel):
         self.endResetModel()
 
     def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole and index.isValid():
-            return self._data[index.row()][index.column()]
+        if not index.isValid():
+            return None
+        value = self._data[index.row()][index.column()]
+        if role == Qt.DisplayRole:
+            formatter = self._display.get(index.column())
+            if formatter:
+                return formatter(value, self._data[index.row()])
+            return value
+        if role == Qt.ToolTipRole:
+            formatter = self._tooltips.get(index.column())
+            if formatter:
+                return formatter(value, self._data[index.row()])
+            return None
         if role == Qt.EditRole:
-            row = index.row()
-            column = index.column()
-            return self._data[row][column]
+            return value
         return None
 
     def get_column_values(self, column_index):

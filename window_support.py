@@ -4,7 +4,16 @@ import sqlite3
 import traceback
 from pathlib import Path
 
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QVBoxLayout,
+)
 
 import Models.dbhandler as dbh
 
@@ -15,6 +24,64 @@ shablon_otch_path = os.path.join(base_dir, "Shablons", "shablon_otchet.docx")
 # с какой строки шаблона отчёта пишутся данные (у 5-й таблицы шапка длиннее)
 OTCHET_TABLE_START_ROWS = (1, 2, 2, 2, 4, 2)
 RETENTION_YEARS = 5
+
+
+def ask_text(parent, title, label, password=False):
+    dialog = QDialog(parent)
+    dialog.setWindowTitle(title)
+    dialog.setMinimumWidth(360)
+    layout = QVBoxLayout(dialog)
+    layout.addWidget(QLabel(label))
+    edit = QLineEdit()
+    if password:
+        edit.setEchoMode(QLineEdit.EchoMode.Password)
+    edit.returnPressed.connect(dialog.accept)
+    layout.addWidget(edit)
+    buttons = QDialogButtonBox(
+        QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+    )
+    buttons.button(QDialogButtonBox.StandardButton.Ok).setText("ОК")
+    buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Отмена")
+    buttons.accepted.connect(dialog.accept)
+    buttons.rejected.connect(dialog.reject)
+    layout.addWidget(buttons)
+    if dialog.exec() != QDialog.DialogCode.Accepted:
+        return None
+    return edit.text()
+
+
+def prepare_table(table, hide=(), contents=()):
+    header = table.horizontalHeader()
+    model = table.model()
+    hidden = set(hide)
+    sized = set(contents)
+    count = model.columnCount() if model is not None else 0
+    for col in range(count):
+        if col in hidden:
+            table.setColumnHidden(col, True)
+            header.setSectionResizeMode(col, QHeaderView.ResizeMode.Fixed)
+            header.resizeSection(col, 0)
+        elif col in sized:
+            table.setColumnHidden(col, False)
+            header.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
+        else:
+            table.setColumnHidden(col, False)
+            header.setSectionResizeMode(col, QHeaderView.ResizeMode.Stretch)
+    header.setMinimumSectionSize(72)
+    header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
+    header.setTextElideMode(Qt.TextElideMode.ElideNone)
+    lines = 1
+    if model is not None:
+        for col in range(count):
+            if col in hidden:
+                continue
+            text = model.headerData(col, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole)
+            if text:
+                lines = max(lines, str(text).count("\n") + 1)
+    header.setFixedHeight(lines * header.fontMetrics().lineSpacing() + 14)
+    table.setWordWrap(True)
+    table.setTextElideMode(Qt.TextElideMode.ElideNone)
+    table.resizeRowsToContents()
 
 
 def locate_saved_file(stored, root=None):

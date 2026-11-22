@@ -1,5 +1,5 @@
 from docx import Document
-from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
+from PySide6.QtWidgets import QFileDialog, QMessageBox
 
 import Models.datahandler as dh
 from Models.docx_writer import fill_the_table_rows
@@ -7,7 +7,9 @@ from Models.model import PlanTableModel, ResultTableModel
 from View.meetingdatedialog import MeetingDateDialog
 from window_support import (
     OTCHET_TABLE_START_ROWS,
+    ask_text,
     log_exception,
+    prepare_table,
     save_registered_copy,
     shablon_otch_path,
 )
@@ -18,8 +20,8 @@ def report_replace_needs_confirm(row_counts):
 
 
 def show_fio_dialog(parent=None):
-    text, ok = QInputDialog.getText(parent, "Введите ФИО", "Фамилия и инициалы:")
-    if ok and text.strip():
+    text = ask_text(parent, "Введите ФИО", "Фамилия и инициалы:")
+    if text and text.strip():
         return text.strip()
     return None
 
@@ -130,7 +132,7 @@ class ReportPage:
         return answer == QMessageBox.Yes
 
     def load_plan(self):
-        fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Word файлы (*.docx)")
+        fname, _ = QFileDialog.getOpenFileName(self, "Выберите файл", "", "Word файлы (*.docx)")
         if not fname:
             return
         try:
@@ -175,22 +177,31 @@ class ReportPage:
         # Для четвертой таблицы попробуй взять инфу из второй таблицы и надо подредактировать
         # Сделать диалоговое окно, чтобы можно было заполнять таблицу из второй таблицы
 
+    def _update_stage_buttons(self):
+        index = self.ui.stackedWidget.currentIndex()
+        self.ui.otch_prev_btn.setEnabled(index > 0)
+        self.ui.otch_next_btn.setEnabled(index < 5)
+
     def to_next_stage(self):
-        index = self.ui.stackedWidget.currentIndex() + 1
-        if index == 6:
+        index = self.ui.stackedWidget.currentIndex()
+        if index >= 5:
             return
+        index += 1
         self.ui.otch_lbl_stage.setText(f"{index + 1} этап")
         self.ui.stackedWidget.setCurrentIndex(index)
+        self._update_stage_buttons()
 
     def to_prev_stage(self):
-        index = self.ui.stackedWidget.currentIndex() - 1
-        if index == -1:
+        index = self.ui.stackedWidget.currentIndex()
+        if index <= 0:
             return
+        index -= 1
         self.ui.otch_lbl_stage.setText(f"{index + 1} этап")
         self.ui.stackedWidget.setCurrentIndex(index)
+        self._update_stage_buttons()
 
     def load_saved_otchet(self):
-        fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Word файлы (*.docx)")
+        fname, _ = QFileDialog.getOpenFileName(self, "Выберите файл", "", "Word файлы (*.docx)")
         if not fname:
             return
         try:
@@ -223,22 +234,26 @@ class ReportPage:
         headers_for_second_stage = [
             "№\nп/п",
             "Город",
-            "Место проведения",
+            "Место\nпроведения",
             "Направлено",
             "Прибыло",
-            "Инструктаж по ТБ",
-            "Факт. конец",
+            "Инструктаж\nпо ТБ",
+            "Фактический\nконец",
         ]
-        headers_for_third_stage = ["Место", "Рук. от КАИ", "Рук. от предприятия"]
+        headers_for_third_stage = [
+            "Место",
+            "Руководитель\nот КНИТУ-КАИ",
+            "Руководитель\nот предприятия",
+        ]
         headers_fourth_stage = [
             "Место\nпроведения\nпрактики",
             "В цехах",
             "Офис",
             "Инженерно-\nтехнические\nдолжности",
             "Научные\nлаборатории",
-            "Студ.\n отряды",
+            "Студенческие\nотряды",
             "Другое",
-            "Оформление\nТБ на рабочем\nместе(да\нет)",
+            "Оформление ТБ\nна рабочем месте\n(да / нет)",
         ]
         headers_fiveth_stage = [
             "Группа",
@@ -273,3 +288,13 @@ class ReportPage:
         self.ui.otchFivethTableView.setModel(self._fiveth_stg_model)
         self._sixth_stg_model = PlanTableModel(first_data, headers_sixth_stage)
         self.ui.otchSixthTableView.setModel(self._sixth_stg_model)
+        for table in (
+            self.ui.otchFirstTableView,
+            self.ui.otchSecondTableView,
+            self.ui.otchThirdTableView,
+            self.ui.otchFourthTableView,
+            self.ui.otchFivethTableView,
+            self.ui.otchSixthTableView,
+        ):
+            prepare_table(table)
+        self._update_stage_buttons()

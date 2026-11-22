@@ -1,10 +1,13 @@
 QDialog {
-    background-color: rgba(30, 10, 60, 220); /* слегка затемнённый полупрозрачный фон */
+    background-color: qlineargradient(
+        spread: pad, x1: 1, y1: 1, x2: 0, y2: 0,
+        stop: 0 rgba(81, 0, 135, 255),
+        stop: 0.427447 rgba(41, 61, 132, 235),
+        stop: 1 rgba(155, 79, 165, 255)
+    );
     color: white;
     font-family: Consolas;
     font-size: 11pt;
-    border-radius: 12px;
-    padding: 10px;
 }
 
 QLabel {
@@ -65,24 +68,10 @@ QComboBox {
     background-color: rgba(255, 255, 255, 30);
     border: 1px solid rgba(255, 255, 255, 70);
     border-radius: 5px;
-    padding: 5px;
+    padding: 5px 28px 5px 8px;
     font-family: Consolas;
     font-size: 12pt;
     color: white;
-}
-
-QComboBox::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 20px;
-    border-left: 1px solid rgba(255, 255, 255, 40);
-    background-color: rgba(255, 255, 255, 30);
-}
-
-QComboBox::down-arrow {
-    image: url(:/icons/down-arrow.png); /* заменишь на свою иконку или убери эту строку */
-    width: 10px;
-    height: 10px;
 }
 
 QComboBox QAbstractItemView {

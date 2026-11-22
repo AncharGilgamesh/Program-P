@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QPushButton,
     QFormLayout,
+    QHBoxLayout,
     QVBoxLayout,
     QMessageBox,
 )
@@ -13,7 +14,8 @@ from Models.datahandler import resource_path
 class StarostaDialog(QDialog):
     def __init__(self, teachers, starosta_data=None, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Редактировать старосту" if starosta_data else "Добавить старосту")
+        self.setWindowTitle("Изменить старосту" if starosta_data else "Добавить старосту")
+        self.setMinimumWidth(440)
         self.teachers = teachers  # список кортежей: (id, фамилия, имя, отчество)
 
         with open(resource_path("View/dialogstyle.qss"), "r", encoding="utf-8") as f:
@@ -41,12 +43,12 @@ class StarostaDialog(QDialog):
             if index != -1:
                 self.teacher_combo.setCurrentIndex(index)
 
-            self.last_name_edit.setText(starosta_data[1])  # last_name
-            self.first_name_edit.setText(starosta_data[2])  # first_name
-            self.middle_name_edit.setText(starosta_data[3])  # middle_name
-            self.group_edit.setText(starosta_data[4])  # group_num
-            self.email_edit.setText(starosta_data[5])  # email
-            self.phone_edit.setText(starosta_data[6])  # phone
+            self.last_name_edit.setText(starosta_data[1] or "")
+            self.first_name_edit.setText(starosta_data[2] or "")
+            self.middle_name_edit.setText(starosta_data[3] or "")
+            self.group_edit.setText("" if starosta_data[4] is None else str(starosta_data[4]))
+            self.email_edit.setText(starosta_data[5] or "")
+            self.phone_edit.setText(starosta_data[6] or "")
 
         # Layout
         form_layout = QFormLayout()
@@ -56,11 +58,17 @@ class StarostaDialog(QDialog):
         form_layout.addRow("Отчество:", self.middle_name_edit)
         form_layout.addRow("Группа:", self.group_edit)
         form_layout.addRow("Почта:", self.email_edit)
-        form_layout.addRow("Номер:", self.phone_edit)
+        form_layout.addRow("Телефон:", self.phone_edit)
+
+        self.cancel_btn = QPushButton("Отмена")
+        self.cancel_btn.clicked.connect(self.reject)
+        buttons = QHBoxLayout()
+        buttons.addWidget(self.save_btn)
+        buttons.addWidget(self.cancel_btn)
 
         layout = QVBoxLayout()
         layout.addLayout(form_layout)
-        layout.addWidget(self.save_btn)
+        layout.addLayout(buttons)
         self.setLayout(layout)
 
         self.result = None
@@ -79,7 +87,9 @@ class StarostaDialog(QDialog):
         phone = self.phone_edit.text().strip()
 
         if not all([teacher_id, last_name, first_name, group, email]):
-            QMessageBox.warning(self, "Ошибка", "Пожалуйста, заполните обязательные поля.")
+            QMessageBox.warning(
+                self, "Ошибка", "Заполните куратора, фамилию, имя, группу и почту."
+            )
             return
 
         self.result = [teacher_id, last_name, first_name, middle_name, group, email, phone]

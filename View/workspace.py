@@ -41,6 +41,7 @@ class Ui_MainWindow(object):
 "    padding: 8px 16px;\n"
 "    color: white;\n"
 "    font-weight: bold;\n"
+"    text-align: center;\n"
 "}\n"
 "QPushButton:hover {\n"
 "    background-color: rgba(155, 79, 165, 220);\n"

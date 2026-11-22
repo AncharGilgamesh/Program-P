@@ -104,7 +104,7 @@ class PlanPage:
             if not self._ask_replace_plan():
                 return
         fname, _ = QFileDialog.getOpenFileName(
-            self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)"
+            self, "Выберите файл", "", "Файлы Excel (*.xlsx *.xls *.xlsm)"
         )
         if not fname:
             return
@@ -136,7 +136,7 @@ class PlanPage:
             if not self._ask_replace_plan():
                 return
         fname, _ = QFileDialog.getOpenFileName(
-            self, "Choose file", "", "Excel Files (*.xlsx *.xls *.xlsm)"
+            self, "Выберите файл", "", "Файлы Excel (*.xlsx *.xls *.xlsm)"
         )
         if not fname:
             return
@@ -188,7 +188,7 @@ class PlanPage:
             print(block_df.to_string(index=False, header=False))"""
 
     def load_saved_plan(self):
-        fname, _ = QFileDialog.getOpenFileName(self, "Choose file", "", "Word файлы (*.docx)")
+        fname, _ = QFileDialog.getOpenFileName(self, "Выберите файл", "", "Word файлы (*.docx)")
         if not fname:
             return
         try:
